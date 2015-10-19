@@ -7,6 +7,8 @@ amazon---获取amazon商品信息
 
 anjuke---获取安居客上面小区信息
 
+ali_comments---获取淘宝天猫商品评论
+
 dianping---大众点评上商家信息
 
 douban---豆瓣电影信息
