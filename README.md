@@ -30,3 +30,9 @@ www.zimuzu.tv ---电影，电视剧ed2k链接
 www.hexun.com ---和讯网，获取股票交易明细
 
 www.renrendai.com ---人人贷，获取贷款信息
+
+www.kimiss.com ---闺蜜网产品信息
+
+www.cjsyw.com ---长江水运网货源信息
+
+Nyspider.py ---爬虫常用功能
