@@ -123,7 +123,7 @@ class Main():
                 urls=[]
                 for url in dicts[key]:
                     urls.append(url)
-                    if len(urls)<10:
+                    if len(urls)<15:
                         continue
                     self.get(key,urls)
                     urls=[]
