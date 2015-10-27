@@ -83,15 +83,15 @@ class Get_product(threading.Thread):
         self.statue=1
         try:
             try:
-                html=requests.get(self.url,headers=headers).text.encode('ISO-8859-1').decode('utf-8','ignore')
+                html=requests.get(self.url,headers=headers,timeout=20).text.encode('ISO-8859-1').decode('utf-8','ignore')
             except:
-                html=requests.get(self.url,headers=headers).text
+                html=requests.get(self.url,headers=headers,timeout=20).text
             soup=BeautifulSoup(html,'lxml')
             self.pinpai=soup.find('h2').get_text()
             table=soup.find('div',attrs={'class':'c1_left_1'})
             image_url=table.find('div',id='preview').find('img').get('src')
             table=table.find('div',attrs={'class':'preview_r'})
-            self.image=requests.get(image_url,headers=headers).content
+            self.image=requests.get(image_url,headers=headers,timeout=20).content
             self.title=table.find('div',attrs={'class':'preview_title'}).find('h1').get_text().replace('\n','').replace(' ','')
             self.pri_type=table.find('div',attrs={'class':'preview_brief'}).get_text().replace('\r\n','').replace(' ','')
             lists=table.find('div',attrs={'class':'previewD'}).find('ul').find_all('li')
@@ -113,7 +113,7 @@ class Main():
         self.sheet=self.f.add_sheet('sheet')
         self.count=0
     def run(self):
-        f=open('man_pro.txt','r').read()
+        f=open('baby_pro.txt','r').read()
         for item in f.split('\n'):
             try:
                 dicts=eval(item)
@@ -123,7 +123,7 @@ class Main():
                 urls=[]
                 for url in dicts[key]:
                     urls.append(url)
-                    if len(urls)<20:
+                    if len(urls)<10:
                         continue
                     self.get(key,urls)
                     urls=[]
@@ -141,22 +141,22 @@ class Main():
         for work in threadings:
             if work.statue==0:
                 continue
-            with open('man_image/MANHZP'+str(self.count+1)+'.jpg','wb') as f:
+            with open('baby_image/BABYHZP'+str(self.count+1)+'.jpg','wb') as f:
                 f.write(work.image)
                 f.close()
             self.sheet.write(self.count,0,self.count+1)
-            self.sheet.write(self.count,1,'man')
+            self.sheet.write(self.count,1,'baby')
             self.sheet.write(self.count,2,key)
             self.sheet.write(self.count,3,work.pinlei)
             self.sheet.write(self.count,4,work.gongxiao)
             self.sheet.write(self.count,5,work.pinpai)
             self.sheet.write(self.count,6,work.title)
             self.sheet.write(self.count,7,work.pri_type)
-            self.sheet.write(self.count,8,'MANHZP'+str(self.count+1))
+            self.sheet.write(self.count,8,'BABYHZP'+str(self.count+1))
             self.sheet.write(self.count,9,work.infor)
             self.count+=1
             print(self.count)
-        self.f.save('man.xls')
+        self.f.save('baby.xls')
 
 #work=Get_product('http://product.kimiss.com/product/49053/')
 work=Main()
