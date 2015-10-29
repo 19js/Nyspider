@@ -35,4 +35,6 @@ www.kimiss.com ---闺蜜网产品信息
 
 www.cjsyw.com ---长江水运网货源信息
 
+finance.yahoo.com ---雅虎财经
+
 Nyspider.py ---爬虫常用功能
