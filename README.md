@@ -37,7 +37,7 @@ www.cjsyw.com ---长江水运网货源信息
 
 finance.yahoo.com ---雅虎财经
 
-data.cma.gov.cn ---国家气象局
+data.cma.gov.cn ---中国气象数据网
 
 www.fang.com ---搜房网小区信息
 
