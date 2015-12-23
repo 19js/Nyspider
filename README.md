@@ -41,4 +41,10 @@ data.cma.gov.cn ---中国气象数据网
 
 www.fang.com ---搜房网小区信息
 
+www.itjuzi.com ---IT桔子投资信息
+
+www.zhongchou.com ---众筹网
+
+www.we.com ---人人贷散标数据
+
 Nyspider.py ---爬虫常用功能
