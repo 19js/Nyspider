@@ -25,6 +25,7 @@ def get_transaction(url):
         for item in items:
             f.write(str(item)+'\n')
     f.close()
+    driver.quit()
 
 def html_parser(html):
     table=BeautifulSoup(html,'lxml').find('tbody',attrs={'class':'tb-list-body'}).find_all('tr')
@@ -40,16 +41,13 @@ def html_parser(html):
                 item['grade']=''
             item['price']=lists[1].get_text().replace('\r\n','').replace('\t','').replace('\n','').replace(' ','')
             item['count']=lists[2].get_text().replace('\r\n','').replace('\t','').replace('\n','').replace(' ','')
-            item['date']=lists[3].get_text().replace('\r\n','').replace('\t','').replace('\n','').replace(' ','')
+            item['date']=lists[3].get_text().replace('\r\n','').replace('\t','').replace('\n','')
             item['des']=lists[4].get_text().replace('\r\n','').replace('\t','').replace('\n','').replace(' ','')
             items.append(item)
         except:
             continue
     return items
 
-
-def main():
+if __name__=='__main__':
     url='https://item.taobao.com/item.htm?spm=a230r.1.14.17.Ujh8zA&id=44680207403&ns=1&abbucket=13#detail'
     get_transaction(url)
-
-main()
