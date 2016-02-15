@@ -18,15 +18,14 @@ class Get_data():
             'Connection': 'keep-alive'}
         self.f=xlwt3.Workbook()
         self.sheet=self.f.add_sheet('sheet')
-        self.lists=['id','Loan_Title', 'Loan_Status','Amount', 'Interest_Rate', 'Term','Next_Payment_Day','Term_Remain', 'Repayment_Type','Guarantee_Type','Early_Repayment_Rate',
-                'Borrower_Id', 'Age','Education',  'Marital status','Working_City','Company_Scale','Position','Employment_Sector', 'Emploment_Length','Homeowner', 'Mortgage', 'Car', 'Car_Loan',
+        self.lists=['id','Loan_Title', 'Loan_Status','Amount', 'Interest_Rate', 'Term','Next_Payment_Day','Term_Remain', 'Repayment_Type','Des','Guarantee_Type','Early_Repayment_Rate',
+                'Borrower_Id','Userid','Age','Education',  'Marital status','Working_City','Company_Scale','Position','Employment_Sector', 'Emploment_Length','Homeowner', 'Mortgage', 'Car', 'Car_Loan',
                 'Total_Amount','Number_of_Succesful_Loan', 'Income_Range_Monthly', 'Number_of_Borrow', 'Number_of_Repaid', 'Outstanding','Overdue_amount','Severe_overdue','Credit_Score',  'Number_Arrears', 'Credit_Limit']
         self.count=1
         num=0
-        for key in self.lists:
-            self.sheet.write(0,num,key)
-            num+=1
         self.login()
+        self.text_f=open('text.txt','a')
+        self.failed_f=open('failed.txt','a')
 
     def login(self):
         data={
@@ -38,21 +37,35 @@ class Get_data():
         self.session.post('https://www.we.com/j_spring_security_check',data=data,headers=self.headers)
 
     def run(self):
-        id_from=input('输入起始id:')
-        id_to=input("输入终止id:")
+        id_from=700000
+        id_to=8050000
         for load_id in range(int(id_from),int(id_to)+1):
             try:
                 items=self.get_page('http://www.we.com/lend/detailPage.action?loanId='+str(load_id))
             except:
+                self.login()
+                self.failed_f.write(str(load_id)+'\n')
                 continue
             items['id']=str(load_id)
             print(load_id)
-            self.write_to_excel(items)
+            self.write_to_text(items)
+            '''
+            #self.write_to_excel(items)
+            for key in self.lists:
+                self.sheet.write(0,num,key)
+                num+=1
+            '''
 
     def get_page(self,url):
         html=self.session.get(url,headers=self.headers).text
         infor=self.parser(html)
         return infor
+
+    def write_to_text(self,items):
+        text=''
+        for key in self.lists:
+            text+=items[key].replace(' ','')+' ||'
+        self.text_f.write(text+'\n')
 
     def write_to_excel(self,items):
         num=0
@@ -85,7 +98,9 @@ class Get_data():
             infor['Next_Payment_Day']=''
         table=soup.find('div',id='loan-details').find('table',attrs={'class':'ui-table-basic-list'}).find_all('tr')
         infor['Borrower_Id']=table[0].find('em').get_text()
+        infor['Userid']=table[0].find('em').find('a').get('href').replace('/account/myInfo.action?userId=','')
         infor['Credit_Score']=table[0].find_all('em')[1].get('title')
+        infor['Des']=soup.find('div',attrs={'class':'ui-tab-list color-dark-text'}).get_text().replace('\n','').replace('\t','')
         em=table[2].find_all('em')
         infor['Age']=em[0].get_text().replace('\n','').replace('\t','')
         infor['Education']=em[1].get_text().replace('\n','').replace('\t','')
