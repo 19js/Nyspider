@@ -6,8 +6,6 @@ import threading
 import re
 import os
 import xlwt3
-import sqlite3
-import re
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:39.0) Gecko/20100101 Firefox/39.0',
@@ -20,7 +18,7 @@ def Get_Quarter():
     statue=True
     while statue:
         try:
-            html=requests.get('https://duapp2.drexel.edu/webtms_du/app?page=Home&service=page',headers=headers,timeout=50).text
+            html=requests.get('https://duapp2.drexel.edu/webtms_du/app?page=Home&service=page',headers=headers,timeout=30).text
             statue=False
         except:
             continue
@@ -36,7 +34,7 @@ def Get_College(url):
     statue=True
     while statue:
         try:
-            html=requests.get(url,headers=headers,timeout=50).text
+            html=requests.get(url,headers=headers,timeout=30).text
             statue=False
         except:
             continue
@@ -50,7 +48,7 @@ def Get_subjects(url):
     statue=True
     while statue:
         try:
-            html=requests.get(url,headers=headers,timeout=50).text
+            html=requests.get(url,headers=headers,timeout=30).text
             statue=False
         except:
             continue
@@ -70,7 +68,7 @@ class CourseInfor(threading.Thread):
         statue=True
         while statue:
             try:
-                html=requests.get(self.url,headers=headers,timeout=50).text
+                html=requests.get(self.url,headers=headers,timeout=30).text
                 statue=False
             except:
                 continue
@@ -91,7 +89,7 @@ class CourseInfor(threading.Thread):
         statue=True
         while statue:
             try:
-                html=requests.get(course['url'],headers=headers,timeout=50).text
+                html=requests.get(course['url'],headers=headers,timeout=30).text
                 statue=False
             except:
                 continue
@@ -128,10 +126,8 @@ class CourseInfor(threading.Thread):
         return course
 
 def Get_Course(Quarter,college,subjects):
-    conn=sqlite3.connect(Quarter+'/data.db')
-    cursor=conn.cursor()
-    cursor.execute("create table if not exists %s(SubjectCode varchar(80),CourseNumber varchar(20),Title varchar(80),College varchar(80),Restrictions TEXT,Co_Requisites TEXT,Pre_Requisites TEXT,Repeat_Status TEXT)"%(college.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_')))
     print(Quarter+'--'+college+'--Start')
+    excel=xlwt3.Workbook()
     threadings=[]
     for subject in subjects:
         work=CourseInfor(subjects[subject], subject)
@@ -141,23 +137,17 @@ def Get_Course(Quarter,college,subjects):
         work.start()
     for work in threadings:
         work.join()
-    static_label=['SubjectCode','CourseNumber','Title','College','Restrictions','Co-Requisites','Pre-Requisites','Repeat Status']
-    dynamic_label=['CRN','Section','Credits','Campus','Instructors','Instruction_Type','Instruction_Method','Max_Enroll','Enroll','Section_Comments','Times','Building','Room','url']
+    sheet=excel.add_sheet(college)
+    count=0
+    lists=['SubjectCode','CourseNumber','CRN','Section','Credits','Times','Title','Campus','Instructors','Instruction_Type'
+    ,'Instruction_Method','Max_Enroll','Enroll','Section_Comments','Building','Room','College','Restrictions','Co-Requisites','Pre-Requisites','Repeat Status','url']
     for work in threadings:
-        cursor.execute("create table if not exists %s(CRN varchar(10),Section varchar(80),Credits varchar(50),Campus varchar(80),Instructors varchar(80),Instruction_Type varchar(80),Instruction_Method varchar(80),Max_Enroll varchar(50),Enroll varchar(50),Section_Comments varchar(80),Times TEXT,Building varchar(80),Room varchar(80),url TEXT)"%(work.name.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_')))
         for course in work.course_list:
-            static=[]
-            dynamic=[]
-            for index in range(len(static_label)):
-                static.append(course[static_label[index]])
-            for index in range(len(dynamic_label)):
-                dynamic.append(course[dynamic_label[index]])
-            cursor.execute("insert into %s(SubjectCode,CourseNumber,Title,College,Restrictions,Co_Requisites,Pre_Requisites,Repeat_Status) values"%(college.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_'))+str(tuple(static)))
-            cursor.execute("insert into %s(CRN,Section,Credits,Campus,Instructors,Instruction_Type,Instruction_Method,Max_Enroll,Enroll,Section_Comments,Times,Building,Room,url) values"%(work.name.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_'))+str(tuple(dynamic)))
-    conn.commit()
-    cursor.close()
-    conn.close()
+            for num in range(len(lists)):
+                sheet.write(count,num,course[lists[num]])
+            count+=1
     print(Quarter+'--'+college+'--OK')
+    excel.save(Quarter+'/'+college+'.xls')
 
 def main():
     quarter=Get_Quarter()
@@ -167,6 +157,7 @@ def main():
             os.mkdir(key)
         except:
             print('--')
+        excel=xlwt3.Workbook()
         threadings=[]
         for college in colleges:
             subjects=Get_subjects(colleges[college])
