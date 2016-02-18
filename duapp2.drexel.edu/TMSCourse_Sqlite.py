@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 import threading
 import re
 import os
-import xlwt3
 import sqlite3
 import re
 
@@ -16,7 +15,7 @@ headers = {
     'Accept-Encoding': 'gzip, deflate',
     'Connection': 'keep-alive'}
 
-def Get_Quarter():
+def Get_Semesters():
     statue=True
     while statue:
         try:
@@ -25,12 +24,12 @@ def Get_Quarter():
         except:
             continue
     table=BeautifulSoup(html,'lxml').find_all('table',attrs={'class':'termPanel'})
-    quarter={}
+    semesters={}
     for item in table[0].find_all('a'):
-        quarter[item.get_text()]='https://duapp2.drexel.edu'+item.get('href')
+        semesters[item.get_text()]='https://duapp2.drexel.edu'+item.get('href')
     for item in table[1].find_all('a'):
-        quarter[item.get_text()]='https://duapp2.drexel.edu'+item.get('href')
-    return quarter
+        semesters[item.get_text()]='https://duapp2.drexel.edu'+item.get('href')
+    return semesters
 
 def Get_College(url):
     statue=True
@@ -127,11 +126,11 @@ class CourseInfor(threading.Thread):
         course['Times']=item.find('table').get_text()
         return course
 
-def Get_Course(Quarter,college,subjects):
-    conn=sqlite3.connect(Quarter+'/data.db')
+def Get_Course(semester,college,subjects):
+    conn=sqlite3.connect(semester+'/data.db')
     cursor=conn.cursor()
-    cursor.execute("create table if not exists %s(SubjectCode varchar(80),CourseNumber varchar(20),Title varchar(80),College varchar(80),Restrictions TEXT,Co_Requisites TEXT,Pre_Requisites TEXT,Repeat_Status TEXT)"%(college.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_')))
-    print(Quarter+'--'+college+'--Start')
+    cursor.execute("create table if not exists %s(SubjectCode varchar(80),CourseNumber varchar(20),Title varchar(80),College varchar(80),Restrictions TEXT,Co_Requisites TEXT,Pre_Requisites TEXT,Repeat_Status TEXT)"%(college.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_').replace('(','_').replace(')','_')))
+    print(semester+'--'+college+'--Start')
     threadings=[]
     for subject in subjects:
         work=CourseInfor(subjects[subject], subject)
@@ -144,7 +143,7 @@ def Get_Course(Quarter,college,subjects):
     static_label=['SubjectCode','CourseNumber','Title','College','Restrictions','Co-Requisites','Pre-Requisites','Repeat Status']
     dynamic_label=['CRN','Section','Credits','Campus','Instructors','Instruction_Type','Instruction_Method','Max_Enroll','Enroll','Section_Comments','Times','Building','Room','url']
     for work in threadings:
-        cursor.execute("create table if not exists %s(CRN varchar(10),Section varchar(80),Credits varchar(50),Campus varchar(80),Instructors varchar(80),Instruction_Type varchar(80),Instruction_Method varchar(80),Max_Enroll varchar(50),Enroll varchar(50),Section_Comments varchar(80),Times TEXT,Building varchar(80),Room varchar(80),url TEXT)"%(work.name.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_')))
+        cursor.execute("create table if not exists %s(CRN varchar(10),Section varchar(80),Credits varchar(50),Campus varchar(80),Instructors varchar(80),Instruction_Type varchar(80),Instruction_Method varchar(80),Max_Enroll varchar(50),Enroll varchar(50),Section_Comments varchar(80),Times TEXT,Building varchar(80),Room varchar(80),url TEXT)"%(work.name.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_').replace('(','_').replace(')','_')))
         for course in work.course_list:
             static=[]
             dynamic=[]
@@ -152,17 +151,16 @@ def Get_Course(Quarter,college,subjects):
                 static.append(course[static_label[index]])
             for index in range(len(dynamic_label)):
                 dynamic.append(course[dynamic_label[index]])
-            cursor.execute("insert into %s(SubjectCode,CourseNumber,Title,College,Restrictions,Co_Requisites,Pre_Requisites,Repeat_Status) values"%(college.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_'))+str(tuple(static)))
-            cursor.execute("insert into %s(CRN,Section,Credits,Campus,Instructors,Instruction_Type,Instruction_Method,Max_Enroll,Enroll,Section_Comments,Times,Building,Room,url) values"%(work.name.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_'))+str(tuple(dynamic)))
+            cursor.execute("insert into %s(SubjectCode,CourseNumber,Title,College,Restrictions,Co_Requisites,Pre_Requisites,Repeat_Status) values"%(college.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_').replace('(','_').replace(')','_'))+str(tuple(static)))
+            cursor.execute("insert into %s(CRN,Section,Credits,Campus,Instructors,Instruction_Type,Instruction_Method,Max_Enroll,Enroll,Section_Comments,Times,Building,Room,url) values"%(work.name.replace(' ','_').replace('.','_').replace('&','_').replace(',','_').replace('-','_').replace(':','_').replace("'",'_').replace('(','_').replace(')','_'))+str(tuple(dynamic)))
     conn.commit()
     cursor.close()
     conn.close()
-    print(Quarter+'--'+college+'--OK')
+    print(semester+'--'+college+'--OK')
 
-def main():
-    quarter=Get_Quarter()
-    for key in quarter:
-        colleges=Get_College(quarter[key])
+def Get_all(semesters):
+    for key in semesters:
+        colleges=Get_College(semesters[key])
         try:
             os.mkdir(key)
         except:
@@ -178,5 +176,47 @@ def main():
         for work in threadings:
             work.join()
         print('----------'+key+'--OK----------')
+
+def Get_One(semester,url):
+    colleges=Get_College(url)
+    try:
+        os.mkdir(semester)
+    except:
+        print('--')
+    threadings=[]
+    for college in colleges:
+        subjects=Get_subjects(colleges[college])
+        work=threading.Thread(target=Get_Course,args=(semester, college, subjects))
+        threadings.append(work)
+    for work in threadings:
+        work.setDaemon(True)
+        work.start()
+    for work in threadings:
+        work.join()
+    print('----------'+semester+'--OK----------')
+
+def main():
+    semesters=Get_Semesters()
+    print('0.Get All')
+    print('1.Get One')
+    statue=input("0--Get All,1--Get One:")
+    if statue=='0':
+        Get_all(semesters)
+    elif statue=='1':
+        lists=[]
+        print('----------')
+        for key in semesters:
+            lists.append(key)
+        for num in range(len(lists)):
+            print(num,'--'+lists[num])
+        index=input("Input number:")
+        try:
+            index=int(index)
+            Get_One(lists[index], semesters[lists[index]])
+        except:
+            print("Error!")
+            return
+    else:
+        print('Error!')
 
 main()
