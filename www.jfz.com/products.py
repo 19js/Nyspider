@@ -86,7 +86,10 @@ class Main():
             for work in threadings:
                 work.join()
             for work in threadings:
-                index=self.label[work.strategy]-1
+                try:
+                    index=self.label[work.strategy]-1
+                except:
+                    index=2
                 self.write(index,work.history,work.baseinfor)
             print(page,'----OK')
             page+=1
@@ -106,6 +109,7 @@ class Main():
             self.col_table[str(index+1)]+=1
         except:
             self.col_table[str(index+1)]=1
+            col=self.col_table[str(index+1)]
             self.sheet_table[str(index+1)]+=1
             self.sheets[index]=self.excel_f[index].add_sheet(str(self.sheet_table[str(index+1)]), cell_overwrite_ok=True)
             num=0
