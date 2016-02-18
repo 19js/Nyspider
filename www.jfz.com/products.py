@@ -17,7 +17,13 @@ headers = {
 
 
 def get_products(page):
-    html=requests.get('http://www.jfz.com/simu/list_p%s.html'%page,headers=headers).text
+    statue=True
+    while statue:
+        try:
+            html=requests.get('http://www.jfz.com/simu/list_p%s.html'%page,headers=headers,timeout=50).text
+            statue=False
+        except:
+            continue
     rel='href="(/product.*?html)"'
     result=re.findall(rel,html)
     urls=[]
@@ -93,7 +99,9 @@ class Main():
                 self.write(index,work.history,work.baseinfor)
             print(page,'----OK')
             page+=1
-            self.save()
+            if page%20==0:
+                self.save()
+        self.save()
 
     def write(self,index,history,baseinfor):
         col=self.col_table[str(index+1)]
@@ -103,7 +111,12 @@ class Main():
                 self.sheets[index].write(num,col,infor)
                 num+=1
             for key in history:
-                row=self.get_row(key)
+                try:
+                    row=self.get_row(key)
+                except:
+                    continue
+                if row>65533 or row<0:
+                    continue
                 self.sheets[index].write(row,col,history[key])
                 self.sheets[index].write(row,0,key)
             self.col_table[str(index+1)]+=1
@@ -117,7 +130,12 @@ class Main():
                 self.sheets[index].write(num,col,infor)
                 num+=1
             for key in history:
-                row=self.get_row(key)
+                try:
+                    row=self.get_row(key)
+                except:
+                    continue
+                if row>65533 or row<0:
+                    continue
                 self.sheets[index].write(row,col,history[key])
                 self.sheets[index].write(row,0,key)
             self.col_table[str(index+1)]+=1
