@@ -4,8 +4,6 @@ import requests
 from bs4 import BeautifulSoup
 import xlwt3
 
-#登录后的cookie,每次使用的时候更换cookie
-cookie='Hm_lvt_16f9bb97b83369e62ee1386631124bb1=1449805903,1450175719; rrdLoginCartoon=rrdLoginCartoon; newuser=new; JSESSIONID=60C3753F3743FBEB65AD181218120A7D575957D8981BC4084DC0CB8747EA6FF5; Hm_lpvt_16f9bb97b83369e62ee1386631124bb1=1450175780; jforumUserInfo=c1fE1x9cq0BQTuRBRbrVLRb%2FrUmAs9jk%0A; IS_MOBLIE_IDPASS=true-false; activeTimestamp=2490435'
 
 class Get_data():
     def __init__(self):
@@ -18,7 +16,7 @@ class Get_data():
             'Connection': 'keep-alive'}
         self.f=xlwt3.Workbook()
         self.sheet=self.f.add_sheet('sheet')
-        self.lists=['id','Loan_Title', 'Loan_Status','Amount', 'Interest_Rate', 'Term','Next_Payment_Day','Term_Remain', 'Repayment_Type','Des','Guarantee_Type','Early_Repayment_Rate',
+        self.lists=['id','Loan_Title','Loan_type', 'Loan_Status','Amount', 'Interest_Rate', 'Term','Next_Payment_Day','Term_Remain', 'Repayment_Type','Des','Guarantee_Type','Early_Repayment_Rate',
                 'Borrower_Id','Userid','Age','Education',  'Marital status','Working_City','Company_Scale','Position','Employment_Sector', 'Emploment_Length','Homeowner', 'Mortgage', 'Car', 'Car_Loan',
                 'Total_Amount','Number_of_Succesful_Loan', 'Income_Range_Monthly', 'Number_of_Borrow', 'Number_of_Repaid', 'Outstanding','Overdue_amount','Severe_overdue','Credit_Score',  'Number_Arrears', 'Credit_Limit']
         self.count=1
@@ -29,16 +27,16 @@ class Get_data():
 
     def login(self):
         data={
-            'j_username':'18502793163',
-            'j_password':'TWVqb89VKdl87RGdWgHZHbPjOik7noAQ0QErNQC+NAOJP6KeOw9+Thz1Ac0ZUehsTftixuPqRqA12s3/eovVHcWcfa/tr67llXr0zZkvaouYFshRQ31TfI4J5INhz7C8wuh7VOk2hXmUD2kX6SsTuvH/UnlUUj8ber5x1O2hM6c=',
+            'j_username':'',
+            'j_password':'',
             'rememberme':'on',
             'targetUrl':'http://www.we.com/',
             'returnUrl':'https://www.we.com/account/index.action'}
         self.session.post('https://www.we.com/j_spring_security_check',data=data,headers=self.headers)
 
     def run(self):
-        id_from=700000
-        id_to=8050000
+        id_from=795000
+        id_to=808500
         for load_id in range(int(id_from),int(id_to)+1):
             try:
                 items=self.get_page('http://www.we.com/lend/detailPage.action?loanId='+str(load_id))
@@ -79,6 +77,7 @@ class Get_data():
         soup=BeautifulSoup(html,'lxml').find('div',id='pg-loan-invest')
         infor_one=soup.find('div',id='loan-basic-panel')
         infor={}
+        infor['Loan_type']=infor_one.find('div',attrs={'class':'fn-left fn-text-overflow pl25'}).get('title')
         infor['Loan_Title']=infor_one.find('em',attrs={'class':'title-text'}).get_text()
         em=infor_one.find('div',attrs={'class':'fn-clear  mb25'}).find_all('em')
         infor['Amount']=em[0].get_text()
