@@ -19,8 +19,8 @@ class Get_infor():
         data={
         'IsAsync':'true',
         'Redirect':'',
-        'UserName':'191081279@qq.com',
-        'Password':'199513nl',
+        'UserName':'',
+        'Password':'',
         'RememberMe':'true'
         }
         self.session=requests.session()
@@ -28,7 +28,7 @@ class Get_infor():
         self.session.get('http://www.ppdai.com/account/lend',headers=headers).text
 
     def main(self):
-        f=open('Tdata.txt','w',encoding='utf-8')
+        f=open('Tdata.txt','a',encoding='utf-8')
         for text in open('Tperson.txt','r').readlines():
             text=text.replace('\n','')
             line=self.PersonInfor(text)
@@ -39,7 +39,7 @@ class Get_infor():
 
     def PersonInfor(self,text):
         rel='实名认证：|身份认证\(10分\)|视频认证\(10分\)|学历认证\(5分\)|手机认证\(10分\)|网上银行充值认证\(3分\)|邀请朋友评价\（5分\）\[已停用\]|【逾期未还清用户无法正常发布列表】|\[非实时更新\]|\(1分/次,每个月最多加一分\)|\(-2分/次\)|\(非实时\)| '
-        url=text.split('|')[3]
+        url=text.split('|')[4]
         try:
             html=requests.get(url,headers=headers,timeout=50).text.encode('ISO-8859-1').decode('utf-8','ignore')
         except:
@@ -86,7 +86,7 @@ def get_person(Id):
         infor=soup.find('div',attrs={'class':'newLendDetailInfoLeft'})
         biao_table=soup.find('div',attrs={'class':'newLendDetailMoneyLeft'}).find_all('dl')
         jin_table=soup.find('div',attrs={'class':'newLendDetailRefundLeft'}).find_all('div',attrs={'class':'part'})[1].find_all('div')
-        text=infor.find('a',attrs={'class':'username'}).get_text()+'|'+infor.find('span',attrs={'class':'bidinfo'}).get_text()+'|'+infor.find('a').get('href')
+        text=infor.find('a',attrs={'class':'username'}).get_text()+'|'+infor.find('a',attrs={'class':'altQust'}).find('span').get('class')[1]+'|'+infor.find('span',attrs={'class':'bidinfo'}).get_text()+'|'+infor.find('a').get('href')
         for i in biao_table:
             text+='|'+i.get_text().replace('\r','').replace('\n','').replace(' ','')
         for i in jin_table:
@@ -96,9 +96,9 @@ def get_person(Id):
         return False
 
 def main():
-    f_person=open('Tperson.txt','w',encoding='utf-8')
-    startId=5140000
-    endId=5180000
+    f_person=open('Tperson.txt','a',encoding='utf-8')
+    startId=9158271
+    endId=9158371
     while startId<endId:
         text=get_person(startId)
         startId+=1
