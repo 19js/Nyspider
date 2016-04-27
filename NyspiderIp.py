@@ -5,7 +5,7 @@ import re
 
 def get_ip():
     while True:
-        ip=requests.get('http://qsdrk.daili666api.com/ip/?tid=559950660678689&num=1&delay=1&category=2&protocol=https&filter=on').text
+        ip=requests.get(url).text
         proxies={
         'http':'http://%s'%ip
         }
