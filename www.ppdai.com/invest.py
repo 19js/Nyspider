@@ -1,6 +1,7 @@
 import requests
 import xlwt3
 from bs4 import BeautifulSoup
+import datetime
 
 headers = {
         'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:39.0) Gecko/20100101 Firefox/39.0',
@@ -61,11 +62,18 @@ def geturls(url):
         return result[1]
     return result
 
+def calculate_time(time1,time2):
+    t1=datetime.datetime.strptime(time1,'%Y/%m/%d %H:%M:%S')
+    t2=datetime.datetime.strptime(time2,'%Y/%m/%d %H:%M:%S')
+    result=((t1-t2).seconds)/60
+    print(time1,time2,result)
+    return result
+
 def main():
     pageurls=['http://invest.ppdai.com/loan/list_safe_s0_ppage?Rate=0','http://invest.ppdai.com/loan/list_riskmiddle_s0_ppage?Rate=0','http://invest.ppdai.com/loan/list_riskhigh_s0_ppage?Rate=0']
     labels=['新手收益区','中风险收益区','高风险收益区']
     excel=xlwt3.Workbook()
-    for index in range(len(urls)):
+    for index in range(len(pageurls)):
         sheet=excel.add_sheet(labels[index])
         count=0
         pageurl=pageurls[index]
@@ -90,11 +98,17 @@ def main():
                 result.append(lists[8].replace('进度条：',''))
                 history=eval(lists[-1])
                 if history==[]:
-                    num=0
-                    for i in result:
-                        sheet.write(count,num,i)
-                        num+=1
-                    count+=1
+                    continue
+                sum=0
+                for index_hi in range(len(history)-1):
+                    try:
+                        sum+=calculate_time(history[index_hi].split('-')[1],history[index_hi+1].split('-')[1])
+                    except:
+                        continue
+                try:
+                    diff=sum/(len(history)-1)
+                except:
+                    continue
                 for item in history:
                      num=0
                      for i in result:
@@ -102,6 +116,7 @@ def main():
                          num+=1
                      sheet.write(count,num,item.split('-')[0])
                      sheet.write(count,num+1,item.split('-')[1])
+                     sheet.write(count,num+2,diff)
                      count+=1
                 excel.save('result.xls')
             print(labels[index],'--',page,'--ok')
