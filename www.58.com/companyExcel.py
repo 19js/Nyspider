@@ -23,9 +23,10 @@ def getUrl():
                 table=BeautifulSoup(html,'lxml').find('div',id='infolist').find_all('dl')
                 for item in table:
                     url=item.find('a',{'class':'fl'}).get('href')
-                    if url in urls:
+                    companyname=item.find('a',{'class':'fl'}).get('title')
+                    if companyname in urls:
                         continue
-                    urls.append(url)
+                    urls.append(companyname)
                     date=item.find_all('dd')[-1].get_text().replace('\r','').replace('\n','').replace(' ','')
                     if date!='精准' and date!='今天' and '小时' not in date and '分钟' not in date:
                         statue=False
@@ -33,7 +34,6 @@ def getUrl():
                     com=[]
                     area=item.find_all('dd')[-2].get_text()
                     job=item.find('a').get_text()
-                    companyname=item.find('a',{'class':'fl'}).get('title')
                     com=[companyname,job,area,url]
                     result.append(com)
             except:
