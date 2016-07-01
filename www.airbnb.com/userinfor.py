@@ -72,9 +72,9 @@ def parser(html):
     return result.replace('\n','')
 
 def main():
-    userfailed=open('userfailed.txt','a')
-    userdata=open('userdata.txt','a')
-    for line in open('urls.txt','r'):
+    userfailed=open('userfailed.txt','a',encoding='utf-8')
+    userdata=open('userdata.txt','a',encoding='utf-8')
+    for line in open('urls.txt','r',encoding='utf-8'):
         line=line.replace('\n','')
         url='https://www.airbnb.com'+line.split('||')[-1]
         try:

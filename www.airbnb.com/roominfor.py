@@ -12,7 +12,7 @@ headers = {
 
 
 def roominfor(url):
-    html=requests.get(url,headers=headers).text
+    html=requests.get(url,headers=headers,timeout=50).text
     result=parser(html)
     return result
 
@@ -52,7 +52,7 @@ def parser(html):
         hostprofile=soup.find('div',id='host-profile').get_text()
     except:
         hostprofile='--'
-    result=wishlist
+    result=title+'||'+location+'||'+wishlist
     for key in Room_Guest_Bed_labels:
         try:
             result+='||'+Room_Guest_BedList[key]
@@ -72,9 +72,9 @@ def parser(html):
     return result
 
 def main():
-    userfailed=open('roomfailed.txt','a')
-    userdata=open('roomdata.txt','a')
-    for line in open('urls.txt','r'):
+    userfailed=open('roomfailed.txt','a',encoding='utf-8')
+    userdata=open('roomdata.txt','a',encoding='utf-8')
+    for line in open('urls.txt','r',encoding='utf-8'):
         line=line.replace('\n','')
         url='https://www.airbnb.com'+line.split('||')[-2]
         try:
@@ -83,7 +83,7 @@ def main():
             userfailed.write(line+'\n')
             time.sleep(200)
             continue
-        userdata.write(line+'||'+result+'\n')
+        userdata.write(line+'||'+result.replace('\n','')+'\n')
         print(line,'--ok')
         time.sleep(10)
     userdata.close()

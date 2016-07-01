@@ -50,10 +50,10 @@ def rooms(url):
 
 def getrooms():
     citys="Chicago,Vancouver,Montreal,Portland,Philadelphia,Denver,Austin,D.C.,New Orleans,Phoenix,San Diego,Nashville,Paris,Berlin,Rome,Amsterdam,Barcelona,Copenhagen,Prague,Budapest,Stockholm,Florence,Edinburgh,Istanbul,Sydney,Melbourne,Cape Town,Beijing,Shanghai,Tokyo"
-    failed=open('failed.txt','a')
+    failed=open('failed.txt','a',encoding='utf-8')
     for city in citys.split(','):
         print(city)
-        url_f=open('urls.txt','a')
+        url_f=open('urls.txt','a',encoding='utf-8')
         url='https://www.airbnb.com/s/'+city.replace(' ','+').replace('.','%252E')
         page=1
         pre=[]
