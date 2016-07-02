@@ -10,6 +10,7 @@ headers = {
     'Accept-Language': 'en-US,en;q=0.5',
     'Accept-Encoding': 'gzip, deflate',
     'Referer':"http://210.12.219.18/jianguanfabuweb/companies.html",
+    'Cookie':"ASP.NET_SessionId=evkmapz1ljljsqh54siborwj",
     'Connection': 'keep-alive'}
 
 def getInfor(item):

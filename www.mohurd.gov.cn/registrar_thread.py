@@ -2,6 +2,9 @@ import threading
 import requests
 from bs4 import BeautifulSoup
 import re
+import random
+
+
 
 headers = {
     'Host':"210.12.219.18",
@@ -10,6 +13,7 @@ headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.5',
     'Accept-Encoding': 'gzip, deflate',
+    'Cookie':"ASP.NET_SessionId=evkmapz1ljljsqh54siborwj",
     'Referer':"http://210.12.219.18/jianguanfabuweb/companies.html",
     'Connection': 'keep-alive'}
 
@@ -48,11 +52,12 @@ def main():
     f=open('result.txt','a')
     count=0
     items=[]
+    ok=0
     for line in open('person.txt','r').readlines():
         count+=1
         person=eval(line.replace('\n',''))
         items.append(person)
-        if len(items)<20:
+        if len(items)<10:
             continue
         threadings=[]
         for item in items:
@@ -67,8 +72,10 @@ def main():
                 failed=open('person_failed.txt','a')
                 failed.write(str(work.item)+'\n')
                 failed.close()
+                continue
             f.write(str(work.result)+'\n')
-        print(count)
+            ok+=1
+        print(count,ok)
         items=[]
 
     for item in items:
@@ -83,8 +90,10 @@ def main():
             failed=open('person_failed.txt','a')
             failed.write(str(work.item)+'\n')
             failed.close()
+            continue
         f.write(str(work.result)+'\n')
-    print(count)
+        ok+=1
+    print(count,ok)
     f.close()
 
 main()

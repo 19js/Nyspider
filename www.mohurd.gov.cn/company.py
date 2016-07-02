@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import re
-
+import copy
 
 headers = {
     'Host':"210.12.219.18",
@@ -60,7 +60,7 @@ def companyInfor(url,name):
     table=BeautifulSoup(html,'lxml').find_all('a')
     result=[]
     for item in table:
-        person=company
+        person=copy.deepcopy(company)
         person['url']=item.get('href').replace('\\"','')
         result.append(person)
     return result
