@@ -32,7 +32,8 @@ def deal():
             text=''
             try:
                 for i in item[key]:
-                    text+=i+','
+                    if i not in text:
+                        text+=i+','
                 person[key]=text
             except:
                 person[key]=text
