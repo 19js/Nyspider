@@ -24,12 +24,12 @@ class RegisInfor(threading.Thread):
 
     def run(self):
         try:
-            self.result=self.getInfor(self.item)
+            self.result=self.get_infor(self.item)
             self.statue=True
         except:
             self.statue=False
 
-    def getInfor(self,item):
+    def get_infor(self,item):
         url='http://210.12.219.18/jianguanfabuweb/'+item['url']
         html=requests.get(url,headers=headers,timeout=30).text
         soup=BeautifulSoup(html,'lxml').find('div',{'class':'content'})

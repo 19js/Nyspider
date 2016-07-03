@@ -13,7 +13,7 @@ headers = {
     'Cookie':"ASP.NET_SessionId=evkmapz1ljljsqh54siborwj",
     'Connection': 'keep-alive'}
 
-def getInfor(item):
+def get_infor(item):
     url='http://210.12.219.18/jianguanfabuweb/'+item['url']
     html=requests.get(url,headers=headers,timeout=30).text
     soup=BeautifulSoup(html,'lxml').find('div',{'class':'content'})
@@ -39,7 +39,7 @@ def main():
         count+=1
         person=eval(line.replace('\n',''))
         try:
-            item=getInfor(person)
+            item=get_infor(person)
         except:
             failed=open('person_failed.txt','a')
             failed.write(line)

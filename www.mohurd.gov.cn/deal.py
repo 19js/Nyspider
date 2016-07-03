@@ -2,7 +2,7 @@ import os
 
 
 
-def loadLevel():
+def load_level():
     level={}
     for line in open('Cost_qualification.txt','r'):
         line=line.replace('\n','').split('\t')
@@ -34,7 +34,7 @@ def deal():
                 for i in item[key]:
                     if i not in text:
                         text+=i+','
-                person[key]=text
+                person[key]=text[:-1]
             except:
                 person[key]=text
         try:
