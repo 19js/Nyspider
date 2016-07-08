@@ -6,6 +6,7 @@ import xlwt3
 import time
 import re
 import json
+import openpyxl
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:39.0) Gecko/20100101 Firefox/39.0',
@@ -128,8 +129,36 @@ def load_companyurl(code):
     data=json.loads(f)
     return data
 
+def write_to_excel(filename):
+    data=open(filename,'r',encoding='utf-8').readlines()
+    try:
+        import os
+        os.mkdir('excel')
+    except:
+        pass
+    keys=['name','industry','location','website','tags','baseinfor','fullname','startdate','size','sholu','team']
+    roundkeys=['date','round','capital','Investmenters']
+    excel=openpyxl.Workbook(write_only=True)
+    sheet=excel.create_sheet()
+    for item in data:
+        item=eval(item)
+        company=[]
+        for key in keys:
+            company.append(item[key])
+        for rou in item['round']:
+            roundinfor=[]
+            for key in roundkeys:
+                roundinfor.append(rou[key])
+            sheet.append(company+roundinfor)
+    excel.save('excel/%s_'%(time.strftime("%Y%m%d_%H%M%S",time.localtime()))+filename.replace('txt','xlsx'))
+
 def main():
-    code=input('Input the Code:')
+    code=input('输入行业代码:')
+    endpage=input("输入终止页码：")
+    try:
+        endpage=int(endpage)
+    except:
+        endpage=100
     startpage=1
     names=[]
     companys=[]
@@ -137,7 +166,7 @@ def main():
         companyurls=load_companyurl(code)
     except:
         companyurls={}
-    while True:
+    while startpage<=endpage:
         try:
             results=get_investlist('https://www.itjuzi.com/investevents?scope=%s&page=%s'%(code,startpage))
         except:
@@ -153,7 +182,8 @@ def main():
         startpage+=1
         print(startpage)
         time.sleep(2)
-    f_data=open('result_%s.txt'%(code),'a',encoding='utf-8')
+
+    f_data=open('result_%s.txt'%(code),'w',encoding='utf-8')
     for item in companys:
         try:
             companyurl=companyurls[item['name']]
@@ -182,9 +212,10 @@ def main():
         print(item['name'])
         f_data.write(str(company)+'\n')
         time.sleep(3)
-    com_f=open('company_47.json','w',encoding='utf-8')
+    com_f=open('company_%s.json'%code,'w',encoding='utf-8')
     json.dump(companyurls,com_f)
     com_f.close()
     f_data.close()
+    write_to_excel('result_%s.txt'%(code))
 
 main()
