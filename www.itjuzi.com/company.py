@@ -128,8 +128,7 @@ def company_infor(company):
         company['sholu']=''
     return company
 
-def write_to_excel(filename):
-    data=open(filename,'r',encoding='utf-8').readlines()
+def write_to_excel(item):
     try:
         import os
         os.mkdir('excel')
@@ -139,72 +138,23 @@ def write_to_excel(filename):
     roundkeys=['date','round','capital','Investmenters']
     excel=openpyxl.Workbook(write_only=True)
     sheet=excel.create_sheet()
-    for item in data:
-        item=eval(item)
-        company=[]
-        for key in keys:
-            company.append(item[key])
-        if item['round']==[]:
-            sheet.append(company)
-            continue
-        for rou in item['round']:
-            roundinfor=[]
-            for key in roundkeys:
-                roundinfor.append(rou[key])
-            sheet.append(company+roundinfor)
-    excel.save('excel/%s_'%(time.strftime("%Y%m%d_%H%M%S",time.localtime()))+filename.replace('txt','xlsx'))
-
-def get_company(url):
-    html=requests.get(url,headers=headers).text
-    soup=BeautifulSoup(html,'lxml').find_all('ul',{'class':'list-main-icnset'})[1].find_all('p',{'class':'title'})
-    result=[]
-    for p in soup:
-        a=p.find('a')
-        company={}
-        company['name']=a.get_text().replace(' ','').replace('\n','').replace('\t','')
-        company['companyurl']=a.get('href')
-        result.append(company)
-    return result
+    company=[]
+    for key in keys:
+        company.append(item[key])
+    if item['round']==[]:
+        sheet.append(company)
+    for rou in item['round']:
+        roundinfor=[]
+        for key in roundkeys:
+            roundinfor.append(rou[key])
+        sheet.append(company+roundinfor)
+    excel.save('excel/%s'%(time.strftime("%Y%m%d_%H%M%S",time.localtime()))+'.xlsx')
 
 def main():
-    code=input('输入tag代码:')
-    endpage=input("输入终止页码：")
-    try:
-        endpage=int(endpage)
-    except:
-        endpage=100
-    startpage=1
-    companys=[]
-    while startpage<=endpage:
-        try:
-            results=get_company('http://www.itjuzi.com/company?sortby=inputtime&tag=%s&page=%s'%(code,startpage))
-        except:
-            time.sleep(5)
-            print('failed')
-            continue
-        if results==[]:
-            break
-        for item in results:
-            companys.append(item)
-        print(startpage)
-        startpage+=1
-        time.sleep(2)
-
-    f_data=open('result_%s.txt'%(code),'w',encoding='utf-8')
-    for item in companys:
-        try:
-            company=company_infor(item)
-        except:
-            failed=open('failed_%s.txt'%code,'a',encoding='utf-8')
-            failed.write(str(item)+'\n')
-            failed.close()
-            print(item['name'],'failed')
-            time.sleep(3)
-            continue
-        print(item['name'])
-        f_data.write(str(company)+'\n')
-        time.sleep(3)
-    f_data.close()
-    write_to_excel('result_%s.txt'%(code))
+    code=input('输入公司代码:')
+    item={'companyurl':'http://www.itjuzi.com/company/%s'%code,'name':''}
+    company=company_infor(item)
+    print(company)
+    write_to_excel(company)
 
 main()
