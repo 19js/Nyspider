@@ -40,8 +40,9 @@ def getdata():
     }
     session=login()
     timestr=str(time.time()).replace('.','')
-    html=session.post('https://www.jisilu.cn/data/sfnew/arbitrage_vip_list/?___t=1468939338335',data=data).text
+    html=session.post('https://www.jisilu.cn/data/sfnew/arbitrage_vip_list/?___t=%s'%timestr,data=data).text
     data=json.loads(html)['rows']
+    print(data[0])
     write_to_excel(data)
     print('OK')
 
