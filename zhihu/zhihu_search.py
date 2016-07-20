@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import time
+import openpyxl
 
 headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -78,4 +79,27 @@ def question_infor(item):
         item['comments'].append(comment)
     return item
 
+def write_to_excel(items):
+    excel=openpyxl.Workbook(write_only=True)
+    sheet1=excel.create_sheet('question')
+    sheet2=excel.create_sheet("answer")
+    question_keys=['title', 'question-id','question-url-token','question-content', 'comment-count']
+    answer_keys=['question-id','answer-id','answer-url-token','author', 'votecount', 'answer-content','answer-comment-count', 'copyright', 'date']
+    sheet1.append(question_keys+['comment-id','comment-content'])
+    sheet2.append(answer_keys)
+    for item in items:
+        question=[]
+        for key in question_keys:
+            question.append(item[key])
+        if len(item['comments'])==0:
+            sheet1.append(question)
+        for comment in item['comments']:
+            sheet1.append(question+[comment['comment-id'],comment['comment-content']])
+        answer=[]
+        for key in answer_keys:
+            answer.append(item[key])
+        sheet2.append(answer)
+    excel.save('result.xlsx')
+
 result=search("zhihu")
+write_to_excel(result)
