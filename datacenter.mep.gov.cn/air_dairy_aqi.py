@@ -23,20 +23,32 @@ def get_table(url):
     return result
 
 def main():
-    text_f=open('2000_2014.txt','a')
-    pagestart=1
-    while pagestart<=12702:
-        url='http://datacenter.mep.gov.cn/report/air_daily/air_dairy_aqi.jsp?city=&startdate=2000-01-01&enddate=2015-12-31&page=%s'%pagestart
+    text_f=open('2000_2014.txt','w',encoding='utf-8')
+    startdate='2000-01-01'#起始日期
+    enddate='2015-12-31'#结束日期
+    startpage=1#起始页码
+    endpage=10#结束页码
+    while startpage<=endpage:
+        url='http://datacenter.mep.gov.cn/report/air_daily/air_dairy_aqi.jsp?city=&startdate={}&enddate={}&page={}'.format(startdate,enddate,startpage)
         try:
             items=get_table(url)
         except:
             time.sleep(2)
-            print(pagestart,'-failed')
+            print(startpage,'-failed')
             continue
         for item in items:
             text_f.write(item+'\n')
-        print(pagestart,'-ok')
-        pagestart+=1
+        print(startpage,'-ok')
+        startpage+=1
     text_f.close()
+    write_to_excel()
+
+def write_to_excel():
+    excel=openpyxl.Workbook(write_only=True)
+    sheet=excel.create_sheet()
+    for line in open('2000_2014.txt','r',encoding='utf-8'):
+        line=line.replace('\n','')
+        sheet.append(line.split('|'))
+    excel.save('2000_2014.xlsx')
 
 main()
