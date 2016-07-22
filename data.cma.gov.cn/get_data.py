@@ -62,7 +62,7 @@ class Get_data():
         image=open('captcha.png','rb').read()
         image=base64.b64encode(image)
         #image=base64.encodestring(zlib.compress(image))
-        client=Client('http://www.qidiansharp.com:9001/Service1.asmx?WSDL')
+        client=Client('http://yanzhengma.gotoip2.com/Service1.asmx?WSDL')
         data=client.service.GetStrImg(image.decode())
         return data
 
