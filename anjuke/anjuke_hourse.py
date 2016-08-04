@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import openpyxl
 import re
+import time
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:39.0) Gecko/20100101 Firefox/39.0',
@@ -77,6 +78,7 @@ def main():
                 failed.close()
                 continue
             f.write(str(hourse)+'\n')
+            time.sleep(2)
             print(item['title'],'ok')
         print(page,'ok')
         page+=1
