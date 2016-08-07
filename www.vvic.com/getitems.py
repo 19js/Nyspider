@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import openpyxl
 import time
+import os
 
 headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -78,8 +79,8 @@ def getimg(item):
         pass
     try:
         content=requests.get(item['imgurl'],headers=headers).content
-        filename=item['maintitle']+'-'+item['title']+'-'+item['number']+'-'+item['price']+item['imgurl'].split('.')[-1]
-        with open('result/imgs/'+filename+'.','wb') as img:
+        filename=item['maintitle']+'-'+item['title']+'-'+item['number']+'-'+item['price']+'.'+item['imgurl'].split('.')[-1]
+        with open('result/imgs/'+filename,'wb') as img:
             img.write(content)
     except:
         return False
