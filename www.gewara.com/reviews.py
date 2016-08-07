@@ -35,6 +35,14 @@ def getcontent(id):
     text=BeautifulSoup(html,'lxml').get_text().replace('\r','').replace('\n','').replace('\t','')
     return text
 
+def write_to_excel():
+    excel=openpyxl.Workbook(write_only=True)
+    sheet=excel.create_sheet()
+    for line in open('result.txt','r'):
+        item=eval(line)
+        sheet.append([item['grade'],item['review']])
+    excel.save('result.xlsx')
+
 def main():
     f=open('result.txt','a')
     page=1
@@ -69,4 +77,4 @@ def main():
             break
     f.close()
 
-main()
+write_to_excel()
