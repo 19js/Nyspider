@@ -88,8 +88,7 @@ def getimg(item):
 
 def main():
     while True:
-        #mainurl=input('输入链接(如：http://www.vvic.com/shops/12):')
-        mainurl='http://www.vvic.com/shops/12'
+        mainurl=input('输入链接(如：http://www.vvic.com/shops/12):')
         try:
             shops=getshop(mainurl)
         except:
@@ -115,6 +114,7 @@ def main():
             line=''
             for key in keys:
                 line+=item[key]+'||'
+            line+=item['maintitle']+'-'+item['title']+'-'+item['number']+'-'+item['price']+'.'+item['imgurl'].split('.')[-1]
             f.write(line+'\n')
     f.close()
     write_to_excel(item['maintitle'])
