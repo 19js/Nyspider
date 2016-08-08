@@ -32,7 +32,12 @@ def getitems(shop):
     page=1
     result=[]
     while True:
-        html=requests.get(shop['url']+'?&currentPage=%s'%page,headers=headers).text
+        try:
+            html=requests.get(shop['url']+'?&currentPage=%s'%page,headers=headers,timeout=30).text
+        except:
+            time.sleep(2)
+            print(shop['title'],page,'failed,retrying')
+            continue
         table=BeautifulSoup(html,'lxml').find('div',{'class':'goods-list shop-list clearfix'}).find_all('div',{'class':'item'})
         if len(table)==0:
             break
@@ -78,8 +83,8 @@ def getimg(item):
     except:
         pass
     try:
-        content=requests.get(item['imgurl'],headers=headers).content
-        filename=item['maintitle']+'-'+item['title']+'-'+item['number']+'-'+item['price']+'.'+item['imgurl'].split('.')[-1]
+        content=requests.get(item['imgurl'],headers=headers,timeout=30).content
+        filename=item['itemurl'].split('/')[-1]+'.'+item['imgurl'].split('.')[-1]
         with open('result/imgs/'+filename,'wb') as img:
             img.write(content)
     except:
@@ -114,7 +119,9 @@ def main():
             line=''
             for key in keys:
                 line+=item[key]+'||'
-            line+=item['maintitle']+'-'+item['title']+'-'+item['number']+'-'+item['price']+'.'+item['imgurl'].split('.')[-1]
+            filename=item['itemurl'].split('/')[-1]+'.'+item['imgurl'].split('.')[-1]
+            filename=filename.replace('/','')
+            line+=filename
             f.write(line+'\n')
     f.close()
     write_to_excel(item['maintitle'])
