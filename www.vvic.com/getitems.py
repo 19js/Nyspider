@@ -126,4 +126,11 @@ def main():
     f.close()
     write_to_excel(item['maintitle'])
 
-main()
+while True:
+    try:
+        main()
+    except:
+        print('Failed!')
+    key=input("输入Y退出：")
+    if key=='Y':
+        break
