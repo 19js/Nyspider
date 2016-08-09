@@ -21,7 +21,13 @@ def getshop(url):
     result=[]
     for item in table:
         try:
-            title=item.get_text().replace('\r','').replace('\n','').replace(' ','')
+            title=item.get_text()
+            try:
+                i=item.find('i',{'class':'vvicon'}).get_text()
+                title=title.replace(i,'')
+            except:
+                pass
+            title=title.replace('\r','').replace('\n','').replace(' ','')
             url='http://www.vvic.com/'+item.get('href')
             result.append({'title':title,'url':url,'maintitle':maintitle})
         except:
