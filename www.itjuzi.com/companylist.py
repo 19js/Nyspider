@@ -31,12 +31,13 @@ def get_companylist(page):
         result.append([img,title,url,des,tags,loca,date,round])
     return result
 
-def write_to_excel():
+def write_to_excel(result):
     excel=openpyxl.Workbook(write_only=True)
     sheet=excel.create_sheet()
-    for line in open('result.txt','r',encoding='utf-8'):
-        sheet.append(line.split('||'))
-    excel.save('result.xlsx')
+    filename=time.strftime("%Y%m%d_%H%M%S",time.localtime())+'.xlsx'
+    for line in result:
+        sheet.append(line)
+    excel.save(filename)
 
 def loadcompany():
     companys=[]
@@ -52,6 +53,7 @@ def main():
     page=1
     f=open('result.txt','w',encoding='utf-8')
     flag=False
+    new_list=[]
     while True:
         try:
             result=get_companylist(page)
@@ -66,6 +68,7 @@ def main():
             if line in companys:
                 flag=True
                 break
+            new_list.append(item)
             f.write(line+'\r\n')
         if flag:
             break
@@ -75,6 +78,6 @@ def main():
     for company in companys:
         f.write(company+'\r\n')
     f.close()
-    write_to_excel()
+    write_to_excel(new_list)
 
 main()
