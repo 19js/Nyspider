@@ -211,7 +211,9 @@ class Psddata(Ui_MainWindow,QtWidgets.QMainWindow):
         groupindex=self.listWidget_2.currentRow()
         index=self.listWidget.currentRow()
         for key in self.grouplist[groupindex]:
-            self.groupgrouplist[groupindex][key].remove(self.groupgrouplist[groupindex][key][index])
+            if len(self.grouplist[groupindex][key])==0:
+                return
+            self.grouplist[groupindex][key].remove(self.grouplist[groupindex][key][index])
             self.listshow()
             self.listWidget.setCurrentRow(0)
 
@@ -266,10 +268,10 @@ class Psddata(Ui_MainWindow,QtWidgets.QMainWindow):
                             line.append('')
                     result.append(line)
                 write_to_excel(result,filename+'.xlsx')
-                self.pushButton.setEnabled(True)
-                self.del_pushButton_2.setEnabled(True)
-                self.add_pushButton.setEnabled(True)
-                self.pushButton.setText('开始抓取')
+        self.pushButton.setEnabled(True)
+        self.del_pushButton_2.setEnabled(True)
+        self.add_pushButton.setEnabled(True)
+        self.pushButton.setText('开始抓取')
 
 def write_to_excel(result,filename):
     excel=openpyxl.Workbook(write_only=True)
