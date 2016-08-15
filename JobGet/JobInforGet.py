@@ -7,6 +7,8 @@ from email.mime.text import MIMEText
 from email.utils import parseaddr,formataddr
 import smtplib
 import threading
+import json
+import re
 
 headers = {
         'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:39.0) Gecko/20100101 Firefox/39.0',
@@ -101,7 +103,7 @@ def Company58():
             continue
         for i in item:
             text+=i+'\n'
-        text+='\n\n'
+        text+='\n\n--------------'
         count+=1
         if count<10:
             continue
@@ -243,7 +245,7 @@ def Company51():
             continue
         for i in item:
             text+=i+'\n'
-        text+='\n\n'
+        text+='\n\n--------------'
         count+=1
         if count<10:
             continue
@@ -361,7 +363,7 @@ def CompanyZhilian():
             continue
         for i in item:
             text+=i+'\n'
-        text+='\n\n'
+        text+='\n\n--------------'
         count+=1
         if count<10:
             continue
@@ -474,7 +476,7 @@ def CompanyCj():
             continue
         for i in item:
             text+=i+'\n'
-        text+='\n\n'
+        text+='\n\n--------------'
         count+=1
         if count<10:
             continue
@@ -503,13 +505,146 @@ def CompanyCj():
     except:
         print('Send email Failed!')
 
+def jobcnurls():
+    page=1
+    try:
+        exists=[line.replace('\n','') for line in open('jobcnexists.txt','r',encoding='utf-8')]
+    except:
+        exists=[]
+    result=[]
+    status=True
+    while status:
+        try:
+            data={
+            'p.querySwitch':"0",
+            'p.searchSource':"default",
+            'p.keyword':"外贸",
+            'p.keyword2':"",
+            'p.keywordType':"2",
+            'p.pageNo':page,
+            'p.pageSize':"40",
+            'p.sortBy':"postdate",
+            'p.statistics':"false",
+            'p.totalRow':"556",
+            'p.cachePageNo':'1',
+            'p.cachePosIds':"3513784,2542627,2175796,3203044,2996185,3614375,3395878,3571408,1231266,3601002,3516555,3274772,1959747,3109563,3332633,2170628,3615059,3595859,3587717,3535948,3291403,3621325,3461433,3472599,3472621,3578139,2706695,3616287,3493549,3607106,3616931,3439425,3280638,3578145,3270019,1916558,1228083,3524309,3465542,3486713,3486707,3601025,3391175,3321005,3320998,3320996,3320994,3306390,3365198,3533514,3533500,2811010,2425856,3623211,3583850,2717496,3358036,3246890,3534463,3527159,3511972,3369724,1374874,3535274,3284704,3567439,3608412,3528423,3077368,3075370,3623956,3623949,3623936,2163952,3584947,3599522,3599518,3582993,2532549,3415244,1834820,3490070,3377947,3479194,3330969,3572298,3256770,3217981,3544077,3517787,3409490,2799496,3593391,3402261,3417841,3253317,3570524,3393344,3610898,3610598,3603185,3610905,3610889,3610699,3610694,3610601,3610573,3022817,3605224,3193085,2992893,3555263,3027745,3572094,3471935,3436003,3605218,3587727,3591475,3577476,3533077,3006314,3501469,3495393,3496318,3568220,3567212,3552154,3616415,3616191,3616179,3546881,3519846,3400707,3482812,3458998,3458994,3458991,3458990,3457766,3612384,3388971,3567679,3558114,3015274,3289607,3587729,3587715,3565104,3613923,3613913,3573873,3541749,3613076,3613000,3491848,3429534,3309660,3308632,3612064,3612061,3612027,2999639,2799009,3330820,2658670,3442336,3606261,3577069,3546094,2732605,3494886,3449636,3551506,3455154,3528192,1995873,3476392,3398936,3398929,3501222,3479232,3598970,2390239,1931366,1830190,3606063,3556527,3553706,3546420,3410018,3250223,3480094,3605141,3604841,3573305,3472646,3511922,3511900,3374124",
+            'p.cachePosUpddates':"201608152130,201608152105,201608152100,201608152047,201608152047,201608152036,201608152015,201608152000,201608151933,201608151925,201608151900,201608151857,201608151746,201608151505,201608151430,201608151412,201608151222,201608151222,201608151222,201608151214,201608151155,201608150934,201608150900,201608150859,201608150850,201608150259,201608150259,201608121855,201608121814,201608121744,201608121723,201608121652,201608121652,201608121620,201608121540,201608121540,201608121540,201608121520,201608121520,201608121455,201608121455,201608121414,201608121411,201608121411,201608121411,201608121411,201608121411,201608121411,201608121357,201608121117,201608121117,201608121052,201608121049,201608121038,201608121038,201608121034,201608120942,201608120939,201608120926,201608120926,201608120925,201608120925,201608120921,201608120858,201608120835,201608120828,201608120825,201608120813,201608120813,201608120813,201608120300,201608120300,201608120300,201608120259,201608111024,201608101528,201608101528,201608101528,201608101528,201608101402,201608101133,201608101022,201608101015,201608100934,201608100926,201608100829,201608091630,201608091630,201608091608,201608091608,201608091350,201608091036,201608090931,201608090852,201608081101,201608081008,201608080839,201608080839,201608071706,201608071706,201608071706,201608071705,201608071705,201608071705,201608071705,201608071705,201608071705,201608070941,201608070819,201608061746,201608061654,201608061144,201608061042,201608060921,201608051118,201608051118,201608051018,201608031109,201608030845,201608021919,201608021156,201608021156,201608021138,201608021025,201608011801,201608011125,201608011123,201608011122,201608010300,201608010300,201608010300,201607311127,201607311127,201607311014,201607311013,201607301706,201607301706,201607301706,201607301706,201607301706,201607291750,201607291750,201607291549,201607291549,201607291543,201607291542,201607291117,201607291117,201607291117,201607280300,201607280300,201607271124,201607271124,201607270300,201607270300,201607261642,201607261642,201607261640,201607261640,201607260300,201607260300,201607260300,201607251846,201607251846,201607251756,201607251756,201607251755,201607251638,201607241429,201607241429,201607241402,201607241200,201607241137,201607241011,201607191831,201607191542,201607191354,201607190259,201607181205,201607181205,201607181019,201607181018,201607170924,201607161542,201607161418,201607161417,201607160300,201607151729,201607151729,201607151536,201607151536,201607151448,201607151358,201607150300,201607140300,201607131547,201607131547,201607131035,201607131035,201607131035",
+            'p.jobnature':"15",
+            'p.JobLocationTown':"龙岗区;大鹏新区;坪山新区",
+            'p.includeNeg':"0",
+            'p.inputSalary':"-1",
+            'p.workYear1':"-1",
+            'p.workYear2':"11",
+            'p.jobLocation':"广东;深圳",
+            'p.jobLocationId':"3010",
+            'p.degreeId1':"10",
+            'p.degreeId2':"70",
+            'p.posPostDate':"366",
+            'p.salary':"-1",
+            'p.otherFlag':"3"
+            }
+            html=requests.post('http://www.jobcn.com/search/result_servlet.ujson?s=search%2Ftop',headers=headers,data=data).text
+            jsondata=json.loads(html)['rows']
+            for row in jsondata:
+                try:
+                    comname=row['comName']
+                    if comname in exists:
+                        continue
+                    exists.append(comname)
+                    date=row['postDateDesc']
+                    if '天' in date:
+                        status=False
+                        break
+                    city=row['jobLoc4City']
+                    address=row['address']
+                    contactPerson=row['contactPerson']
+                    email=row['email']
+                    posDescription=row['posDescription']
+                    comId=row['comId']
+                    posId=row['posId']
+                    result.append([comname,address,contactPerson,email,row['posName'],city,date,posDescription,comId,posId])
+                except:
+                    continue
+        except:
+            break
+        print('卓博',page,'ok')
+        page+=1
+    f=open('jobcnexists.txt','w',encoding='utf-8')
+    for line in exists:
+        f.write(line+'\n')
+    f.close()
+    return result
+
+def jobcn_infor(item):
+    html=requests.get('http://www.jobcn.com/position/detail.xhtml?redirect=0&posId=%s&comId=%s&s=search/advanced&acType=1'%(item[-1],item[-2]),headers=headers).text
+    soup=BeautifulSoup(html,'lxml')
+    comdes=soup.find('div',id='menuHeader').find('div',{'class':'base'}).get_text().replace('\r','').replace('\n\n','')
+    return comdes
+
+def jobcn():
+    urls=jobcnurls()
+    print('卓博--',len(urls))
+    result=[]
+    for item in urls:
+        try:
+            companydes=jobcn_infor(item)
+        except:
+            continue
+        time.sleep(1)
+        result.append(item[:-2]+[companydes])
+    if len(result)==0:
+        return
+    count=0
+    text=''
+    keys=['龙岗','坪山','坑梓','大鹏']
+    for item in result:
+        ok=False
+        for key in keys:
+            if key in str(item):
+                ok=True
+                break
+        if not ok:
+            continue
+        for i in item[:-1]:
+            text+=i+'\n'
+        text+=item[-1]
+        text+='\n\n--------------'
+        count+=1
+        if count<10:
+            continue
+        while True:
+            try:
+                Count=loademail()
+                break
+            except:
+                pass
+        try:
+            sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 卓博',text)
+        except:
+            print('Send email Failed!')
+        count=0
+        text=''
+    if text=='':
+        return
+    while True:
+        try:
+            Count=loademail()
+            break
+        except:
+            pass
+    try:
+        sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 卓博',text)
+    except:
+        print('Send email Failed!')
+
 count=input("输入间隔时间(分钟)：")
 try:
     count=int(count)
 except:
     count=10
 
-functions=[Company58,Company51,CompanyZhilian,CompanyCj]
+#functions=[Company58,Company51,CompanyZhilian,CompanyCj]
+functions=[jobcn]
 while True:
     works=[]
     for func in functions:
