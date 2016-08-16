@@ -93,6 +93,12 @@ def Company58():
     count=0
     text=''
     keys=['龙岗','坪山','坑梓','大鹏']
+    while True:
+        try:
+            Count=loademail()
+            break
+        except:
+            pass
     for item in result:
         ok=False
         for key in keys:
@@ -103,16 +109,10 @@ def Company58():
             continue
         for i in item:
             text+=i+'\n'
-        text+='\n\n--------------'
+        text+='\n\n'+'--------------'*10+'\n'
         count+=1
         if count<10:
             continue
-        while True:
-            try:
-                Count=loademail()
-                break
-            except:
-                pass
         try:
             sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 58',text)
         except:
@@ -121,12 +121,6 @@ def Company58():
         text=''
     if text=='':
         return
-    while True:
-        try:
-            Count=loademail()
-            break
-        except:
-            pass
     try:
         sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 58',text)
     except:
@@ -235,6 +229,12 @@ def Company51():
     count=0
     text=''
     keys=['龙岗','坪山','坑梓','大鹏']
+    while True:
+        try:
+            Count=loademail()
+            break
+        except:
+            pass
     for item in result:
         ok=False
         for key in keys:
@@ -245,16 +245,10 @@ def Company51():
             continue
         for i in item:
             text+=i+'\n'
-        text+='\n\n--------------'
+        text+='\n\n'+'--------------'*10+'\n'
         count+=1
         if count<10:
             continue
-        while True:
-            try:
-                Count=loademail()
-                break
-            except:
-                pass
         try:
             sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 51job',text)
         except:
@@ -263,12 +257,6 @@ def Company51():
         text=''
     if text=='':
         return
-    while True:
-        try:
-            Count=loademail()
-            break
-        except:
-            pass
     try:
         sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 51job',text)
     except:
@@ -353,6 +341,12 @@ def CompanyZhilian():
     count=0
     text=''
     keys=['龙岗','坪山','坑梓','大鹏']
+    while True:
+        try:
+            Count=loademail()
+            break
+        except:
+            pass
     for item in result:
         ok=False
         for key in keys:
@@ -363,16 +357,10 @@ def CompanyZhilian():
             continue
         for i in item:
             text+=i+'\n'
-        text+='\n\n--------------'
+        text+='\n\n'+'--------------'*10+'\n'
         count+=1
         if count<10:
             continue
-        while True:
-            try:
-                Count=loademail()
-                break
-            except:
-                pass
         try:
             sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 智联',text)
         except:
@@ -381,12 +369,6 @@ def CompanyZhilian():
         text=''
     if text=='':
         return
-    while True:
-        try:
-            Count=loademail()
-            break
-        except:
-            pass
     try:
         sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 智联',text)
     except:
@@ -466,6 +448,12 @@ def CompanyCj():
     count=0
     text=''
     keys=['龙岗','坪山','坑梓','大鹏']
+    while True:
+        try:
+            Count=loademail()
+            break
+        except:
+            pass
     for item in result:
         ok=False
         for key in keys:
@@ -476,16 +464,10 @@ def CompanyCj():
             continue
         for i in item:
             text+=i+'\n'
-        text+='\n\n--------------'
+        text+='\n\n'+'--------------'*10+'\n'
         count+=1
         if count<10:
             continue
-        while True:
-            try:
-                Count=loademail()
-                break
-            except:
-                pass
         try:
             sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 人才在线',text)
         except:
@@ -494,12 +476,6 @@ def CompanyCj():
         text=''
     if text=='':
         return
-    while True:
-        try:
-            Count=loademail()
-            break
-        except:
-            pass
     try:
         sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 人才在线',text)
     except:
@@ -543,7 +519,7 @@ def jobcnurls():
             'p.salary':"-1",
             'p.otherFlag':"3"
             }
-            html=requests.post('http://www.jobcn.com/search/result_servlet.ujson?s=search%2Ftop',headers=headers,data=data).text
+            html=requests.post('http://www.jobcn.com/search/result_servlet.ujson?s=search%2Ftop',headers=headers,data=data,timeout=30).text
             jsondata=json.loads(html)['rows']
             for row in jsondata:
                 try:
@@ -576,7 +552,7 @@ def jobcnurls():
     return result
 
 def jobcn_infor(item):
-    html=requests.get('http://www.jobcn.com/position/detail.xhtml?redirect=0&posId=%s&comId=%s&s=search/advanced&acType=1'%(item[-1],item[-2]),headers=headers).text
+    html=requests.get('http://www.jobcn.com/position/detail.xhtml?redirect=0&posId=%s&comId=%s&s=search/advanced&acType=1'%(item[-1],item[-2]),headers=headers,timeout=30).text
     soup=BeautifulSoup(html,'lxml')
     comdes=soup.find('div',id='menuHeader').find('div',{'class':'base'}).get_text().replace('\r','').replace('\n\n','')
     return comdes
@@ -591,12 +567,18 @@ def jobcn():
         except:
             continue
         time.sleep(1)
-        result.append(item[:-2]+[companydes])
+        result.append(item[:-2]+[companydes]+['http://www.jobcn.com/position/detail.xhtml?redirect=0&posId=%s&comId=%s&s=search/advanced&acType=1'%(item[-1],item[-2])])
     if len(result)==0:
         return
     count=0
     text=''
     keys=['龙岗','坪山','坑梓','大鹏']
+    while True:
+        try:
+            Count=loademail()
+            break
+        except:
+            pass
     for item in result:
         ok=False
         for key in keys:
@@ -608,16 +590,10 @@ def jobcn():
         for i in item[:-1]:
             text+=i+'\n'
         text+=item[-1]
-        text+='\n\n--------------'
+        text+='\n\n'+'--------------'*10+'\n'
         count+=1
         if count<10:
             continue
-        while True:
-            try:
-                Count=loademail()
-                break
-            except:
-                pass
         try:
             sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 卓博',text)
         except:
@@ -626,14 +602,256 @@ def jobcn():
         text=''
     if text=='':
         return
+    try:
+        sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 卓博',text)
+    except:
+        print('Send email Failed!')
+
+def ganjiurls():
+    need_place=['http://sz.ganji.com/zpbiaoqian/longgang/o{}/_%E5%A4%96%E8%B4%B8/zhaopin/','http://sz.ganji.com/zpbiaoqian/pingshanxinqu/o{}/_%E5%A4%96%E8%B4%B8/zhaopin/','http://sz.ganji.com/zpbiaoqian/dapengxinqu/o{}/_%E5%A4%96%E8%B4%B8/zhaopin/']
+    try:
+        exists=[line.replace('\n','') for line in open('ganjiexists.txt','r',encoding='utf-8')]
+    except:
+        exists=[]
+    result=[]
+    for placeurl in need_place:
+        page=1
+        statue=True
+        while statue:
+            try:
+                html=requests.get(placeurl.format(page),headers=headers,timeout=30).text
+                table=BeautifulSoup(html,'lxml').find('div',id='list-job-id').find_all('dl',{'class':'con-list-zcon'})
+                for item in table:
+                    try:
+                        dds=item.find_all('dd')
+                        companyname=dds[0].find('a').get('title')
+                        companyurl=dds[0].find('a').get('href')
+                        joburl=item.find('a').get('href')
+                        if companyname in exists:
+                            continue
+                        date=dds[-1].get_text()
+                        if '今天' not in date:
+                            statue=False
+                            break
+                        com=[]
+                        exists.append(companyname)
+                        job=item.find('a').get_text().replace('\n','')
+                        com=[companyname,date,companyurl,joburl]
+                        result.append(com)
+                    except:
+                        continue
+            except:
+                break
+            time.sleep(2)
+            print('赶集',page,'--ok')
+            page+=1
+    f=open('ganjiexists.txt','w',encoding='utf-8')
+    for line in exists:
+        f.write(line+'\n')
+    f.close()
+    return result
+
+def ganji_infor(company):
+    html=requests.get('http://sz.ganji.com/'+company[-1],headers=headers,timeout=30).text
+    soup=BeautifulSoup(html,'lxml').find('div',{'class':'l-d-con'})
+    title=soup.find('h1').get_text()
+    text=soup.find('div',{'class':'d-c-left-age d-c-left-firm mt-30'}).get_text().replace('\r','').replace('\n','#').replace(' ','')
+    try:
+        place=re.findall('工作地点：(.*?)#',text)[0]
+    except:
+        place='--'
+    jobdes=soup.find('div',{'class':'deta-Corp'}).get_text().replace('\r','').replace('\n','')
+    html=requests.get(company[-2],headers=headers,timeout=30).text
+    try:
+        comdes=BeautifulSoup(html,'lxml').find('div',{'class':'l-d-con'}).find('div',{'class':'c-introduce'}).get_text()
+    except:
+        try:
+            table=BeautifulSoup(html,'lxml').find_all('div',{'class':'content'})
+            comdex='--'
+            for item in table:
+                if '公司名称：' in str(item):
+                    comdes=item.get_text().replace('\r','').replace('\n\n','\n').replace(' ','')
+                    break
+        except:
+            pass
+    result=[comdes,title,place,jobdes,'http://sz.ganji.com/'+company[-1],company[-2]]
+    return  result
+
+
+def ganji():
+    urls=ganjiurls()
+    print('赶集--',len(urls))
+    result=[]
+    for item in urls:
+        try:
+            company=ganji_infor(item)
+        except:
+            continue
+        time.sleep(1)
+        result.append(company)
+    if len(result)==0:
+        return
+    count=0
+    text=''
+    keys=['龙岗','坪山','坑梓','大鹏']
     while True:
         try:
             Count=loademail()
             break
         except:
             pass
+    for item in result:
+        ok=False
+        for key in keys:
+            if key in str(item):
+                ok=True
+                break
+        if not ok:
+            continue
+        for i in item:
+            text+=i.replace('\n\n','\n')+'\n'
+        text+='\n\n\n'+'--------------'*10+'\n'
+        count+=1
+        if count<10:
+            continue
+        try:
+            sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 赶集',text)
+        except:
+            print('Send email Failed!')
+        count=0
+        text=''
+    if text=='':
+        return
     try:
-        sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 卓博',text)
+        sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 赶集',text)
+    except:
+        print('Send email Failed!')
+
+def jobuiurls():
+    need_place=['http://www.jobui.com/jobs?jobKw=%E5%A4%96%E8%B4%B8&cityKw=%E6%B7%B1%E5%9C%B3&areaCode=190305&n={}&sortField=last']
+    try:
+        exists=[line.replace('\n','') for line in open('jobuiexists.txt','r',encoding='utf-8')]
+    except:
+        exists=[]
+    result=[]
+    for placeurl in need_place:
+        page=1
+        statue=True
+        while statue:
+            try:
+                html=requests.get(placeurl.format(page),headers=headers,timeout=30).text
+                table=BeautifulSoup(html,'lxml').find('ul',{'class':'searcher-job-detail j-recommendJob'}).find_all('li')
+                for item in table:
+                    try:
+                        companyname=item.find('a').get('title')
+                        companyurl=item.find('a').get('href')
+                        jobname=item.find('h2').find('a').get_text()
+                        joburl=item.find('h2').find('a').get('href')
+                        if companyname in exists:
+                            continue
+                        date=item.find('span',{'class':'fr'}).get_text()
+                        if '天' in date:
+                            statue=False
+                            break
+                        com=[]
+                        exists.append(companyname)
+                        com=[companyname,jobname,date,'http://www.jobui.com/'+companyurl,'http://www.jobui.com/'+joburl]
+                        result.append(com)
+                    except:
+                        continue
+            except:
+                break
+            time.sleep(2)
+            print('职友集',page,'--ok')
+            page+=1
+    f=open('jobuiexists.txt','w',encoding='utf-8')
+    for line in exists:
+        f.write(line+'\n')
+    f.close()
+    return result
+
+def jobui_infor(company):
+    html=requests.get(company[-1],headers=headers,timeout=30).text
+    soup=BeautifulSoup(html,'lxml').find('div',{'class':'j-job-detail'}).find('div',{'class':'cfix'})
+    jobdes=''
+    try:
+        jobdes=soup.find('div').get_text().replace('\r','').replace('\t','').replace('\n','').replace(' ','')
+    except:
+        pass
+    try:
+        jobdes+=soup.find('dl').get_text().replace('：\n','：')
+    except:
+        pass
+    try:
+        url='http://www.jobui.com/'+soup.find('p',{'class':'j-job-option'}).find('a',{'class':'fs12 j-valaber'}).get('href')
+        jobdes+='源网站:'+url+'\n'
+    except:
+        pass
+    try:
+        html=requests.get(company[-2],headers=headers,timeout=30).text
+        soup=BeautifulSoup(html,'lxml').find('div',{'class':'aleft'})
+        comdes=''
+        try:
+            comdes+=soup.find('div',id='cmp-intro').get_text()
+        except:
+            pass
+        try:
+            comdes+='\n'+soup.find_all('div',{'class':'jk-box jk-matter'})[1].find('dl').get_text()
+        except:
+            pass
+    except:
+        comdes=''
+    comdes=comdes.replace('\n\n','').replace('：\n','：')
+    comdes=re.sub('\d+张公司照片','',comdes)
+    result=[comdes,'职位要求:'+jobdes]+company
+    return result
+
+def jobui():
+    urls=jobuiurls()
+    print('职友集--',len(urls))
+    result=[]
+    for item in urls:
+        try:
+            company=jobui_infor(item)
+        except:
+            continue
+        time.sleep(1)
+        result.append(company)
+    if len(result)==0:
+        return
+    count=0
+    text=''
+    keys=['龙岗','坪山','坑梓','大鹏']
+    while True:
+        try:
+            Count=loademail()
+            break
+        except:
+            pass
+    for item in result:
+        ok=False
+        for key in keys:
+            if key in str(item):
+                ok=True
+                break
+        if not ok:
+            continue
+        for i in item:
+            text+=i+'\n'
+        text+='\n\n'+'--------------'*10+'\n'
+        count+=1
+        if count<10:
+            continue
+        try:
+            sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 职友集',text)
+        except:
+            print('Send email Failed!')
+        count=0
+        text=''
+    if text=='':
+        return
+    try:
+        sendEmail(Count[0],Count[1],'2786203719@qq.com',time.strftime("%Y-%m-%d %H:%M:%S")+'-- 职友集',text)
     except:
         print('Send email Failed!')
 
@@ -643,14 +861,14 @@ try:
 except:
     count=10
 
-#functions=[Company58,Company51,CompanyZhilian,CompanyCj]
-functions=[jobcn]
+functions=[Company58,Company51,CompanyZhilian,CompanyCj,jobcn,ganji,jobui]
 while True:
     works=[]
     for func in functions:
         work=threading.Thread(target=func)
         works.append(work)
     for work in works:
+        work.setDaemon(True)
         work.start()
     for work in works:
         work.join()
