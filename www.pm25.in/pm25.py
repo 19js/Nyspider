@@ -37,7 +37,7 @@ def infor(url):
     for item in table:
         line=[]
         for td in item.find_all('td'):
-            line.append(td.get_text())
+            line.append(td.get_text().replace('\r','').replace('\n','').replace('\t',''))
         result['list'].append(line)
     return result
 
@@ -87,4 +87,4 @@ def main():
 
 while True:
     main()
-    time.sleep(20*60)
+    time.sleep(30*60)
