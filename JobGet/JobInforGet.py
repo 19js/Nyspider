@@ -49,7 +49,7 @@ def get58Url():
             except:
                 break
             time.sleep(2)
-            print('58',page,'--ok')
+            print('58','page',page,'--ok')
             page+=1
     f=open('58exists.txt','w',encoding='utf-8')
     for line in exists:
@@ -180,7 +180,7 @@ def get51Url():
             except:
                 break
             time.sleep(2)
-            print('前程无忧',page,'--ok')
+            print('前程无忧','page',page,'--ok')
             page+=1
             if page==10:
                 break
@@ -299,7 +299,7 @@ def getZhilianUrl():
                 statue=False
                 break
             time.sleep(2)
-            print('智联',page,'--ok')
+            print('智联','page',page,'--ok')
             page+=1
     f=open('zhiexists.txt','w',encoding='utf-8')
     for line in exists:
@@ -404,7 +404,7 @@ def getCjUrl():
                 statue=False
                 break
             time.sleep(1)
-            print('人才在线',page,'--ok')
+            print('人才在线','page',page,'--ok')
             page+=1
             if(page==30):
                 break
@@ -521,6 +521,8 @@ def jobcnurls():
             }
             html=requests.post('http://www.jobcn.com/search/result_servlet.ujson?s=search%2Ftop',headers=headers,data=data,timeout=30).text
             jsondata=json.loads(html)['rows']
+            if len(jsondata)==0:
+                break
             for row in jsondata:
                 try:
                     comname=row['comName']
@@ -543,8 +545,11 @@ def jobcnurls():
                     continue
         except:
             break
-        print('卓博',page,'ok')
+        print('卓博','page',page,'--ok')
         page+=1
+        time.sleep(2)
+        if page==10:
+            break
     f=open('jobcnexists.txt','w',encoding='utf-8')
     for line in exists:
         f.write(line+'\n')
@@ -643,7 +648,7 @@ def ganjiurls():
             except:
                 break
             time.sleep(2)
-            print('赶集',page,'--ok')
+            print('赶集','page',page,'--ok')
             page+=1
     f=open('ganjiexists.txt','w',encoding='utf-8')
     for line in exists:
@@ -762,7 +767,7 @@ def jobuiurls():
             except:
                 break
             time.sleep(2)
-            print('职友集',page,'--ok')
+            print('职友集','page',page,'--ok')
             page+=1
     f=open('jobuiexists.txt','w',encoding='utf-8')
     for line in exists:
