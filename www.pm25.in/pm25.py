@@ -74,7 +74,7 @@ def main():
         date=result['date']
         for item in result['list']:
             try:
-                text=open('result/'+city+'/'+item['0']+'.txt','r',encoding='utf-8').read()
+                text=open('result/'+city+'/'+item[0]+'.txt','r',encoding='utf-8').read()
                 if date in text:
                     continue
             except:
@@ -87,4 +87,4 @@ def main():
 
 while True:
     main()
-    time.sleep(30*60)
+    time.sleep(20*60)
