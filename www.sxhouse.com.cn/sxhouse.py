@@ -60,6 +60,9 @@ def get_saledetail(house):
     house['saleable']={}
     house['saled']={}
     house['unable']={}
+    house['anjie']={}
+    house['yuding']={}
+    house['fufang']={}
     keys=[]
     for item in soup.find_all('td',{'bgcolor':'#66ff66'}):
         if '商业' in str(item):
@@ -73,6 +76,20 @@ def get_saledetail(house):
                 house['saleable'][areanum]=1
         except:
             continue
+
+    for item in soup.find_all('td',{'bgcolor':'#ffff66'}):
+        if '商业' in str(item):
+            continue
+        try:
+            areanum=re.findall("showFlow\('show_\d+',(.*?),.*?\)",str(item))[0]
+            keys.append(areanum)
+            try:
+                house['saleable'][areanum]+=1
+            except:
+                house['saleable'][areanum]=1
+        except:
+            continue
+
     for item in soup.find_all('td',{'bgcolor':'#ff0000'}):
         if '商业' in str(item):
             continue
@@ -85,7 +102,8 @@ def get_saledetail(house):
                 house['saled'][areanum]=1
         except:
             continue
-    for item in soup.find_all('td',{'bgcolor':'#990000'}):
+
+    for item in soup.find_all('td',{'bgcolor':'#666666'}):
         if '商业' in str(item):
             continue
         try:
@@ -97,6 +115,44 @@ def get_saledetail(house):
                 house['unable'][areanum]=1
         except:
             continue
+
+    for item in soup.find_all('td',{'bgcolor':'#990000'}):
+        if '商业' in str(item):
+            continue
+        try:
+            areanum=re.findall("建筑面积：(.*?)㎡",str(item))[0]
+            keys.append(areanum)
+            try:
+                house['anjie'][areanum]+=1
+            except:
+                house['anjie'][areanum]=1
+        except:
+            continue
+    for item in soup.find_all('td',{'bgcolor':'#0033ff'}):
+        if '商业' in str(item):
+            continue
+        try:
+            areanum=re.findall("建筑面积：(.*?)㎡",str(item))[0]
+            keys.append(areanum)
+            try:
+                house['yuding'][areanum]+=1
+            except:
+                house['yuding'][areanum]=1
+        except:
+            continue
+    for item in soup.find_all('td',{'bgcolor':'#0099ff'}):
+        if '商业' in str(item):
+            continue
+        try:
+            areanum=re.findall("建筑面积：(.*?)㎡",str(item))[0]
+            keys.append(areanum)
+            try:
+                house['fufang'][areanum]+=1
+            except:
+                house['fufang'][areanum]=1
+        except:
+            continue
+
     keys=list(set(keys))
     names=''
     for item in soup.find_all('tr')[-1].find_all('td'):
@@ -123,7 +179,7 @@ def main():
         return
     excel=openpyxl.Workbook(write_only=True)
     sheet=excel.create_sheet()
-    header=['日期','楼号','总套数','已售','面积','已售','面积','未售','面积','不可售']
+    header=['日期','楼号','总套数','已售','面积','已售','面积','未售','面积','不可售','面积','按揭/抵押','面积','预订','面积','附房']
     sheet.append(header)
     for item in houselist:
         for house in item['list']:
@@ -145,6 +201,18 @@ def main():
                     line+=[key,0]
                 try:
                     line+=[key,infor['unable'][key]]
+                except:
+                    line+=[key,0]
+                try:
+                    line+=[key,infor['anjie'][key]]
+                except:
+                    line+=[key,0]
+                try:
+                    line+=[key,infor['yuding'][key]]
+                except:
+                    line+=[key,0]
+                try:
+                    line+=[key,infor['fufang'][key]]
                 except:
                     line+=[key,0]
                 line.append(infor['names'])
