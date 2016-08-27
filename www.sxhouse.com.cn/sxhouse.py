@@ -47,6 +47,7 @@ def get_list(hid):
                 history=eval(history)
                 house['pid']=history[0]
                 house['hid']=history[1]
+                house['secid']=history[2]
                 item['list'].append(house)
             except:
                 continue
@@ -54,16 +55,18 @@ def get_list(hid):
     return result
 
 def get_saledetail(house):
-    html=requests.get('http://www.sxhouse.com.cn/Loupan/saledetail.aspx?pid=%s&hid=%s&sectionID=1'%(house['pid'],house['hid']),headers=headers).text
+    html=requests.get('http://www.sxhouse.com.cn/Loupan/saledetail.aspx?pid=%s&hid=%s&sectionID=%s'%(house['pid'],house['hid'],house['secid']),headers=headers).text
     soup=BeautifulSoup(html,'lxml').find('div',{'class':'floordetail'})
     house['saleable']={}
     house['saled']={}
     house['unable']={}
+    keys=[]
     for item in soup.find_all('td',{'bgcolor':'#66ff66'}):
         if '商业' in str(item):
             continue
         try:
             areanum=re.findall("showFlow\('show_\d+',(.*?),.*?\)",str(item))[0]
+            keys.append(areanum)
             try:
                 house['saleable'][areanum]+=1
             except:
@@ -75,6 +78,7 @@ def get_saledetail(house):
             continue
         try:
             areanum=re.findall("建筑面积：(.*?)㎡",str(item))[0]
+            keys.append(areanum)
             try:
                 house['saled'][areanum]+=1
             except:
@@ -86,12 +90,19 @@ def get_saledetail(house):
             continue
         try:
             areanum=re.findall("建筑面积：(.*?)㎡",str(item))[0]
+            keys.append(areanum)
             try:
                 house['unable'][areanum]+=1
             except:
                 house['unable'][areanum]=1
         except:
             continue
+    keys=list(set(keys))
+    names=''
+    for item in soup.find_all('tr')[-1].find_all('td'):
+        names+=item.find('b').get_text()+';\n'
+    house['names']=names
+    house['keys']=keys
     return house
 
 def main():
@@ -117,30 +128,26 @@ def main():
     for item in houselist:
         for house in item['list']:
             infor=get_saledetail(house)
-            infor['saled']=sorted(infor['saled'].items(),key=lambda x:x[0],reverse=True)
-            infor['saleable']=sorted(infor['saleable'].items(),key=lambda x:x[0],reverse=True)
-            infor['unable']=sorted(infor['unable'].items(),key=lambda x:x[0],reverse=True)
-            length=0
-            if length<len(infor['saled']):
-                length=len(infor['saled'])
-            if length<len(infor['saleable']):
-                length=len(infor['saleable'])
-            if length<len(infor['unable']):
-                length=len(infor['unable'])
-            for index in range(length):
+            if len(infor['keys'])==0:
+                line=[item['date'],infor['housenum'],infor['allnum'],infor['salednum']]
+                sheet.append(line)
+                sheet.append([])
+                continue
+            for key in infor['keys']:
                 line=[item['date'],infor['housenum'],infor['allnum'],infor['salednum']]
                 try:
-                    line+=[infor['saled'][index][0],infor['saled'][index][1]]
+                    line+=[key,infor['saled'][key]]
                 except:
-                    line+=['','']
+                    line+=[key,0]
                 try:
-                    line+=[infor['saleable'][index][0],infor['saleable'][index][1]]
+                    line+=[key,infor['saleable'][key]]
                 except:
-                    line+=['','']
+                    line+=[key,0]
                 try:
-                    line+=[infor['unable'][index][0],infor['unable'][index][1]]
+                    line+=[key,infor['unable'][key]]
                 except:
-                    line+=['','']
+                    line+=[key,0]
+                line.append(infor['names'])
                 sheet.append(line)
             sheet.append([])
             print(item['date'],infor['housenum'],'ok')
