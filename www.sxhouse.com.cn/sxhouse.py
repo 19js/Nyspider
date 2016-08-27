@@ -81,7 +81,7 @@ def get_saledetail(house):
         if '商业' in str(item):
             continue
         try:
-            areanum=re.findall("showFlow\('show_\d+',(.*?),.*?\)",str(item))[0]
+            areanum=re.findall("建筑面积：(.*?)㎡",str(item))[0]
             keys.append(areanum)
             try:
                 house['saleable'][areanum]+=1
