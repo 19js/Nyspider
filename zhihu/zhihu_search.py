@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import json
 import time
 import openpyxl
+import jieba
+import re
 
 headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -78,6 +80,26 @@ def question_infor(item):
         comment['comment-content']=div.find('div',{'class':'zm-comment-content'}).get_text()
         item['comments'].append(comment)
     return item
+
+def get_comments(answerid):
+    comments=[]
+    page=1
+    pre=[]
+    while True:
+        try:
+            html=requests.get('https://www.zhihu.com/r/answers/%s/comments?page=%s'%(answerid,page),headers=headers).text
+            data=json.loads(html)['data']
+            if data==pre:
+                break
+            pre=data
+            for item in data:
+                comments.append(item['content'])
+            print('Get comments',answerid,page,'ok')
+            page+=1
+            time.sleep(1)
+        except:
+            break
+    return comments
 
 def write_to_excel(items):
     excel=openpyxl.Workbook(write_only=True)
