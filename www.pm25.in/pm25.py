@@ -19,6 +19,10 @@ def get_city():
         result[item.get_text()]='http://www.pm25.in/'+item.get('href')
     return result
 
+def get_time():
+    timenow=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
+    return timenow
+
 def infor(url):
     count=0
     while True:
@@ -46,12 +50,21 @@ def main():
         os.mkdir('result')
     except:
         pass
-    try:
-        cities=get_city()
-    except:
-        print('Get City Failed!')
-        main()
-        return
+    count=0
+    while True:
+        try:
+            cities=get_city()
+            break
+        except:
+            count+=1
+            if count==3:
+                return
+            f=open('log.txt','a',encoding='utf-8')
+            print('Get City Failed!')
+            timenow=get_time()
+            f.write(str(timenow)+'---Get City Failed!\r\n')
+            f.close()
+    log_f=open('log.txt','a',encoding='utf-8')
     for city in cities:
         try:
             os.mkdir('result/'+city)
@@ -60,7 +73,6 @@ def main():
         count=0
         status=True
         while True:
-            result=infor(cities[city])
             try:
                 result=infor(cities[city])
                 break
@@ -84,7 +96,15 @@ def main():
             f.write('\t'.join(line)+'\r\n')
             f.close()
         print(date,city,'ok')
+        log_f.write(date+'---'+city+'ok'+'\r\n')
+    log_f.close()
 
 while True:
-    main()
+    try:
+        main()
+    except:
+        time.sleep(20)
+        continue
+    date=time.strftime("%Y-%m-%d %H:%M:%S")
+    print(date,'sleep')
     time.sleep(20*60)
