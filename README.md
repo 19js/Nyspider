@@ -116,3 +116,5 @@ zhihu  --- 知乎
 www.sxhouse.com.cn --- 绍兴房地产信息网
 
 baidumap --- 百度地图商家信息
+
+www.teld.cn --- 特来电充电桩信息
