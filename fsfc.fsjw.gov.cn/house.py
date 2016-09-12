@@ -32,6 +32,9 @@ def buildinfor(building_id):
         build=[]
         for key in keys:
             try:
+                if key in ['jzmj','tnmj']:
+                    build.append(float(item[key]))
+                    continue
                 build.append(item[key])
             except:
                 build.append('')
@@ -42,8 +45,13 @@ def main():
     house_id=input("输入楼盘id:")#楼盘链接中的id
     excel=openpyxl.Workbook(write_only=True)
     buildings=get_buildings(house_id)
+    header=['房号','用途','总面积(㎡)','套内面积(㎡)','销售状态']
+    count=0
     for item in buildings:
-        sheet=excel.create_sheet(item['name'])
+        sheet=excel.create_sheet(str(count))
+        count+=1
+        sheet.append([item['name']])
+        sheet.append(header)
         result=buildinfor(item['id'])
         for line in result:
             sheet.append(line)
