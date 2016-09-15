@@ -14,10 +14,30 @@ def insert_into_mysql(result):
     userdata=load_mysql_setting()
     conn=pymysql.connect(host=userdata['host'],user=userdata['user'],passwd=userdata['passwd'],db=userdata['db'],port=userdata['port'],charset=userdata['charset'])
     cur=conn.cursor()
-    keys=['bmatch','bmain','bumain','btime','buse', 'btype', 'bsrc','bstart','batt','bdateline']
-    row=cur.execute('update chat_direct set bmain="test" where bid=1;')
-    if row ==0:
-        cur.execute('insert chat_direct values bmain="test" where bid=1;')
+    where_keys=['bmatch','bmain','bumain','btime']
+    update_keys=['buse', 'btype', 'bsrc','bstart','batt','bdateline']
+    for item in result:
+        where_cmd=''
+        for key in where_keys:
+            try:
+                where_cmd+=key+'='+'"%s"'%item[key]+' and '
+            except:
+                continue
+        update_cmd=''
+        for key in update_keys:
+            try:
+                update_cmd+=key+'='+'"%s"'%item[key]+','
+            except:
+                continue
+        row=cur.execute('update chat_direct set %s where %s'%(update_cmd[:-1],where_cmd[:-4]))
+        if row ==0:
+            line=[]
+            for key in ['bmatch','bmain','bumain','btime','buse', 'btype', 'bsrc','bstart','batt','bdateline']:
+                try:
+                    line.append(item[key])
+                except:
+                    line.append('')
+            cur.execute('insert into chat_direct(bmatch,bmain,bumain,btime,buse,btype,bsrc,bstart,batt,bdateline) values'+str(tuple(line)))
     conn.commit()
     cur.close()
     conn.close()
@@ -49,14 +69,17 @@ def crawl_from_web():
             if btype=='足球':
                 btype=2
             item={}
+            item['bdateline']=timenow
             item['btype']=btype
+            item['batt']=1
             item['btime']=spans[0].get_text()
-            btime=int(item['btime'].replace(':',''))
+            btime=int(item['btime'].replace(':',''))-5
             item['bmatch']=spans[2].get_text()
             name=spans[3].get_text().replace('\r','').replace('\n','').replace(' ','').replace('[HD]','')
             item['bmain']=name.split('VS')[0]
             item['bumain']=name.split('VS')[-1]
             if nowtime<btime:
+                item['buse']=2
                 item['bstart']=2
                 result.append(item)
                 continue
@@ -68,8 +91,8 @@ def crawl_from_web():
                 item['buse']=2
                 result.append(item)
                 continue
+            item['buse']=1
             item['bsrc']=bsrc
-            item['bdateline']=timenow
             item['batt']=1
             result.append(item)
         except:
@@ -95,13 +118,23 @@ def get_web_src(videoid):
     url=html.split('$$$')[-1]
     return url
 
-'''
-result=crawl_from_web()
-keys=[]
-for item in result:
-    for key in item:
-        keys.append(key)
-print(list(set(keys)))
-'''
-
-insert_into_mysql('')
+while True:
+    f=open('log','a',encoding='utf8')
+    try:
+        result=crawl_from_web()
+    except:
+        timenow=time.strftime('%Y-%m-%d %H:%M:%S')
+        f.write(timenow+'\t抓取失败\r\n')
+        time.sleep(2)
+        continue
+    try:
+        insert_into_mysql(result)
+    except:
+        timenow=time.strftime('%Y-%m-%d %H:%M:%S')
+        f.write(timenow+'\t插入数据库失败\r\n')
+        time.sleep(10)
+        continue
+    timenow=time.strftime('%Y-%m-%d %H:%M:%S')
+    print(timenow,'ok')
+    f.write(timenow+'\tok\r\n')
+    time.sleep(20)
