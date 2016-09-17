@@ -205,7 +205,10 @@ class Ukers(QtWidgets.QMainWindow,Ui_MainWindow):
         self.pushButton_2.clicked.connect(self.stop_crawl)
 
     def stop_crawl(self):
-        self.crawler.terminate()
+        try:
+            self.crawler.terminate()
+        except:
+            pass
         self.pushButton.setEnabled(True)
         self.pushButton.setText("查询")
 
@@ -222,14 +225,14 @@ class Ukers(QtWidgets.QMainWindow,Ui_MainWindow):
         data['pop_floor']=self.person_num_lineEdit.text()
         data['ft_floor']=self.last_tang_lineEdit.text()
         data['ft_cell']=self.last_tang_lineEdit_2.text()
-        data['sj_date_floor']=self.upload_dateEdit.text()
-        data['sj_date_cell']=self.update_dateEdit_2.text()
-        data['ft_date_floor']=self.share_dateEdit_1.text()
-        data['ft_date_cell']=self.share_dateEdit_2.text()
+        data['sj_date_floor']=self.upload_dateEdit.text().replace(' ','')
+        data['sj_date_cell']=self.update_dateEdit_2.text().replace(' ','')
+        data['ft_date_floor']=self.share_dateEdit_1.text().replace(' ','')
+        data['ft_date_cell']=self.share_dateEdit_2.text().replace(' ','')
         data['page']=1
         data['order']=''
         data['sort']=''
-        self.newest_date=self.newdate_dateEdit.text()
+        self.newest_date=self.newdate_dateEdit.text().replace(' ','')
         return data
 
     def table_show(self):
@@ -318,8 +321,8 @@ class Crawl(QtCore.QThread):
         self.session=requests.session()
         self.session.get('http://www.ukers.cn/identity/sign/sign_location',headers=self.headers)
         data={
-        'phone':'18927639636',
-        'password':'13425816864'
+        'phone':'',
+        'password':''
         }
         self.session.post('http://www.ukers.cn/identity/sign/signin_action',data=data,headers=self.headers)
 
