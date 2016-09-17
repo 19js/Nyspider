@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import json
 from PyQt5 import QtCore, QtGui, QtWidgets
 import time
+import datetime
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -61,28 +62,12 @@ class Ui_MainWindow(object):
         self.label_5 = QtWidgets.QLabel(self.centralWidget)
         self.label_5.setGeometry(QtCore.QRect(750, 66, 71, 21))
         self.label_5.setObjectName("label_5")
-        self.upload_dateEdit = QtWidgets.QDateEdit(self.centralWidget)
-        self.upload_dateEdit.setGeometry(QtCore.QRect(820, 60, 121, 31))
-        self.upload_dateEdit.setDate(QtCore.QDate(2016, 9, 16))
-        self.upload_dateEdit.setObjectName("upload_dateEdit")
         self.label_6 = QtWidgets.QLabel(self.centralWidget)
         self.label_6.setGeometry(QtCore.QRect(946, 60, 16, 31))
         self.label_6.setObjectName("label_6")
-        self.update_dateEdit_2 = QtWidgets.QDateEdit(self.centralWidget)
-        self.update_dateEdit_2.setGeometry(QtCore.QRect(960, 60, 121, 31))
-        self.update_dateEdit_2.setDate(QtCore.QDate(2016, 9, 16))
-        self.update_dateEdit_2.setObjectName("update_dateEdit_2")
         self.label_7 = QtWidgets.QLabel(self.centralWidget)
         self.label_7.setGeometry(QtCore.QRect(10, 110, 51, 31))
         self.label_7.setObjectName("label_7")
-        self.share_dateEdit_1 = QtWidgets.QDateEdit(self.centralWidget)
-        self.share_dateEdit_1.setGeometry(QtCore.QRect(80, 110, 121, 31))
-        self.share_dateEdit_1.setDate(QtCore.QDate(2016, 9, 16))
-        self.share_dateEdit_1.setObjectName("share_dateEdit_1")
-        self.share_dateEdit_2 = QtWidgets.QDateEdit(self.centralWidget)
-        self.share_dateEdit_2.setGeometry(QtCore.QRect(250, 110, 121, 31))
-        self.share_dateEdit_2.setDate(QtCore.QDate(2016, 9, 16))
-        self.share_dateEdit_2.setObjectName("share_dateEdit_2")
         self.label_8 = QtWidgets.QLabel(self.centralWidget)
         self.label_8.setGeometry(QtCore.QRect(220, 110, 21, 21))
         self.label_8.setObjectName("label_8")
@@ -125,13 +110,32 @@ class Ui_MainWindow(object):
         self.label_15 = QtWidgets.QLabel(self.centralWidget)
         self.label_15.setGeometry(QtCore.QRect(400, 166, 71, 21))
         self.label_15.setObjectName("label_15")
-        self.newdate_dateEdit = QtWidgets.QDateEdit(self.centralWidget)
-        self.newdate_dateEdit.setGeometry(QtCore.QRect(480, 160, 141, 31))
-        self.newdate_dateEdit.setDate(QtCore.QDate(2016, 9, 16))
-        self.newdate_dateEdit.setObjectName("newdate_dateEdit")
         self.pushButton = QtWidgets.QPushButton(self.centralWidget)
         self.pushButton.setGeometry(QtCore.QRect(750, 160, 91, 31))
         self.pushButton.setObjectName("pushButton")
+        self.pushButton_1 = QtWidgets.QPushButton(self.centralWidget)
+        self.pushButton_1.setGeometry(QtCore.QRect(850, 160, 91, 31))
+        self.pushButton_1.setText("重新计算")
+        self.pushButton_1.setObjectName("pushButton_1")
+        self.pushButton_2 = QtWidgets.QPushButton(self.centralWidget)
+        self.pushButton_2.setGeometry(QtCore.QRect(950, 160, 91, 31))
+        self.pushButton_2.setText("停止")
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.upload_dateEdit = QtWidgets.QLineEdit(self.centralWidget)
+        self.upload_dateEdit.setGeometry(QtCore.QRect(820, 60, 113, 31))
+        self.upload_dateEdit.setObjectName("upload_dateEdit")
+        self.update_dateEdit_2 = QtWidgets.QLineEdit(self.centralWidget)
+        self.update_dateEdit_2.setGeometry(QtCore.QRect(960, 60, 113, 31))
+        self.update_dateEdit_2.setObjectName("update_dateEdit_2")
+        self.share_dateEdit_1 = QtWidgets.QLineEdit(self.centralWidget)
+        self.share_dateEdit_1.setGeometry(QtCore.QRect(80, 110, 131, 31))
+        self.share_dateEdit_1.setObjectName("share_dateEdit_1")
+        self.share_dateEdit_2 = QtWidgets.QLineEdit(self.centralWidget)
+        self.share_dateEdit_2.setGeometry(QtCore.QRect(240, 110, 131, 31))
+        self.share_dateEdit_2.setObjectName("share_dateEdit_2")
+        self.newdate_dateEdit = QtWidgets.QLineEdit(self.centralWidget)
+        self.newdate_dateEdit.setGeometry(QtCore.QRect(480, 160, 171, 31))
+        self.newdate_dateEdit.setObjectName("newdate_dateEdit")
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 1102, 22))
@@ -159,37 +163,31 @@ class Ui_MainWindow(object):
         item = self.tableWidget.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "挂单数量"))
         item = self.tableWidget.horizontalHeaderItem(4)
-        item.setText(_translate("MainWindow", "本月收益"))
+        item.setText(_translate("MainWindow", "月收益"))
         item = self.tableWidget.horizontalHeaderItem(5)
         item.setText(_translate("MainWindow", "糖块1"))
         item = self.tableWidget.horizontalHeaderItem(6)
         item.setText(_translate("MainWindow", "分糖日"))
         item = self.tableWidget.horizontalHeaderItem(7)
         item.setText(_translate("MainWindow", "计算结果"))
-        self.label.setText(_translate("MainWindow", "府名"))
-        self.label_2.setText(_translate("MainWindow", "府内人数"))
+        self.label.setText(_translate("MainWindow", "府名："))
+        self.label_2.setText(_translate("MainWindow", "府内人数:"))
         self.label_3.setText(_translate("MainWindow", "~ 500"))
-        self.label_4.setText(_translate("MainWindow", "所含大糖块"))
-        self.label_5.setText(_translate("MainWindow", "上架日期"))
-        self.upload_dateEdit.setDisplayFormat(_translate("MainWindow", "yyyy-MM-dd"))
+        self.label_4.setText(_translate("MainWindow", "所含大糖块:"))
+        self.label_5.setText(_translate("MainWindow", "上架日期:"))
         self.label_6.setText(_translate("MainWindow", "~"))
-        self.update_dateEdit_2.setDisplayFormat(_translate("MainWindow", "yyyy-MM-dd"))
-        self.label_7.setText(_translate("MainWindow", "分糖日"))
-        self.share_dateEdit_1.setDisplayFormat(_translate("MainWindow", "yyyy-MM-dd"))
-        self.share_dateEdit_2.setDisplayFormat(_translate("MainWindow", "yyyy-MM-dd"))
+        self.label_7.setText(_translate("MainWindow", "分糖日:"))
         self.label_8.setText(_translate("MainWindow", "~"))
-        self.label_9.setText(_translate("MainWindow", "月收益"))
+        self.label_9.setText(_translate("MainWindow", "月收益："))
         self.label_10.setText(_translate("MainWindow", "~"))
-        self.label_11.setText(_translate("MainWindow", "最新价格"))
+        self.label_11.setText(_translate("MainWindow", "最新价格："))
         self.label_12.setText(_translate("MainWindow", "~"))
-        self.label_13.setText(_translate("MainWindow", "上期分糖"))
+        self.label_13.setText(_translate("MainWindow", "上期分糖："))
         self.label_14.setText(_translate("MainWindow", "~"))
-        self.label_15.setText(_translate("MainWindow", "最新时间"))
-        self.newdate_dateEdit.setDisplayFormat(_translate("MainWindow", "yyyy-MM-dd"))
+        self.label_15.setText(_translate("MainWindow", "最新时间："))
         self.pushButton.setText(_translate("MainWindow", "查询"))
         self.menu.setTitle(_translate("MainWindow", "菜单"))
         self.action.setText(_translate("MainWindow", "退出"))
-
 
 class Ukers(QtWidgets.QMainWindow,Ui_MainWindow):
     def __init__(self):
@@ -197,10 +195,19 @@ class Ukers(QtWidgets.QMainWindow,Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle('Ukers')
         self.base_init()
+        self.table_result=[]
 
     def base_init(self):
         self.action.triggered.connect(self.close)
         self.pushButton.clicked.connect(self.crawl)
+        self.newdate_dateEdit.setText('2016-09-16')
+        self.pushButton_1.clicked.connect(self.recalculate)
+        self.pushButton_2.clicked.connect(self.stop_crawl)
+
+    def stop_crawl(self):
+        self.crawler.terminate()
+        self.pushButton.setEnabled(True)
+        self.pushButton.setText("查询")
 
     def get_input_data(self):
         data={}
@@ -225,17 +232,80 @@ class Ukers(QtWidgets.QMainWindow,Ui_MainWindow):
         self.newest_date=self.newdate_dateEdit.text()
         return data
 
+    def table_show(self):
+        self.tableWidget.clearContents()
+        #self.tableWidget.setHorizontalHeaderLabels(['代码','府名','卖一价格','挂单数量',
+                                              #'月收益','糖块1','分糖日期','计算结果'])
+        result=sorted(self.table_result,key=lambda x:x[-1],reverse=True)
+        self.tableWidget.setColumnCount(8)
+        self.tableWidget.setRowCount(len(result))
+        for num in range(len(result)):
+            for i in range(8):
+                newItem=QtWidgets.QTableWidgetItem()
+                newItem.setText(str(result[num][i]))
+                self.tableWidget.setItem(num,i,newItem)
+
     def crawl(self):
+        self.pushButton.setEnabled(False)
+        self.pushButton.setText("查询中")
+        self.table_result.clear()
+        self.table_show()
         data=self.get_input_data()
         self.crawler=Crawl(data)
+        self.crawler._page_ok_signal.connect(self.load_result)
+        self.crawler._ok_signal.connect(self.crawl_ok)
+        self.crawler.start()
 
+    def crawl_ok(self):
+        self.pushButton.setEnabled(True)
+        self.pushButton.setText("查询")
 
     def load_result(self,result):
         keys=['code','name','sell_one','sell_one_amount','stock_avg_bonus','dtk_1','ft_date']
+        for item in result:
+            line=[]
+            for key in keys:
+                try:
+                    line.append(item[key])
+                except:
+                    line.append('-')
+            line.append(self.calculate(item))
+            if line in self.table_result:
+                continue
+            self.table_result.append(line)
+        self.table_show()
 
-def Crawl(QtCore.QThread):
+    def recalculate(self):
+        self.newest_date=self.newdate_dateEdit.text()
+        for index in range(len(self.table_result)):
+            line=self.table_result[index]
+            self.table_result[index][-1]=self.calculate({'sell_one':line[2],'stock_avg_bonus':line[4],'ft_date':line[6]})
+        self.table_show()
+
+    def calculate(self,item):
+        if item['sell_one']==-1:
+            return 0
+        if item['sell_one']==0:
+            return 0
+        try:
+            result=float(item['stock_avg_bonus'])+27.72-float(item['sell_one'])
+            d1=time.strptime(self.newest_date,'%Y-%m-%d')
+            d2=time.strptime(item['ft_date'],'%Y-%m-%d')
+            d1=datetime.date(d1[0],d1[1],d1[2])
+            d2=datetime.date(d2[0],d2[1],d2[2])
+            days=(d1-d2).days+1
+            result=result/(days*30)
+            result=result/float(item['sell_one'])
+        except:
+            return 0
+        return result
+
+
+class Crawl(QtCore.QThread):
     _page_ok_signal=QtCore.pyqtSignal(list)
+    _ok_signal=QtCore.pyqtSignal(int)
     def __init__(self,data):
+        super(Crawl,self).__init__()
         self.data=data
         self.headers = {
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -256,27 +326,41 @@ def Crawl(QtCore.QThread):
     def run(self):
         self.login()
         page=1
-        result=[]
         while True:
             self.data['page']=page
-            html=self.session.post('http://www.ukers.cn/stock/stocksenior/get_senior_info',data=self.data,headers=self.headers).text
-            items=json.loads(html)['data']
+            result=[]
+            try:
+                html=self.session.post('http://www.ukers.cn/stock/stocksenior/get_senior_info',data=self.data,headers=self.headers,timeout=30).text
+            except:
+                break
+            try:
+                if html.startswith(u'\ufeff'):
+                    html=html.encode('utf8')[3:].decode('utf8')
+                items=json.loads(html)['data']
+            except:
+                break
             if items==[]:
                 break
             for item in items:
-                office_id=item['office_id']
-                selldata=get_sell(office_id)
-                item['sell_one']=selldata['sell_one']
-                item['sell_one_amount']=selldata['sell_one_amount']
-                result.append(result)
+                try:
+                    office_id=item['office_id']
+                    selldata=self.get_sell(office_id)
+                    item['sell_one']=selldata['sell_one']
+                    item['sell_one_amount']=selldata['sell_one_amount']
+                    result.append(item)
+                except:
+                    continue
             page+=1
             self._page_ok_signal.emit(result)
+        self._ok_signal.emit(1)
 
 
     def get_sell(self,office_id):
-        html=self.session.get('http://www.ukers.cn/stock/stocksenior/get_utcard_ten?id='+str(office_id),headers=self.headers).text
+        html=self.session.get('http://www.ukers.cn/stock/stocksenior/get_utcard_ten?id='+str(office_id),headers=self.headers,timeout=30).text
+        if html.startswith(u'\ufeff'):
+            html=html.encode('utf8')[3:].decode('utf8')
         data=json.loads(html)
-        return data
+        return data['data']
 
 if __name__ == '__main__':
     import sys
