@@ -131,6 +131,7 @@ def main():
                     continue
                 if count<4:
                     failed_count[url]+=1
+                    urls.append(url)
                 else:
                     failed=open('failed.txt','a',encoding='utf-8')
                     failed.write(crawler.url+'\n')
@@ -141,5 +142,5 @@ def main():
         time.sleep(sleep_time)
     write_to_excel(result)
     print('完成')
-    
+
 main()
