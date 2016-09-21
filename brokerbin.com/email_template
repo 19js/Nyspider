@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <h3>
+        Hi {name},
+        </h3>
+        <p>
+            We have following quote matches your "searching" on Brokerbin:
+        </p>
+        <p>
+            {product_name}  new landed {price}  each 3days delievery
+        </p>
+        <p>
+            <a href="{product_url}">
+            Click here to buy on our website.
+            </a>
+        </p>
+        <p>
+            Please know the special price only provide after you logined.
+        </p>
+        <p>
+            Thanks!
+        </p>
+        <p>
+        </p>
+        <p>
+            --
+        </p>
+        <p>
+            *Please register at our web-store:www.sailnetwork.com to check P&A 24-7. Regular coupons will be sent to register customers, and product prices will be lower online.
+            <br>
+            Best regards;
+            <br>
+            Sales Department | Sail Network Co., Ltd.
+            <br>
+            Office: +86(0)2154223056*8004
+            <br>
+            E-mail: sales@sailnetwork.com
+            <br>
+            E-Shop: www.sailnetwork.com
+            <br>
+            No.3-318, Lane7058, Zhongchun Rd. Shanghai, China
+        </p>
+    </body>
+</html>
