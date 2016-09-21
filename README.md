@@ -120,3 +120,7 @@ baidumap --- 百度地图商家信息
 www.teld.cn --- 特来电充电桩信息
 
 zhidao.baidu.com --- 百度知道
+
+wenda.so.com --- 360问答
+
+tur.bizdirlib.com --- Turkey Business Database
