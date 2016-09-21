@@ -67,13 +67,20 @@ class Crawler(threading.Thread):
                 continue
         return result
 
-def load_urls():
+def load_urls(urls_filename):
+    '''
     workbook=load_workbook(filename='urls.xlsx')
     names=workbook.get_sheet_names()
     sheet=workbook.get_sheet_by_name(names[0])
     urls=[]
     for row in sheet.rows[1:]:
         urls.append(row[0].value)
+    return urls
+    '''
+    urls=[]
+    for line in open(urls_filename,'r',encoding='utf-8'):
+        line=line.replace('\r','').replace('\n','')
+        urls.append(line)
     return urls
 
 def switch_ip():
@@ -98,12 +105,15 @@ def write_to_excel(result):
                 line.append('')
         sheet.append(line)
     timenow=time.strftime('%Y%m%d_%H%M%S')
-    excel.save(timenow+'_result.xls')
+    excel.save(timenow+'_result.xlsx')
 
 t=threading.Timer(switch_time,switch_ip)
+t.setDaemon(True)
 t.start()
+
 def main():
-    urls=load_urls()
+    urls_filename='urls.txt'
+    urls=load_urls(urls_filename)
     result=[]
     failed_count={}
     while len(urls):
