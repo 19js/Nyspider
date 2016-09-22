@@ -15,12 +15,9 @@ headers = {
 email_template=open('email_template','r',encoding='utf-8').read()
 
 def login():
+    f=open('./logindata.json','r',encoding='utf8')
+    data=json.load(f)
     session=requests.session()
-    data={
-    'login':"",
-    'password':"",
-    'remember':"1"
-    }
     session.post('http://members.brokerbin.com/',data=data,headers=headers,timeout=30)
     return session
 
@@ -40,6 +37,7 @@ def get_form(session):
 def get_person(session,url):
     html=session.get(url,headers=headers,timeout=30).text
     table=BeautifulSoup(html,'html.parser').find('table',{'class':'nowrap'}).find_all('tr',{'class':'caution'})
+    exsits=[]
     result=[]
     for item in table:
         try:
@@ -49,6 +47,9 @@ def get_person(session,url):
             product=tds[2].get_text().replace('\t','').replace(' ','').replace('\xa0','')
             person_name=item.find('a').get_text()
             person_url=re.findall("newWindow\('(.*?),\d",item.find('a').get('onclick'))[0]
+            if product+person_url in exsits:
+                continue
+            exsits.append(product+person_url)
             result.append({'product_name':product,'person_name':person_name,'person_url':person_url})
         except:
             continue
@@ -82,9 +83,11 @@ def main():
     for url in urls:
         result=get_person(session,url)
         persons+=result
+        break
         print(url,'ok')
     result=[]
     price={}
+    count=0
     for person in persons:
         try:
             email=get_email(session,person['person_url'])
@@ -95,12 +98,10 @@ def main():
             product_price=price[person['product_name']]
             person['product']=product_price
             write_to_email_txt(person)
-        except:
-            print(person['product_name'],'get price failed')
-            failed=open('failed','a',encoding='utf-8')
-            failed.write(str(person)+'\r\n')
-            failed.close()
+            count+=1
+            print(count,'ok')
             continue
+        except:
             pass
         try:
             product_price=get_price(person['product_name'])
@@ -110,7 +111,10 @@ def main():
             failed.write(str(person)+'\r\n')
             failed.close()
             continue
+        count+=1
+        print(count,'ok')
         price[person['product_name']]=product_price
         person['product']=product_price
         write_to_email_txt(person)
+
 main()
