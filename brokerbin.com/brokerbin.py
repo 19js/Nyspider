@@ -83,7 +83,6 @@ def main():
     for url in urls:
         result=get_person(session,url)
         persons+=result
-        break
         print(url,'ok')
     result=[]
     price={}

@@ -4,6 +4,9 @@ from email.mime.text import MIMEText
 from email.utils import parseaddr,formataddr
 import smtplib
 import time
+import os
+import json
+
 
 def _format_addr(s):
     name, addr = parseaddr(s)
@@ -11,17 +14,17 @@ def _format_addr(s):
 
 def sendEmail(fromemail,passwd,toemail,subject,text):
     msg = MIMEText(text, 'html', 'utf-8')
-    msg['Subject']=Header(subject, 'utf-8').encode()
-    msg['From'] = _format_addr(fromemail)
+    msg['Subject']=subject
+    msg['From'] = _format_addr(fromemail.replace('foxmail','sailnetwork'))
     msg['To'] = _format_addr(toemail)
-    server=smtplib.SMTP('smtp-mail.outlook.com',587)
-    server.starttls()
+    server=smtplib.SMTP_SSL('smtp.qq.com')
+    server.ehlo('smtp.qq.com')
     server.login(fromemail,passwd)
     server.sendmail(fromemail, [toemail], msg.as_string())
     server.quit()
 
-def load_emails():
-    f=open('./20160921.txt','r',encoding='utf-8').read()
+def load_emails(filename):
+    f=open('email/'+filename,'r',encoding='utf-8').read()
     emails=[]
     for item in f.split('---'*8):
         try:
@@ -34,13 +37,36 @@ def load_emails():
             continue
     return emails
 
+def load_login():
+    f=open('./email.json','r',encoding='utf8')
+    data=json.load(f)
+    return data
+
 def main():
-    fromemail=''
-    passwd=''
-    emails=load_emails()
-    for i in range(13,20):
-        email=emails[i]
-        sendEmail(fromemail,passwd,email[0],email[1],email[2])
-        time.sleep(2)
-        print(email[1])
+    try:
+        data=load_login()
+        fromemail=data['fromemail']
+        passwd=data['passwd']
+    except:
+        print("帐号导入失败")
+        return
+    for filename in os.listdir('email'):
+        try:
+            emails=load_emails(filename)
+        except:
+            print(filename,'load failed')
+        for i in range(len(emails)):
+            try:
+                email=emails[i]
+                toemail=email[0].replace('\r','').replace('\n','').replace('\t','').replace(' ','')
+            except:
+                continue
+            try:
+                sendEmail(fromemail,passwd,toemail,email[1].replace('\r','').replace('\n',''),email[2])
+                time.sleep(2)
+                print(toemail,'send ok')
+            except:
+                print(toemail,'failed')
+                
 main()
+time.sleep(60)
