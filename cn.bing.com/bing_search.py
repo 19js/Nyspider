@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import Levenshtein
 import re
 import openpyxl
 import chardet
@@ -15,14 +14,16 @@ headers = {
     "Connection": "keep-alive",
     "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:39.0) Gecko/20100101 Firefox/39.0"}
 
-def search(key,limit):
-    html=requests.get('http://cn.bing.com/search?q='+key,headers=headers).text
+def search(key,need_urls):
+    html=requests.get('http://cn.bing.com/search?q='+key.replace('-',' '),headers=headers).text
     table=BeautifulSoup(html,'lxml').find('ol',id="b_results").find_all('li')
     result=[]
     name=key.lower()
-    replace_keys=[',','(',')','...','[',']']
+    replace_keys=[',','(',')','...','[',']','?','!','/','*','&','^','%','$'
+                ,'#','@','<','>','.',',','~','`',"'",'_','+','=','？','。','，','；','：']
     for punctuation in replace_keys:
-        name=name.replace(punctuation,'')
+        name=name.replace(punctuation,'').replace(' ','')
+    names=name.split('-')
     for li in table:
         h2=li.find('h2')
         if h2==None:
@@ -35,11 +36,18 @@ def search(key,limit):
             continue
         str1=''
         for strong in h2.find_all('strong'):
-            str1+=strong.get_text()+' '
-        num=Levenshtein.ratio(str1.lower(),name)
-        if num>limit:
-            result.append([num,url])
-    result=sorted(result,key=lambda x:x[0],reverse=True)
+            str1+=strong.get_text()
+        str1=str1.lower().replace(' ','')
+        status=True
+        for key in names:
+            if key.replace(' ','') not in str1:
+                status=False
+        if not status:
+            continue
+        for need in need_urls:
+            if need in url:
+                result.append(url)
+                break
     return result[:3]
 
 def get_chardet(filename):
@@ -47,15 +55,26 @@ def get_chardet(filename):
     coding=chardet.detect(data)
     return coding['encoding']
 
+def load_needurls():
+    encoding=get_chardet('urls.txt')
+    if encoding=='GB2312':
+        encoding='GBK'
+    urls=[]
+    for line in open('urls.txt','r',encoding=encoding):
+        line=line.replace('\r','').replace('\n','').replace('\t','').replace(' ','')
+        urls.append(line)
+    return urls
+
 def main():
     try:
         os.mkdir('result')
     except:
         pass
     try:
-        num=float(input("输入相似度(0.6~0.75比较合适):"))
+        need_urls=load_needurls()
     except:
-        num=0.6
+        print('导入urls.txt 失败')
+        return
     for filename in os.listdir('data'):
         encoding=get_chardet('data/'+filename)
         if encoding=='GB2312':
@@ -68,13 +87,12 @@ def main():
             if key.replace(' ','').replace('\t','')=='':
                 continue
             try:
-                result=search(key,num)
+                result=search(key,need_urls)
             except:
-                print('采集失败')
                 sheet.append(line)
                 continue
             for item in result:
-                line.append(item[1])
+                line.append(item)
             sheet.append(line)
             time.sleep(0.5)
             try:
@@ -82,4 +100,6 @@ def main():
             except:
                 pass
         excel.save('result/'+filename+'.xlsx')
+    print("完成")
 main()
+time.sleep(60)
