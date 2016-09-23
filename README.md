@@ -124,3 +124,9 @@ zhidao.baidu.com --- 百度知道
 wenda.so.com --- 360问答
 
 tur.bizdirlib.com --- Turkey Business Database
+
+www.variflight.com ---飞常准航班信息
+
+cn.bing.com --- 必应搜索
+
+finance.sina.com.cn --- 新浪财经 上市公司高管信息
