@@ -5,6 +5,7 @@ import random
 import os
 from PIL import Image
 import math
+import datetime
 
 def convert_image(image):
     image=image.convert('L')
@@ -137,7 +138,7 @@ def get_image(img_url,session):
     count=0
     while True:
         try:
-            content=session.get(img_url,timeout=30).content
+            content=session.get(img_url,headers=get_headers(),timeout=30).content
             return content
         except:
             count+=1
@@ -162,7 +163,8 @@ def parser(url):
         try:
             flight={}
             spans=item.find_all('span')
-            flight['name']=spans[0].get_text()
+            flight['name']=spans[0].find('a').get_text()
+            flight['flight']=spans[0].get_text().replace(flight['name'],'')
             flight['fly_time']=spans[1].get_text()
             r_fly_time_url='http://www.variflight.com/'+spans[2].find('img').get('src')
             try:
@@ -195,7 +197,6 @@ def parser(url):
     return result
 
 def crawler(date):
-    #timenow=time.strftime('%Y%m%d_%H%M%S')
     f=open(date+'.txt','w',encoding='utf-8')
     recognise=CaptchaRecognize()
     for line in open('flights.txt','r',encoding='utf-8'):
@@ -217,12 +218,34 @@ def crawler(date):
                     flight[key]=''
                     continue
                 flight[key]=recognise.recognise(content)
-            keys=['name','fly_time','r_fly_time_img','from','arrive_time','r_arrive_time_img','to','on_time_img','status']
-            write_line=''
+            keys=['name','flight','fly_time','r_fly_time_img','from','arrive_time','r_arrive_time_img','to','on_time_img','status']
+            write_line=date+'\t'
             for key in keys:
                 write_line+=flight[key]+'\t'
             f.write(write_line+'\r\n')
-        print(line,'ok')
+        print(date,line.split('|')[0],'ok')
     f.close()
 
-crawler('20160920')
+def day_get(d):
+    oneday = datetime.timedelta(days=1)
+    day = d+oneday
+    day=str(day).split(' ')[0].replace('-','')
+    print(day)
+    return day
+
+date_from=input("起始日期（如20160921）：")
+date_to=input("结束日期:")
+while True:
+    try:
+        crawler(date_from)
+    except:
+        print(date_from,'failed')
+    if date_from==date_to:
+        break
+    date_now=datetime.datetime.strptime(date_from, "%Y%m%d")
+    date_from=day_get(date_now)
+print('完成')
+time.sleep(60)
+
+
+
