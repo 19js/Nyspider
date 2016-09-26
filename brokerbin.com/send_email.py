@@ -47,6 +47,7 @@ def main():
         data=load_login()
         fromemail=data['fromemail']
         passwd=data['passwd']
+        toemail=data['toemail']
     except:
         print("帐号导入失败")
         return
@@ -58,15 +59,16 @@ def main():
         for i in range(len(emails)):
             try:
                 email=emails[i]
-                toemail=email[0].replace('\r','').replace('\n','').replace('\t','').replace(' ','')
+                subject=email[1].replace('\r','').replace('\n','').replace('\t','').replace(' ','')+'\t'+email[0].replace('\r','').replace('\n','').replace('\t','').replace(' ','')
             except:
                 continue
             try:
-                sendEmail(fromemail,passwd,toemail,email[1].replace('\r','').replace('\n',''),email[2])
+                sendEmail(fromemail,passwd,toemail,subject,email[2])
                 time.sleep(2)
-                print(toemail,'send ok')
+                print(subject,'send ok')
             except:
-                print(toemail,'failed')
+                print(subject,'failed')
+    print(filename,'完成')
                 
 main()
 time.sleep(60)
