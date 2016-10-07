@@ -66,8 +66,8 @@ def query(cookies,date_from,date_to):
                 result.append({'infor':item['orderCopyContent'],'recipient_name':item['recipient_name'],'tel':phone})
             except:
                 continue
-            time.sleep(0.5)
-        time.sleep(0.5)
+            time.sleep(0.1)
+        time.sleep(0.2)
         print(date_from,date_to,page,'ok')
         page+=1
     return result
@@ -86,8 +86,8 @@ def get_phone(cookies,wmPoiId,wmOrderId):
     return phone
 
 
-def day_get(d):
-    oneday = datetime.timedelta(days=7)
+def day_get(d,num):
+    oneday = datetime.timedelta(days=num)
     day=d-oneday
     day=str(day).split(' ')[0]
     return day
@@ -121,10 +121,29 @@ def main():
     except:
         cookies=login()
     cookies=is_ok(cookies)
+    '''
     date_today=time.strftime('%Y-%m-%d',time.localtime())
     d=datetime.datetime.strptime(date_today, "%Y-%m-%d")
     pre_date=day_get(d)
-    result=query(cookies,pre_date,date_today)
-    write_to_excel(result,pre_date+'_'+date_today+'.xlsx')
+    '''
+    date_today='2016-09-13'
+    while True:
+        d=datetime.datetime.strptime(date_today, "%Y-%m-%d")
+        pre_date=day_get(d,6)
+        result=query(cookies,pre_date,date_today)
+        #write_to_excel(result,pre_date+'_'+date_today+'.xlsx')
+        f=open('result.txt','a')
+        for item in result:
+            line=''
+            for key in ['recipient_name','tel','infor']:
+                try:
+                    line+=item[key]+' ||'
+                except:
+                    continue
+            f.write(line+'\n')
+        f.close()
+        d=datetime.datetime.strptime(pre_date, "%Y-%m-%d")
+        date_today=day_get(d,1)
+        print(date_today)
 
 main()
