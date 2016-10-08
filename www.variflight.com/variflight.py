@@ -228,8 +228,6 @@ def parser(url):
             count+=1
             if count==4:
                 return False
-    with open('html.html','w') as f:
-        f.write(html)
     table=BeautifulSoup(html.replace('\n','').replace('\t',''),'lxml').find('ul',id='list').find_all('li')
     result=[]
     for item in table:
@@ -342,7 +340,7 @@ def flights(date):
         f=open(date+'.txt','a',encoding='utf-8')
         for crawler in threadings:
             if crawler.status==False or crawler.result==False or crawler.result==[]:
-                #f.write(crawler.num+'\tFailed\n')
+                f.write(crawler.num+'\tFalse\n')
                 continue
             for flight in crawler.result:
                 keys=['r_arrive_time_img','r_fly_time_img','on_time_img']
@@ -370,7 +368,6 @@ def flights(date):
         f.close()
         threadings.clear()
 
-
 def day_get(d):
     oneday = datetime.timedelta(days=1)
     day = d+oneday
@@ -379,8 +376,8 @@ def day_get(d):
     return day
 
 
-date_from='20160801'#input("起始日期（如20160921）：")
-date_to='20160831'#input("结束日期:")
+date_from=input("起始日期（如20160921）：")
+date_to=input("结束日期:")
 while True:
     try:
         flights(date_from)
