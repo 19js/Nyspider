@@ -20,9 +20,19 @@ def get_chardet(filename):
 
 def load_keywords():
     encoding=get_chardet('data/negative_keywords.txt')
-    negative_keywords=[line.replace('\r','').replace('\n','') for line in open('data/negative_keywords.txt','r',encoding=encoding)]
+    negative_keywords=[]
+    for line in open('data/negative_keywords.txt','r',encoding=encoding):
+        line=line.replace('\r','').replace('\n','').replace('\t','').replace(' ','')
+        if line=='':
+            continue
+        negative_keywords.append(line)
     encoding=get_chardet('data/positive_keywords.txt')
-    positive_keywords=[line.replace('\r','').replace('\n','') for line in open('data/positive_keywords.txt','r',encoding=encoding)]
+    positive_keywords=[]
+    for line in open('data/positive_keywords.txt','r',encoding=encoding):
+        line=line.replace('\r','').replace('\n','').replace('\t','').replace(' ','')
+        if line=='':
+            continue
+        positive_keywords.append(line)
     return positive_keywords,negative_keywords
 
 def get_titles(url,num):
@@ -114,13 +124,12 @@ def main():
             continue
         titles=get_titles(url,page)
         line=counter(positive_keywords,negative_keywords,name,titles)
-        print(line)
         result_1.append(line)
         try:
-            print(name,'评论时间 ok')
+            print(name,'1 ok')
         except:
             pass
-    write_wo_excel(result_1,'评论')
+    write_wo_excel(result_1,'评论时间')
     result_2=[]
     for item in urls:
         try:
@@ -130,13 +139,12 @@ def main():
             continue
         titles=get_titles(url,page)
         line=counter(positive_keywords,negative_keywords,name,titles)
-        print(line)
         result_2.append(line)
         try:
-            print(name,'发表时间 ok')
+            print(name,'2 ok')
         except:
             pass
-    write_wo_excel(result_2,'发表')
+    write_wo_excel(result_2,'发表时间')
     print("完成")
 
 main()
