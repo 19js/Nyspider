@@ -137,7 +137,7 @@ def main():
             url=item[1]
         except:
             continue
-        titles=get_titles(url,page)
+        titles=get_titles(url.replace('.html',',f.html'),page)
         line=counter(positive_keywords,negative_keywords,name,titles)
         result_2.append(line)
         try:
