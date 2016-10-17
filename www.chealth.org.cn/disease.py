@@ -61,7 +61,23 @@ def disease_infor(name,disease_type,url):
         data[key]=value
     return data
 
+def write_to_excel(result):
+    excel=openpyxl.Workbook(write_only=True)
+    sheet=excel.create_sheet()
+    keys=[ 'name', 'type', '概述', '病因', '症状','诊断','治疗', '预防', '并发症', '治愈性', '遗传性', '治疗综述']
+    sheet.append(keys)
+    for item in result:
+        line=[]
+        for key in keys:
+            try:
+                line.append(item[key])
+            except:
+                line.append('')
+        sheet.append(line)
+    excel.save('result.xlsx')
+
 def main():
+    result=[]
     for line in open('urls.txt','r',encoding='utf-8'):
         line=line.replace('\n','')
         try:
@@ -77,9 +93,8 @@ def main():
             failed.write(line+'\r\n')
             failed.close()
             continue
-        f=open('result.txt','a',encoding='utf-8')
-        f.write(str(data)+'\n')
-        f.close()
+        result.append(data)
         print(name,'ok')
+    write_to_excel(result)
 
 main()
