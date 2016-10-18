@@ -29,23 +29,36 @@ def disease_list():
                 pass
         if len(table)==1:
             break
+        print('page %s urls get'%page)
         page+=1
     f.close()
 
 def disease_infor(name,url):
     html=requests.get(url,headers=headers,timeout=30).text
     table=BeautifulSoup(html,'lxml').find('div',{'class':'lemma-main'}).find_all('div',{'class':'lemma-main-content'})
-    result={'name':name}
+    result=[name]
     for item in table:
         try:
             key=item.find('span',{'class':'headline-content'}).get_text()
             value=item.find('div',{'class':'para'}).get_text()
-            result[key]=value
+            result.append(key+':\t   '+value)
         except:
             continue
     return result
 
+def write_to_excel(result):
+    excel=openpyxl.Workbook(write_only=True)
+    sheet=excel.create_sheet()
+    for line in result:
+        try:
+            sheet.append(line)
+        except:
+            pass
+    excel.save('result.xlsx')
+
 def main():
+    disease_list()
+    result=[]
     for line in open('urls.txt','r',encoding='utf-8'):
         line=line.replace('\n','')
         try:
@@ -60,8 +73,14 @@ def main():
             failed.write(line+'\r\n')
             failed.close()
             continue
-        f=open('result.txt','a',encoding='utf-8')
-        f.write(str(data)+'\n')
-        f.close()
-        print(name,'ok')
+        result.append(data)
+        try:
+            print(name,'ok')
+        except:
+            pass
+    write_to_excel(result)
+    print('完成')
+
+
 main()
+time.sleep(60)
