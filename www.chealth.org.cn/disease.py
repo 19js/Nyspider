@@ -78,6 +78,7 @@ def write_to_excel(result):
 
 def main():
     result=[]
+    disease_list()
     for line in open('urls.txt','r',encoding='utf-8'):
         line=line.replace('\n','')
         try:
@@ -94,7 +95,12 @@ def main():
             failed.close()
             continue
         result.append(data)
-        print(name,'ok')
+        try:
+            print(name,'ok')
+        except:
+            pass
+        if len(result)==10:
+            break
     write_to_excel(result)
 
 main()
