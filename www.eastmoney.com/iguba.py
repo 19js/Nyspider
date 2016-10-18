@@ -110,13 +110,39 @@ def main():
                     cache[uid]['reply'].append(item[0])
             if result==[]:
                 continue
-            sendemail(result)
+            try:
+                send(result)
+            except:
+                pass
+        time.sleep(30)
+        timenow=time.strftime("%y-%m-%d %H:%M:%S")
+        print(timenow,'ok')
+
+def send(result):
+    try:
+        data=open('data/email.txt','r',encoding='utf-8').read()
+        data=eval(data)
+    except:
+        print("邮箱配置文件有误！")
+        time.sleep(100)
+        return False
+    subject=result[0][1]+'--有更新'
+    text=''
+    for item in result:
+        text+=item[2]+'\r\n'+item[3]+'\r\n\r\n'
+    timenow=time.strftime("%y-%m-%d %H:%M:%S")
+    try:
+        sendEmail(data['email'],data['passwd'],subject,text)
+        print(timenow,"发送成功")
+    except:
+        print(timenow,"发送失败")
 
 def _format_addr(s):
     name, addr = parseaddr(s)
     return formataddr((Header(name, 'utf-8').encode(), addr))
 
-def sendEmail(fromemail,passwd,toemail,subject,text):
+def sendEmail(fromemail,passwd,subject,text):
+    toemail='advovo@126.com'
     msg = MIMEText(text, 'plain', 'utf-8')
     msg['Subject']=subject
     msg['From'] = _format_addr(fromemail)#.replace('foxmail','sailnetwork'))
