@@ -12,15 +12,18 @@ headers = {
 
 
 def get_infor(url):
-    html=requests.get(url,headers=headers).text
-    soup=BeautifulSoup(html,'lxml').find('div',{'class':'main-content-wrap--full'})
+    html=requests.get(url,headers=headers,timeout=30).text
+    soup=BeautifulSoup(html).find('div',{'class':'main-content-wrap--full'})
     baseinfor=soup.find('div',{'class':'top-shelf'})
-    name=baseinfor.find('h1').get_text()
-    Claimed=baseinfor.find('span',{'class':'claim-status_teaser'}).get_text()
-    if 'Unclaimed' in Claimed:
-        Claimed='0'
-    else:
-        Claimed='1'
+    name=baseinfor.find('h1').get_text().replace('\n','')
+    try:
+        Claimed=baseinfor.find('span',{'class':'claim-status_teaser'}).get_text()
+        if 'Unclaimed' in Claimed:
+            Claimed='0'
+        else:
+            Claimed='1'
+    except:
+        Claimed=''
     try:
         rating=baseinfor.find('div',{'class':'rating-very-large'}).find('i').get('title').replace('star rating','')
     except:
@@ -35,10 +38,13 @@ def get_infor(url):
     except:
         price_range=''
     try:
-        address=baseinfor.find('div',{'class':'map-box-address'}).find('address').get_text()
+        address=baseinfor.find('div',{'class':'map-box-address'}).find('address').get_text().replace('\n','')
     except:
         address=''
-    ylist=soup.find('div',{'class':'bordered-rail'}).find('div',{'class':'short-def-list'}).find_all('dl')
+    try:
+        ylist=soup.find('div',{'class':'bordered-rail'}).find('div',{'class':'short-def-list'}).find_all('dl')
+    except:
+        ylist=[]
     Waiter_Services=''
     Drive_Thru=''
     for dl in ylist:
@@ -52,17 +58,23 @@ def get_infor(url):
                 Drive_Thru='1'
             else:
                 Drive_Thru='0'
-    ratelist=eval(soup.find('div',id='rating-details-modal-content').get('data-monthly-ratings'))
-    rate_result={''}
-    r_2012=['']*12
-    r_2013=['']*12
-    r_2014=['']*12
-    r_2015=['']*12
-    r_2016=['']*12
+    try:
+        ratelist=eval(soup.find('div',id='rating-details-modal-content').get('data-monthly-ratings'))
+    except:
+        ratelist={}
+    rate_month={'2012':['']*12,'2013':['']*12,'2014':['']*12,'2015':['']*12,'2016':['']*12}
     for key in ratelist:
-        if key=='2012':
-            for item in ratelist['2012']:
-                r_2012
+        for item in ratelist[key]:
+            rate_month[key][item[0]]=item[1]
+    table=soup.find('table',{'class':'histogram--alternating'}).find_all('table')
+    rate=['']*5
+    for index in range(len(table)):
+        rate[index]=table[index].get_text().replace('\n','')
+    keys=['2012','2013','2014','2015','2016']
+    line=[name,address,Claimed,rating,review,price_range,Waiter_Services,Drive_Thru]+rate
+    for key in keys:
+        line+=rate_month[key]
+    return line
 
 
 def load_excel(filename):
@@ -84,9 +96,15 @@ def write_to_excel(result):
         sheet.append(item)
     excel.save('result.xlsx')
 
+def load_failed():
+    items=[eval(line) for line in open('failed.txt','r')]
+    return items
+
 def main():
     items=load_excel('Food2.1.xlsx')
+    #items=load_failed()
     result=[]
+    num=1
     for item in items:
         try:
             line=get_infor(item[-1])
@@ -95,8 +113,8 @@ def main():
             failed.write(str(item)+'\n')
             failed.close()
             continue
-        result.append(line)
+        result.append(item+line)
         print(item,'ok')
     write_to_excel(result)
 
-get_infor('https://www.yelp.com/biz/arbys-canoga-park')
+main()
