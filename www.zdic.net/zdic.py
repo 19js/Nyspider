@@ -40,7 +40,15 @@ def word_infor(wordurl):
             url=img.get('src')
             if url=='/images/bwlico.gif':
                 continue
-            text+=img.get('title')
+            if url=='/images/cc1.gif':
+                text='常用字'
+                break
+            if url=='/images/cc2.gif':
+                text='次常用字'
+                break
+            if url=='/images/ty.gif':
+                text='通用字'
+                break
         baseinfor.append(text)
     except:
         baseinfor.append('')
@@ -53,6 +61,8 @@ def word_infor(wordurl):
                 text+=span.find('a').get_text()+','
             except:
                 continue
+        if text[0]=='/':
+            text=text[1:]
         baseinfor.append(text)
     except:
         baseinfor.append('')
@@ -84,9 +94,10 @@ def word_infor(wordurl):
             line=[]
             line.append(text.split('；')[0])
             try:
-                line.append(text.split('；')[1])
+                text=re.findall('从(.*?)、(.*?)声',text)[0]
+                line+=[text[0],text[1]]
             except:
-                line.append('')
+                line+=['','']
             baseinfor+=line
         except:
             baseinfor+=['','']
@@ -125,7 +136,10 @@ def word_infor(wordurl):
                 pronunciation=p.get_text().split(' ')[0]
                 pronunciation_num=''
             break
-        line=[word,pronunciation,pronunciation_num,[]]
+        try:
+            line=[word,pronunciation_num[0].upper(),pronunciation,pronunciation_num,[]]
+        except:
+            line=[word,'',pronunciation,pronunciation_num,[]]
         try:
             p_class=des[index].get('class')
         except:
