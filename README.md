@@ -2,6 +2,14 @@ anjuke  --- 安居客
 
 aso100.com  --- ASO100 APP榜单
 
+apps.fas.usda.gov --- psdQuery
+
+baidu.lecai.com --- 百度彩票-时时彩历史数据
+
+baidumap --- 百度地图商家信息
+
+bbs.tianya.cn --- 天涯
+
 data.cma.gov.cn  --- 中国气象数据网
 
 datacenter.mep.gov.cn  --- 中华人民共和国环境保护部--数据中心
@@ -9,6 +17,8 @@ datacenter.mep.gov.cn  --- 中华人民共和国环境保护部--数据中心
 dianping  --- 大众点评
 
 finance.yahoo.com  --- Yahoo Finance - Business Finance, Stock Market, Quotes, News
+
+fsfc.fsjw.gov.cn  --- 佛山权威房地产网
 
 forecast.io  --- Forecast
 
@@ -28,6 +38,12 @@ stock.finance.qq.com  --- A股股东信息
 
 stock.jrj.com.cn  --- 股票频道-金融界-股票资金流向
 
+waimai.meituan.com  --- 美团外卖
+
+www.18ladys.com  --- 中药大全_中草药大全
+
+www.3j1688.com  --- 三际手机采购网
+
 www.58.com  --- 58招聘信息
 
 www.aihuishou.com  --- 爱回收
@@ -36,7 +52,13 @@ www.airbnb.com  --- Vacation Rentals, Homes, Apartments & Rooms for Rent - Airbn
 
 www.autozi.com  --- 中驰车福汽配商城-商品信息
 
+www.b8b8.tv --- 比赛直播
+
+www.baikemy.com  --- 百科名医网
+
 www.cbooo.cn  --- 电影信息
+
+www.chazidian.com  --- 教材课文
 
 www.china-10.com  --- 十大品牌网品牌信息
 
@@ -44,9 +66,13 @@ www.chuanlaoda.cn  --- 船老大网
 
 www.cjsyw.com  --- 长江水运网
 
+www.cofeed.com  --- 天下粮仓粮油饲料网
+
 www.ctrip.com  --- 携程网游记
 
 www.dicos.com.cn  --- 德克士餐厅信息
+
+www.eastmoney.com  --- 东方财富网
 
 www.fang.com  --- 搜房网
 
@@ -90,12 +116,13 @@ www.ppdai.com  --- 拍拍贷散标数据
 
 www.renrendai.com  ---   人人贷
 
-
 www.tripadvisor.com  --- TripAdvisor: Read Reviews, Compare Prices & Book
 
 www.tyshbj.com.cn  ---
 
 www.vvic.com  ---  搜款网商品信息
+
+www.variflight.com  --- 飞常准
 
 www.watchseries.li  --- Watch Series Tv Shows Free | WatchSeries.ac
 
@@ -105,17 +132,19 @@ www.yelp.com  --- San Francisco Restaurants, Dentists, Bars, Beauty Salons, Doct
 
 www.yhd.com  --- 1号店店铺信息
 
+www.zdic.net  --- 字典 zdic.net
+
 www.zhongchou.com  --- 众筹网
 
 www.zimuzu.tv  --- 字幕组,ZiMuZu.tv
+
+www.zy91.com  --- 浙大一院智能导诊
 
 xxgk.jl.gov.cn  --- 吉林省政府公告
 
 zhihu  --- 知乎
 
 www.sxhouse.com.cn --- 绍兴房地产信息网
-
-baidumap --- 百度地图商家信息
 
 www.teld.cn --- 特来电充电桩信息
 
@@ -124,8 +153,6 @@ zhidao.baidu.com --- 百度知道
 wenda.so.com --- 360问答
 
 tur.bizdirlib.com --- Turkey Business Database
-
-www.variflight.com ---飞常准航班信息
 
 cn.bing.com --- 必应搜索
 
