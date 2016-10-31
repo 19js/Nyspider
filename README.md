@@ -157,3 +157,5 @@ tur.bizdirlib.com --- Turkey Business Database
 cn.bing.com --- 必应搜索
 
 finance.sina.com.cn --- 新浪财经 上市公司高管信息
+
+buluo.qq.com --- QQ部落帖子图片
