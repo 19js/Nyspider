@@ -28,7 +28,7 @@ def comments(movieid,fromdate,todate):
                 continue
             if int_date<fromdate:
                 continue
-            
+
             f=open('data.txt','a')
             f.write(str(item)+'\n')
             f.close()
