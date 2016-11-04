@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import time
 from proxy import *
 import datetime
+import openpyxl
 
 headers = {
     'Host':'www.dianping.com',
@@ -132,11 +133,14 @@ def get_fans(usrid):
     fans=[]
     while True:
         try:
-            html=requests.get(url.format(usrid,page),headers=headers,timeout=30).text
+            html=requests.get(url.format(usrid,page),headers=headers,timeout=30,proxies=get_proxies()).text
+            if '您使用的IP访问网站过于频繁，为了您的正常访问，请先输入验证码' in html:
+                switch_ip()
+                continue
         except:
             continue
         try:
-            table=BeautifulSoup(html,'lxml').find('div',{'class':'pic-txt'}).find_all("li")
+            table=BeautifulSoup(html,'lxml').find('div',{'class':'main'}).find('div',{'class':'pic-txt'}).find_all("li")
         except:
             break
         for item in table:
@@ -146,6 +150,7 @@ def get_fans(usrid):
             except:
                 continue
         page+=1
+        print(usrid,page)
     return [len(fans),fans]
 
 def get_week_day(date_str):
@@ -181,8 +186,7 @@ def main():
         f.close()
         switch_ip()
         print(usr,'ok')
-    '''
-    for line in open('./comments.txt','r'):
+    for line in open('./shop_failed.txt','r'):
         item=eval(line)
         date_str='20'+item[-1]
         try:
@@ -192,7 +196,7 @@ def main():
         try:
             shopinfor=shop_infor(item[8])
         except:
-            failed=open('shop_failed.txt','a')
+            failed=open('failed.txt','a')
             failed.write(str(item)+'\n')
             failed.close()
             continue
@@ -200,5 +204,43 @@ def main():
         f.write(str(item+[weekday]+shopinfor)+'\n')
         f.close()
         print(item[0],'ok')
+    '''
+    users={}
+    for line in open('./shops.txt','r'):
+        item=eval(line)
+        usrid=item[1].split('/')[-1]
+        try:
+            length=users[usrid]
+        except:
+            result=get_fans(usrid)
+            length=result[0]
+            users[usrid]=length
+            f=open('fans.txt','a')
+            f.write(str([item[0]]+result[1])+'\n')
+            f.close()
+        f=open('result.txt','a')
+        f.write(str(item+[length])+'\n')
+        f.close()
+        print(item[0],'ok')
 
-main()
+def write_to_excel():
+    excel=openpyxl.Workbook(write_only=True)
+    sheet=excel.create_sheet()
+    for line in open('result.txt','r'):
+        item=eval(line)
+        try:
+            item[10]=int(item[10])/10
+        except:
+            pass
+        try:
+            item[-6]=int(item[-6])/10
+        except:
+            pass
+        sheet.append(item)
+    sheet=excel.create_sheet()
+    for line in open('fans.txt','r'):
+        item=eval(line)
+        sheet.append(item)
+    excel.save('result.xlsx')
+
+write_to_excel()
