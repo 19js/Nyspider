@@ -1,14 +1,15 @@
 import requests
 from bs4 import BeautifulSoup
 import time
+from proxy import *
+import datetime
 
 headers = {
     'Host':'www.dianping.com',
-    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:39.0) Gecko/20100101 Firefox/39.0',
+    'User-Agent':"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0",
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.5',
     'Accept-Encoding': 'gzip, deflate',
-    'Cookie':'_hc.v=6a05f596-3058-2734-267b-4911da5f4dca.1478187831; __utma=1.605496850.1478187831.1478187831.1478187831.1; __utmz=1.1478187831.1.1.utmcsr=baidu|utmccn=(organic)|utmcmd=organic; PHOENIX_ID=0a010439-1582d1bafc7-3dd609; JSESSIONID=AC590505E722BF8103C4D9C3A612EEF4; aburl=1; cy=4; cye=guangzhou',
     'Connection': 'keep-alive'}
 
 def get_memberlist():
@@ -37,7 +38,7 @@ def get_memberlist():
 def get_comments(usrid):
     baseurl='http://www.dianping.com/member/{}/reviews?pg={}&reviewCityId=0&reviewShopType=10&c=0&shopTypeIndex=1'
     page=1
-    html=requests.get(baseurl.format(usrid,page),headers=headers).text
+    html=requests.get(baseurl.format(usrid,page),headers=headers,proxies=get_proxies()).text
     soup=BeautifulSoup(html,'lxml').find('div',{'class':'main'})
     citys=soup.find('div',{'class':'p-term-list'}).find_all('li')[1].find_all('span')
     city_num=len(citys)
@@ -64,7 +65,7 @@ def get_comments(usrid):
     page+=1
     while True:
         print(page)
-        html=requests.get(baseurl.format(usrid,page),headers=headers).text
+        html=requests.get(baseurl.format(usrid,page),headers=headers,proxies=get_proxies()).text
         soup=BeautifulSoup(html,'lxml').find('div',{'class':'main'})
         table=soup.find('div',id='J_review').find_all('div',{'class':'J_rptlist'})
         for item in table:
@@ -84,12 +85,20 @@ def get_comments(usrid):
             result.append(line)
             if len(result)==100:
                 return result
-        time.sleep(1)
         page+=1
     return result
 
 def shop_infor(shopurl):
-    html=requests.get(url,headers=headers).text
+    while True:
+        try:
+            html=requests.get(shopurl,headers=headers,proxies=get_proxies(),timeout=30).text
+            if '您使用的IP访问网站过于频繁，为了您的正常访问，请先输入验证码' in html:
+                switch_ip()
+                continue
+            break
+        except:
+            switch_ip()
+            continue
     soup=BeautifulSoup(html,'lxml').find('div',{'class':'body-content'})
     try:
         types=soup.find('div',{'class':'breadcrumb'}).find_all('a')
@@ -118,11 +127,44 @@ def shop_infor(shopurl):
     return [shop_type,star]+line
 
 def get_fans(usrid):
-    
+    url='http://www.dianping.com/member/{}/fans?pg={}'
+    page=1
+    fans=[]
+    while True:
+        try:
+            html=requests.get(url.format(usrid,page),headers=headers,timeout=30).text
+        except:
+            continue
+        try:
+            table=BeautifulSoup(html,'lxml').find('div',{'class':'pic-txt'}).find_all("li")
+        except:
+            break
+        for item in table:
+            try:
+                name=item.find('h6').get_text()
+                fans.append(name)
+            except:
+                continue
+        page+=1
+    return [len(fans),fans]
+
+def get_week_day(date_str):
+    date=datetime.datetime.strptime(date_str,'%Y-%m-%d')
+    week_day_dict={
+        0 : '星期一',
+        1 : '星期二',
+        2 : '星期三',
+        3 : '星期四',
+        4 : '星期五',
+        5 : '星期六',
+        6 : '星期天',
+    }
+    day = date.weekday()
+    return week_day_dict[day]
 
 def main():
+    '''
     usrs=[eval(line) for line in open('./memberlist.txt','r')]
-    flag=True
     for usr in usrs:
         usrid=usr[1].split('/')[-1]
         try:
@@ -137,6 +179,26 @@ def main():
         for item in result:
             f.write(str(usr+item)+'\n')
         f.close()
+        switch_ip()
         print(usr,'ok')
+    '''
+    for line in open('./comments.txt','r'):
+        item=eval(line)
+        date_str='20'+item[-1]
+        try:
+            weekday=get_week_day(date_str)
+        except:
+            weekday=''
+        try:
+            shopinfor=shop_infor(item[8])
+        except:
+            failed=open('shop_failed.txt','a')
+            failed.write(str(item)+'\n')
+            failed.close()
+            continue
+        f=open('shops.txt','a')
+        f.write(str(item+[weekday]+shopinfor)+'\n')
+        f.close()
+        print(item[0],'ok')
 
 main()
