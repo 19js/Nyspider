@@ -3,10 +3,12 @@ from bs4 import BeautifulSoup
 import time
 
 headers = {
+    'Host':'www.dianping.com',
     'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:39.0) Gecko/20100101 Firefox/39.0',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.5',
     'Accept-Encoding': 'gzip, deflate',
+    'Cookie':'_hc.v=6a05f596-3058-2734-267b-4911da5f4dca.1478187831; __utma=1.605496850.1478187831.1478187831.1478187831.1; __utmz=1.1478187831.1.1.utmcsr=baidu|utmccn=(organic)|utmcmd=organic; PHOENIX_ID=0a010439-1582d1bafc7-3dd609; JSESSIONID=AC590505E722BF8103C4D9C3A612EEF4; aburl=1; cy=4; cye=guangzhou',
     'Connection': 'keep-alive'}
 
 def get_memberlist():
@@ -82,23 +84,54 @@ def get_comments(usrid):
             result.append(line)
             if len(result)==100:
                 return result
+        time.sleep(1)
         page+=1
     return result
+
+def shop_infor(shopurl):
+    html=requests.get(url,headers=headers).text
+    soup=BeautifulSoup(html,'lxml').find('div',{'class':'body-content'})
+    try:
+        types=soup.find('div',{'class':'breadcrumb'}).find_all('a')
+        shop_type=types[2].get_text()
+    except:
+        shop_type=''
+    base_infor=soup.find('div',id='basic-info').find('div',{'class':'brief-info'})
+    try:
+        star=base_infor.find('span',{'class':'mid-rank-stars'}).get('class')[1].replace('mid-str','')
+    except:
+        star=''
+    line=['']*4
+    for item in base_infor.find_all('span'):
+        if '人均' in str(item):
+            text=item.get_text()
+            line[0]=text
+        if '口味' in str(item):
+            text=item.get_text()
+            line[1]=text
+        if '环境' in str(item):
+            text=item.get_text()
+            line[2]=text
+        if '服务' in str(item):
+            text=item.get_text()
+            line[3]=text
+    return [shop_type,star]+line
+
+def get_fans(usrid):
+    
 
 def main():
     usrs=[eval(line) for line in open('./memberlist.txt','r')]
     flag=True
     for usr in usrs:
         usrid=usr[1].split('/')[-1]
-        if usrid!='5459347' and flag==True:
-            continue
-        flag=False
         try:
             result=get_comments(usrid)
         except:
             failed=open('failed.txt','a')
             failed.write(str(usr)+'\n')
             failed.close()
+            print(usr,'failed')
             continue
         f=open('comments.txt','a')
         for item in result:
