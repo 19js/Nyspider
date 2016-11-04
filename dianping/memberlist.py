@@ -32,4 +32,78 @@ def get_memberlist():
         if page==7:
             break
 
-def get_comments()
+def get_comments(usrid):
+    baseurl='http://www.dianping.com/member/{}/reviews?pg={}&reviewCityId=0&reviewShopType=10&c=0&shopTypeIndex=1'
+    page=1
+    html=requests.get(baseurl.format(usrid,page),headers=headers).text
+    soup=BeautifulSoup(html,'lxml').find('div',{'class':'main'})
+    citys=soup.find('div',{'class':'p-term-list'}).find_all('li')[1].find_all('span')
+    city_num=len(citys)
+    city_text=''
+    for span in citys:
+        city_text+=span.get_text()+'\t'
+    table=soup.find('div',id='J_review').find_all('div',{'class':'J_rptlist'})
+    result=[]
+    for item in table:
+        title=item.find('a').get_text()
+        url=item.find('a').get('href')
+        try:
+            address=item.find('div',{'class':'addres'}).get_text()
+        except:
+            address=''
+        try:
+            star=item.find('div',{'class':'comm-rst'}).find('span').get('class')[1].replace('irr-star','')
+        except:
+            star=''
+        content=item.find('div',{'class':'comm-entry'}).get_text()
+        date=item.find('div',{'class':"info"}).find('span').get_text().replace("发表于",'')
+        line=[city_num,city_text,title,url,address,star,content,date]
+        result.append(line)
+    page+=1
+    while True:
+        print(page)
+        html=requests.get(baseurl.format(usrid,page),headers=headers).text
+        soup=BeautifulSoup(html,'lxml').find('div',{'class':'main'})
+        table=soup.find('div',id='J_review').find_all('div',{'class':'J_rptlist'})
+        for item in table:
+            title=item.find('a').get_text()
+            url=item.find('a').get('href')
+            try:
+                address=item.find('div',{'class':'addres'}).get_text()
+            except:
+                address=''
+            try:
+                star=item.find('div',{'class':'comm-rst'}).find('span').get('class')[1].replace('irr-star','')
+            except:
+                star=''
+            content=item.find('div',{'class':'comm-entry'}).get_text()
+            date=item.find('div',{'class':"info"}).find('span').get_text().replace("发表于",'')
+            line=[city_num,city_text,title,url,address,star,content,date]
+            result.append(line)
+            if len(result)==100:
+                return result
+        page+=1
+    return result
+
+def main():
+    usrs=[eval(line) for line in open('./memberlist.txt','r')]
+    flag=True
+    for usr in usrs:
+        usrid=usr[1].split('/')[-1]
+        if usrid!='5459347' and flag==True:
+            continue
+        flag=False
+        try:
+            result=get_comments(usrid)
+        except:
+            failed=open('failed.txt','a')
+            failed.write(str(usr)+'\n')
+            failed.close()
+            continue
+        f=open('comments.txt','a')
+        for item in result:
+            f.write(str(usr+item)+'\n')
+        f.close()
+        print(usr,'ok')
+
+main()
