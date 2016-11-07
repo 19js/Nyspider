@@ -2,6 +2,7 @@ import requests
 import json
 import openpyxl
 import time
+import re
 from bs4 import BeautifulSoup
 
 headers = {
@@ -23,7 +24,7 @@ def login():
         print("Load Login data Failed!")
         return False
     session=requests.session()
-    html=requests.get('http://www.trademaps.cn/',headers=headers).text
+    html=session.get('http://www.trademaps.cn/',headers=headers).text
     token=BeautifulSoup(html,'lxml').find('input',{'name':'__RequestVerificationToken'}).get('value')
     data={
     "tboxAccount":logindata["username"],
@@ -31,24 +32,27 @@ def login():
     "__RequestVerificationToken":token
     }
     session.post('http://www.trademaps.cn/Common/CheckLogin',data=data,headers=headers)
-    return session
+    html=session.get('http://www.trademaps.cn/OneSearch/Hemo',headers=headers).text.replace("\n",'').replace(' ','')
+    custid=re.findall("custid='(.*?)'",html)[0]
+    return session,custid
 
 class TradeMaps():
     def __init__(self):
-        self.keyword=input("输入关键词:")
+        self.keyword="bicycle"#input("输入关键词:")
+        self.custid=''
         self.login()
 
     def login(self):
         while True:
             try:
-                self.session=login()
+                self.session,self.custid=login()
                 break
             except:
                 print("登录失败，尝试重新登录")
                 continue
 
     def crawler(self):
-
+        pass
 
     def crawl(self):
         data={
@@ -66,10 +70,17 @@ class TradeMaps():
             "EndDate":"",
             "Ie":"false",
             "PageIndex":1,
-            "PageSize":50
-            "PageTotal":0
-            IsNotNull:true
-            PagePager:0
-            CustomerId:CFA7A20BD3EE1E3CF3BB2D0290BD71F8176B45BC8953EB539C808EA8E25A701AE449AEA23663E5C6E47E47BE58B566FBE30D680A595B0B3B
-            SortType:0
+            "PageSize":30,
+            "PageTotal":0,
+            "IsNotNull":"true",
+            "PagePager":0,
+            "CustomerId":self.custid,
+            "SortType":0
         }
+        print(data)
+        html=self.session.post("http://www.trademaps.cn/api/RestOneSearch",data=data,headers=headers).text
+        print(html)
+
+if __name__=="__main__":
+    trademaps=TradeMaps()
+    trademaps.crawl()
