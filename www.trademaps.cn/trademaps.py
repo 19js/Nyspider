@@ -41,6 +41,8 @@ class TradeMaps():
         self.keyword="bicycle"#input("输入关键词:")
         self.custid=''
         self.login()
+        self.result=[]
+        self.page_total=0
 
     def login(self):
         while True:
@@ -52,9 +54,21 @@ class TradeMaps():
                 continue
 
     def crawler(self):
-        pass
+        page=1
+        while True:
+            try:
+                self.crawl(page)
+            except:
+                print("获取 %s 页 失败"%page)
+                time.sleep(1)
+                continue
+            print("获取 %s 页 成功"%page)
+            if page==self.page_all:
+                break
+            page+=1
+        self.write_to_excel()
 
-    def crawl(self):
+    def crawl(self,page):
         data={
             "Keydoc":self.keyword,
             "SearchType":"desc",
@@ -69,18 +83,49 @@ class TradeMaps():
             "StartDate":"",
             "EndDate":"",
             "Ie":"false",
-            "PageIndex":1,
+            "PageIndex":page,
             "PageSize":30,
-            "PageTotal":0,
+            "PageTotal":self.page_total,
             "IsNotNull":"true",
             "PagePager":0,
             "CustomerId":self.custid,
             "SortType":0
         }
-        print(data)
-        html=self.session.post("http://www.trademaps.cn/api/RestOneSearch",data=data,headers=headers).text
-        print(html)
+        html=self.session.post("http://www.trademaps.cn/api/RestOneSearch",data=data,headers=headers,timeout=30).text
+        self.parser(html)
 
-if __name__=="__main__":
-    trademaps=TradeMaps()
-    trademaps.crawl()
+    def parser(self,json_data):
+        data=json.loads(json_data)
+        if self.page_total==0:
+            self.page_total=data['PageTotal']
+            self.page_all=data['PagePager']
+            print(self.page_all,self.page_total)
+        data=data['Datas']
+        keys=['DataCountry','Date','HsCode','Importer','Exporter','Product','Country','Weight','WeightUnit','Quantity','QuantityUnit','Value']
+        for item in data:
+            line=[]
+            for key in keys:
+                try:
+                    line.append(item[key])
+                except:
+                    line.append('')
+            self.result.append(line)
+
+    def write_to_excel(self):
+        excel=openpyxl.Workbook(write_only=True)
+        sheet=excel.create_sheet()
+        for line in self.result:
+            try:
+                sheet.append(line)
+            except:
+                continue
+        timenow=time.strftime("%Y%m%d_%H%M%S",time.localtime())
+        excel.save('result/%s.xlsx'%timenow)
+
+try:
+    import os
+    os.mkdir('result')
+except:
+    pass
+trademaps=TradeMaps()
+trademaps.crawler()
