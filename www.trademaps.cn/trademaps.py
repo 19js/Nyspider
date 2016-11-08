@@ -3,6 +3,7 @@ import json
 import openpyxl
 import time
 import re
+import os
 from bs4 import BeautifulSoup
 
 headers = {
@@ -38,11 +39,15 @@ def login():
 
 class TradeMaps():
     def __init__(self):
-        self.keyword="bicycle"#input("输入关键词:")
+        self.keyword=input("输入关键词:")
         self.custid=''
         self.login()
         self.result=[]
         self.page_total=0
+        try:
+            os.remove('result/temp.txt')
+        except:
+            pass
 
     def login(self):
         while True:
@@ -102,6 +107,7 @@ class TradeMaps():
             print(self.page_all,self.page_total)
         data=data['Datas']
         keys=['DataCountry','Date','HsCode','Importer','Exporter','Product','Country','Weight','WeightUnit','Quantity','QuantityUnit','Value']
+        f=open('result/temp.txt','a')
         for item in data:
             line=[]
             for key in keys:
@@ -109,7 +115,9 @@ class TradeMaps():
                     line.append(item[key])
                 except:
                     line.append('')
+            f.write('|'.join([str(i) for i in line])+'\r\n')
             self.result.append(line)
+        f.close()
 
     def write_to_excel(self):
         excel=openpyxl.Workbook(write_only=True)
