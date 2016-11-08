@@ -97,7 +97,10 @@ class TradeMaps():
             "SortType":0
         }
         html=self.session.post("http://www.trademaps.cn/api/RestOneSearch",data=data,headers=headers,timeout=30).text
-        self.parser(html)
+        try:
+            self.parser(html)
+        except:
+            print(html)
 
     def parser(self,json_data):
         data=json.loads(json_data)
@@ -107,7 +110,7 @@ class TradeMaps():
             print(self.page_all,self.page_total)
         data=data['Datas']
         keys=['DataCountry','Date','HsCode','Importer','Exporter','Product','Country','Weight','WeightUnit','Quantity','QuantityUnit','Value']
-        f=open('result/temp.txt','a')
+        f=open('result/temp.txt','a',encoding='utf-8')
         for item in data:
             line=[]
             for key in keys:
