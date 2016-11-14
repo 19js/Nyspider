@@ -9,16 +9,13 @@ hotels=[eval(line) for line in open('hotels.txt','r')]
 flag=True
 for hotel in hotels:
     hotel_id=hotel[2].split('.')[0].split('/')[-1]
-    if hotel_id!='437289' and flag:
+    if hotel_id!='1353810' and flag:
         continue
     flag=False
-    f=open('result.txt','a')
-    f.write(str(hotel+[''])+'\n')
-    f.close()
     page=1
     '''
-    if hotel_id=='371212':
-        page=148
+    if hotel_id=='435300':
+        page=54
     '''
     endpage=1000
     while page<=endpage:
@@ -29,19 +26,18 @@ for hotel in hotels:
             continue
         time.sleep(2)
         try:
-            comments=BeautifulSoup(html,'lxml').find_all('div',{'class':'comment_block'})
-            if comments==None:
-                break
+            browser.find_element_by_class_name('comment_tab_main')
+            comments=BeautifulSoup(html,'lxml').find('div',{'class':'comment_tab_main'}).find_all('div',{'class':'comment_block'})
         except:
-            break
+            continue
         if '以下为酒店3年前历史点评' in str(comments):
+            print('以下为酒店3年前历史点评')
             break
-        f=open('result.txt','a')
-        print(len(comments))
+        f=open('result_2.txt','a')
         for line in comments:
             f.write(str(hotel+[str(line)])+'\n')
         f.close()
-        print(page,hotel[0])
+        print(page,endpage,hotel[0])
         if endpage==1000:
             try:
                 endpage=BeautifulSoup(html,'lxml').find('div',{'class':'c_page_list'}).find_all('a')[-1].get('value')
