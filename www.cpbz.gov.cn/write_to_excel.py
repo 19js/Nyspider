@@ -5,7 +5,7 @@ def load_result():
     result=[]
     for line in open('result.txt','r'):
         item=eval(line)
-        baseinfor=[]
+        baseinfor=[item['url']]
         for key in ['机构名称','法定代表人','组织机构代码','邮政编码','注册地址','行政区划']:
             try:
                 baseinfor.append(item['企业基本信息'][key])

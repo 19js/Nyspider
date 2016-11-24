@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import time
 import json
 import random
+import threading
+
 
 def get_headers():
     headers = {
@@ -24,7 +26,7 @@ headers = {
     "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:39.0) Gecko/20100101 Firefox/39.0"}
 
 def company_list():
-    page=14550
+    page=1
     while True:
         data={
         'standardName':'',
@@ -55,7 +57,7 @@ def company_list():
 
 def companyinfor(url):
     html=requests.get(url,headers=get_headers(),timeout=30).text
-    tables=BeautifulSoup(html,'lxml').find_all('table',{'class':'tab-color-5'})
+    tables=BeautifulSoup(html,'lxml').find('div',id='center-bar-center-2').find_all('table',{'class':'tab-color-5'})
     result={}
     for table in tables:
         if '企业基本信息' in str(table):
@@ -138,22 +140,52 @@ def companyinfor(url):
             result['技术指标']=numbers
     return result
 
-def main():
-    for line in open('./company_list.txt','r'):
-        item=eval(line)
-        url='http://www.cpbz.gov.cn/standardProduct/showDetail/%s/%s.do'%(item['orgCode'],item['standardId'])
-        try:
-            result=companyinfor(url)
-        except:
-            failed=open('failed.txt','a')
-            failed.write(line)
-            f.close()
-            continue
-        for key in item:
-            result[key]=item[key]
-        f=open('result.txt','a')
-        f.write(str(result)+'\n')
-        f.close()
-        print(item['orgCode'],'ok')
+class Infor(threading.Thread):
+    def __init__(self,item):
+        super(Infor,self).__init__()
+        self.item=item
+        self.url='http://www.cpbz.gov.cn/standardProduct/showDetail/%s/%s.do'%(item['orgCode'],item['standardId'])
 
-company_list()
+    def run(self):
+        self.status=True
+        try:
+            self.result=companyinfor(self.url)
+            for key in self.item:
+                self.result[key]=self.item[key]
+            self.result['url']=self.url
+        except:
+            self.status=False
+
+def get_lines():
+    lines=[]
+    for line in open('./company_list.txt','r'):
+        lines.append(eval(line))
+        if len(lines)==10:
+            yield lines
+            lines.clear()
+    yield lines
+
+def main():
+    count=0
+    for lines in get_lines():
+        threadings=[]
+        for line in lines:
+            work=Infor(line)
+            work.setDaemon(True)
+            threadings.append(work)
+        for work in threadings:
+            work.start()
+        for work in threadings:
+            work.join()
+        f=open('result.txt','a')
+        for work in threadings:
+            if work.status==False:
+                failed=open('failed.txt','a')
+                failed.write(str(work.item)+'\n')
+                failed.close()
+                continue
+            f.write(str(work.result)+'\n')
+            count+=1
+        print(count,'ok')
+        f.close()
+main()
