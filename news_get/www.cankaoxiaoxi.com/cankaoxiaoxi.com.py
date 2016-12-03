@@ -14,16 +14,16 @@ headers = {
 
 
 def search():
-    url='http://searchbd.haiwainet.cn/cse/search?q=%E7%81%BE%E5%90%8E%E9%87%8D%E5%BB%BA&p={}&s=4763610942530243632&entry=1'
-    page=0
+    url='http://www.chinaso.com/search/pagesearch.htm?q=%E7%81%BE%E5%90%8E%E9%87%8D%E5%BB%BA&site=cankaoxiaoxi.com&page={}&wd=%E7%81%BE%E5%90%8E%E9%87%8D%E5%BB%BA'
+    page=1
     while True:
         try:
-            html=requests.get(url.format(page),headers=headers,timeout=30).text.encode('iso-8859-1').decode('utf-8','ignore')
+            html=requests.get(url.format(page),headers=headers,timeout=30).text#.encode('iso-8859-1').decode('utf-8','ignore')
         except:
             print(page,'failed')
             continue
         try:
-            table=BeautifulSoup(html,'lxml').find('div',{'id':'results'}).find_all('div',{'class':'result'})
+            table=BeautifulSoup(html,'lxml').find('div',{'class':'resultWrapper'}).find_all('li',{'class':'reItem'})
         except:
             break
         if len(table)==0:
@@ -32,7 +32,7 @@ def search():
         for ul in table:
             try:
                 title=ul.find('a').get_text()
-                news_url=ul.find('a').get('href')
+                news_url='http://www.chinaso.com/'+ul.find('a').get('href')
             except:
                 continue
             try:
@@ -42,38 +42,28 @@ def search():
             f.write(str([title,date,news_url])+'\n')
         f.close()
         print(page,'ok')
-        if page==2:
+        if page==20:
             break
         page+=1
 
 def news_content(url):
-    html=requests.get(url,headers=headers,timeout=30).text.encode('iso-8859-1').decode('gbk','ignore')
+    html=requests.get(url,headers=headers,timeout=30).text#.encode('iso-8859-1').decode('gbk','ignore')
+    url=re.findall('href="(.*?)";',html)[0]
+    html=requests.get(url,headers=headers,timeout=30).text#.encode('iso-8859-1').decode('gbk','ignore')
     soup=BeautifulSoup(html,'lxml')
     ok=False
     try:
-        text=soup.find('div',{'class':'show_text'}).get_text()
+        text=soup.find('div',{'class':'article-content'}).get_text()
         ok=True
     except:
         pass
     if not ok:
         try:
-            text=soup.find('div',{'class':'wb_content'}).get_text()
+            text=soup.find('div',{'class':'left_zw'}).get_text()
             ok=True
         except:
             pass
     '''
-    if not ok:
-        try:
-            text=soup.find('div',{'id':'articleContent'}).get_text()
-            ok=True
-        except:
-            pass
-    if not ok:
-        try:
-            text=soup.find('div',{'class':'text_show'}).get_text()
-            ok=True
-        except:
-            pass
     if not ok:
         try:
             text=soup.find('div',{'class':'text_box'}).get_text()
@@ -141,5 +131,6 @@ def main():
             count+=1
         f.close()
         print(count,'ok')
+
 #search()
 main()
