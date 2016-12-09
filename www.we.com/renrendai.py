@@ -2,8 +2,8 @@
 
 import requests
 from bs4 import BeautifulSoup
-import xlwt3
-
+import openpyxl
+import json
 
 class Get_data():
     def __init__(self):
@@ -14,12 +14,14 @@ class Get_data():
             'Accept-Language': 'en-US,en;q=0.5',
             'Accept-Encoding': 'gzip, deflate',
             'Connection': 'keep-alive'}
-        self.f=xlwt3.Workbook()
-        self.sheet=self.f.add_sheet('sheet')
-        self.lists=['id','Loan_Title','Loan_type', 'Loan_Status','Amount', 'Interest_Rate', 'Term','Next_Payment_Day','Term_Remain', 'Repayment_Type','Des','Guarantee_Type','Early_Repayment_Rate',
+        self.keys=['id','Loan_Title','Loan_type', 'Loan_Status','Amount', 'Interest_Rate', 'Term','Next_Payment_Day','Term_Remain', 'Repayment_Type','Des','Guarantee_Type','Early_Repayment_Rate',
                 'Borrower_Id','Userid','Age','Education',  'Marital status','Working_City','Company_Scale','Position','Employment_Sector', 'Emploment_Length','Homeowner', 'Mortgage', 'Car', 'Car_Loan',
                 'Total_Amount','Number_of_Succesful_Loan', 'Income_Range_Monthly', 'Number_of_Borrow', 'Number_of_Repaid', 'Outstanding','Overdue_amount','Severe_overdue','Credit_Score',  'Number_Arrears', 'Credit_Limit']
+        self.credit_keys=['work', 'identification', 'borrowStudy', 'video', 'mobileReceipt', 'child', 'identificationScanning', 'graduation','mobile', 'other', 'house','incomeDuty', 'account','fieldAudit', 'residence', 'marriage', 'detailInformation', 'album', 'credit', 'mobileAuth','kaixin', 'car', 'renren']
         self.count=1
+        self.excel=openpyxl.Workbook(write_only=True)
+        self.sheet=self.excel.create_sheet()
+        self.sheet.append(self.keys+self.credit_keys)
         num=0
         self.login()
         self.text_f=open('text.txt','a')
@@ -35,58 +37,65 @@ class Get_data():
         self.session.post('https://www.we.com/j_spring_security_check',data=data,headers=self.headers)
 
     def run(self):
-        id_from=795000
-        id_to=808500
+        id_from=800000
+        id_to=806575
         for load_id in range(int(id_from),int(id_to)+1):
             try:
-                items=self.get_page('http://www.we.com/lend/detailPage.action?loanId='+str(load_id))
+                item=self.get_page('http://www.we.com/lend/detailPage.action?loanId='+str(load_id))
             except:
-                self.login()
+                try:
+                    self.login()
+                except:
+                    pass
                 self.failed_f.write(str(load_id)+'\n')
                 continue
-            items['id']=str(load_id)
+            item[0]['id']=str(load_id)
             print(load_id)
-            self.write_to_text(items)
-            '''
-            #self.write_to_excel(items)
-            for key in self.lists:
-                self.sheet.write(0,num,key)
-                num+=1
-            '''
+            self.write_to_text(item)
 
     def get_page(self,url):
-        html=self.session.get(url,headers=self.headers).text
+        html=self.session.get(url,headers=self.headers,timeout=30).text
+        credit_infor=self.get_credit_infor(html)
         infor=self.parser(html)
-        return infor
+        return infor,credit_infor
 
-    def write_to_text(self,items):
+    def write_to_text(self,item):
         text=''
-        for key in self.lists:
-            text+=items[key].replace(' ','')+' ||'
+        for key in self.keys:
+            text+=item[0][key].replace(' ','')+' ||'
+        print(item[1])
         self.text_f.write(text+'\n')
 
-    def write_to_excel(self,items):
-        num=0
-        for key in self.lists:
-            self.sheet.write(self.count,num,items[key].replace(' ',''))
-            num+=1
-        self.count+=1
-        self.f.save('data.xls')
+    def get_credit_infor(self,html):
+        json_data=BeautifulSoup(html,'lxml').find('script',id='credit-info-data').get_text()
+        data=json.loads(json_data)['data']['creditInfo']
+        credit_infor=[]
+        for key in self.credit_keys:
+            try:
+                value=data[key]
+                if value=='VALID':
+                    value='1'
+                else:
+                    value=0
+                credit_infor.append(value)
+            except:
+                credit_infor.append('0')
+        return credit_infor
 
     def parser(self,html):
         soup=BeautifulSoup(html,'lxml').find('div',id='pg-loan-invest')
         infor_one=soup.find('div',id='loan-basic-panel')
         infor={}
-        infor['Loan_type']=infor_one.find('div',attrs={'class':'fn-left fn-text-overflow pl25'}).get('title')
+        infor['Loan_type']=infor_one.find('div',attrs={'class':'fn-text-overflow'}).get('title')
         infor['Loan_Title']=infor_one.find('em',attrs={'class':'title-text'}).get_text()
-        em=infor_one.find('div',attrs={'class':'fn-clear  mb25'}).find_all('em')
+        em=infor_one.find('div',attrs={'class':'fn-clear'}).find_all('em')
         infor['Amount']=em[0].get_text()
         infor['Interest_Rate']=em[1].get_text()
         infor['Term']=em[3].get_text()
-        ul=infor_one.find('div',attrs={'class':'fn-left pt10 loaninfo '}).find('ul').find_all('li')
-        infor['Guarantee_Type']=ul[0].find('span',attrs={'class':'fn-left basic-value last'}).get_text()
+        ul=infor_one.find('div',attrs={'class':'loaninfo'}).find('ul').find_all('li')
+        infor['Guarantee_Type']=ul[0].find('span',attrs={'class':'basic-value'}).get_text()
         infor['Early_Repayment_Rate']=ul[0].find('span',attrs={'class':'fn-left basic-value num'}).get_text()
-        infor['Repayment_Type']=ul[1].find('span',attrs={'class':'fn-left basic-value'}).get_text()
+        infor['Repayment_Type']=ul[1].find('span',attrs={'class':'basic-value'}).get_text()
         statue=infor_one.find('div',attrs={'class':'pl25 pr25 fn-clear'}).find('div',attrs={'class':'stamp'}).find('em').get('class')
         infor['Loan_Status']=statue[0]
         if statue==['REPAYING']:
