@@ -1,11 +1,18 @@
-#coding:utf-8
+#coding=utf-8
 
 import requests
 from bs4 import BeautifulSoup
 import openpyxl
 import json
+import codecs
 
-class Get_data():
+#用户名
+j_username=""
+#加密后的密码
+j_password='',
+
+
+class Renrendai():
     def __init__(self):
         self.session=requests.session()
         self.headers = {
@@ -24,13 +31,13 @@ class Get_data():
         self.sheet.append(self.keys+self.credit_keys)
         num=0
         self.login()
-        self.text_f=open('text.txt','a')
-        self.failed_f=open('failed.txt','a')
+        self.text_f=codecs.open('text.txt','a',encoding='utf-8')
+        self.failed_f=codecs.open('failed.txt','a',encoding='utf-8')
 
     def login(self):
         data={
-            'j_username':'',
-            'j_password':'',
+            'j_username':j_username,
+            'j_password':j_password,
             'rememberme':'on',
             'targetUrl':'http://www.we.com/',
             'returnUrl':'https://www.we.com/account/index.action'}
@@ -38,10 +45,11 @@ class Get_data():
 
     def run(self):
         id_from=800000
-        id_to=806575
+        id_to=800075
         for load_id in range(int(id_from),int(id_to)+1):
+            line=self.get_page('http://www.we.com/lend/detailPage.action?loanId='+str(load_id),load_id)
             try:
-                item=self.get_page('http://www.we.com/lend/detailPage.action?loanId='+str(load_id))
+                line=self.get_page('http://www.we.com/lend/detailPage.action?loanId='+str(load_id),load_id)
             except:
                 try:
                     self.login()
@@ -49,22 +57,29 @@ class Get_data():
                     pass
                 self.failed_f.write(str(load_id)+'\n')
                 continue
-            item[0]['id']=str(load_id)
             print(load_id)
-            self.write_to_text(item)
+            self.write_to_text(line)
+            self.write_to_excel(line)
+        self.excel.save('result.xlsx')
 
-    def get_page(self,url):
+    def get_page(self,url,load_id):
         html=self.session.get(url,headers=self.headers,timeout=30).text
-        credit_infor=self.get_credit_infor(html)
-        infor=self.parser(html)
-        return infor,credit_infor
+        try:
+            credit_infor=self.get_credit_infor(html)
+        except:
+            credit_infor=[]
+        base_infor=self.parser(html,load_id)
+        return base_infor+credit_infor
 
-    def write_to_text(self,item):
-        text=''
-        for key in self.keys:
-            text+=item[0][key].replace(' ','')+' ||'
-        print(item[1])
+    def write_to_text(self,line):
+        text='|'.join(line)
         self.text_f.write(text+'\n')
+
+    def write_to_excel(self,line):
+        try:
+            self.sheet.append(line)
+        except:
+            pass
 
     def get_credit_infor(self,html):
         json_data=BeautifulSoup(html,'lxml').find('script',id='credit-info-data').get_text()
@@ -76,19 +91,20 @@ class Get_data():
                 if value=='VALID':
                     value='1'
                 else:
-                    value=0
+                    value='0'
                 credit_infor.append(value)
             except:
                 credit_infor.append('0')
         return credit_infor
 
-    def parser(self,html):
+    def parser(self,html,load_id):
         soup=BeautifulSoup(html,'lxml').find('div',id='pg-loan-invest')
         infor_one=soup.find('div',id='loan-basic-panel')
         infor={}
+        infor['id']=str(load_id)
         infor['Loan_type']=infor_one.find('div',attrs={'class':'fn-text-overflow'}).get('title')
         infor['Loan_Title']=infor_one.find('em',attrs={'class':'title-text'}).get_text()
-        em=infor_one.find('div',attrs={'class':'fn-clear'}).find_all('em')
+        em=infor_one.find('div',attrs={'class':'pl25 pr25 fn-clear'}).find_all('em')
         infor['Amount']=em[0].get_text()
         infor['Interest_Rate']=em[1].get_text()
         infor['Term']=em[3].get_text()
@@ -136,14 +152,20 @@ class Get_data():
         infor['Working_City']=em[0].get_text().replace('\n','').replace('\t','')
         infor['Emploment_Length']=em[1].get_text().replace('\n','').replace('\t','')
         for item in soup.find('div',id='loan-details').find('table',attrs={'class':'ui-table-basic-list'}).find_all('td'):
-            if item.get_text()[:4]=='公司行业':
+            if item.get_text()[:4]==u'公司行业':
                 infor['Employment_Sector']=item.find('em').get_text()
-            if item.get_text()[:4]=='公司规模':
+            if item.get_text()[:4]==u'公司规模':
                 infor['Company_Scale']=item.find('em').get_text()
-            if item.get_text()[:4]=='岗位职位':
+            if item.get_text()[:4]==u'岗位职位':
                 infor['Position']=item.find('em').get_text()
-        return infor
+        line=[]
+        for key in self.keys:
+            try:
+                line.append(infor[key].replace(' ',''))
+            except:
+                line.append('-')
+        return line
 
 if __name__=='__main__':
-    work=Get_data()
+    work=Renrendai()
     work.run()
