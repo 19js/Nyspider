@@ -7,6 +7,7 @@ import copy
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QUrl
 from PyQt5.QtMultimedia import QMediaPlayer,QMediaContent
+from PyQt5.QtCore import QTimer
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Linux; U; Android 2.3.6; zh-cn; GT-S5660 Build/GINGERBREAD) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1 MicroMessenger/4.5.255',
@@ -63,7 +64,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "挂号信息："))
         self.label_3.setText(_translate("MainWindow", "关键词："))
         self.label.setText(_translate("MainWindow", "查询日期："))
-        self.pushButton.setText(_translate("MainWindow", "查询"))
+        self.pushButton.setText(_translate("MainWindow", "开始抓取"))
         self.menu.setTitle(_translate("MainWindow", "菜单"))
         self.actionClose.setText(_translate("MainWindow", "close"))
 
@@ -202,25 +203,28 @@ class BookMainwindow(Ui_MainWindow,QtWidgets.QMainWindow):
     def __init__(self):
         super(BookMainwindow,self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("挂号信息采集器")
         self.departments=[]
-        self.player=QMediaPlayer()
-        url=QUrl()
-        url.setUrl("./7499.wav")
-        self.music_content=QMediaContent(url)
-        self.player.setMedia(self.music_content)
         try:
             self.keywords=load_keywords()
         except:
             self.keywords=['内分泌','肾内科','免疫内科','消化内科','神经内科','妇科','皮','乳腺','中医','感染内科','呼吸内科']
+        self.exists=[]
+        self.is_start=False
         self.init()
 
     def init(self):
-        self.pushButton.clicked.connect(self.get_book_infor)
+        self.pushButton.clicked.connect(self.click_pushbutton)
         self.actionClose.triggered.connect(self.close)
         text=''
         for keyword in self.keywords:
             text+=keyword+','
         self.lineEdit_2.setText(text)
+
+    def click_pushbutton(self):
+        self.pushButton.setText("抓取中")
+        self.pushButton.setEnabled(False)
+        self.get_book_infor()
 
     def get_keywords(self):
         text=self.lineEdit_2.text()
@@ -237,30 +241,52 @@ class BookMainwindow(Ui_MainWindow,QtWidgets.QMainWindow):
         self.crawler._finish_signal.connect(self.load_result)
         self.crawler.start()
 
-    def load_result(self,text):
-        self.textEdit.setText(text)
-        self.play_music()
+    def warning(self,text):
+        box=QtWidgets.QMessageBox.information(self,"更新",text)
+        set_text=''
+        for item in self.exists:
+            set_text+=item
+        self.textEdit.setText(set_text)
+
+    def load_result(self,result):
+        text=''
+        for item in result:
+            if item not in self.exists:
+                text+=item
+        self.exists.clear()
+        self.exists=result
+        if text!='':
+            self.warning(text)
 
 class BookInfor(QtCore.QThread):
-    _finish_signal=QtCore.pyqtSignal(str)
+    _finish_signal=QtCore.pyqtSignal(list)
     def __init__(self,keywords,date):
         super(BookInfor,self).__init__()
         self.keywords=keywords
         self.date=date
 
+
     def run(self):
-        departments=get_department('1',self.keywords)
-        template="\r\n医院:%s\r\n科室:%s\r\n医院号源:%s\r\n医生:%s\r\n费用:%s\r\n"
-        print(local_time(),"开始抓取")
-        text='\r\n-------------------\r\n查找时间:%s\r\n-------------------\r\n'%local_time()
-        depart_items=copy.deepcopy(departments)
-        result=update_infor(depart_items,self.date)
-        for item in result:
-            if self.date not in item[2]:
+        while True:
+            try:
+                self.departments=get_department('1',self.keywords)
+                break
+            except:
                 continue
-            text+=template%tuple(item)
-        print(local_time(),"抓取完成")
-        self._finish_signal.emit(text)
+        while True:
+            template="\r\n医院:%s\r\n科室:%s\r\n医院号源:%s\r\n医生:%s\r\n费用:%s\r\n"
+            print(local_time(),"开始抓取")
+            depart_items=copy.deepcopy(self.departments)
+            items=update_infor(depart_items,self.date)
+            result=[]
+            for item in items:
+                if self.date not in item[2]:
+                    continue
+                text=template%tuple(item)
+                result.append(text)
+            print(local_time(),"抓取完成")
+            self._finish_signal.emit(result)
+            time.sleep(20)
 
 if __name__ == '__main__':
     import sys
