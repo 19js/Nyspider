@@ -286,7 +286,7 @@ class BookInfor(QtCore.QThread):
                 result.append(text)
             print(local_time(),"抓取完成")
             self._finish_signal.emit(result)
-            time.sleep(20)
+            time.sleep(1)
 
 if __name__ == '__main__':
     import sys
