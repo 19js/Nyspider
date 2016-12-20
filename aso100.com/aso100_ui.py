@@ -17,7 +17,7 @@ import os
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(857, 558)
+        MainWindow.resize(957, 558)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setObjectName("centralWidget")
         self.label = QtWidgets.QLabel(self.centralWidget)
@@ -44,7 +44,7 @@ class Ui_MainWindow(object):
         self.comboBox_3.setGeometry(QtCore.QRect(540, 60, 121, 30))
         self.comboBox_3.setObjectName("comboBox_3")
         self.pushButton = QtWidgets.QPushButton(self.centralWidget)
-        self.pushButton.setGeometry(QtCore.QRect(750, 60, 96, 28))
+        self.pushButton.setGeometry(QtCore.QRect(850, 60, 96, 28))
         self.pushButton.setObjectName("pushButton")
         self.textBrowser = QtWidgets.QTextBrowser(self.centralWidget)
         self.textBrowser.setGeometry(QtCore.QRect(10, 110, 841, 411))
@@ -61,6 +61,8 @@ class Ui_MainWindow(object):
         self.comboBox_4.addItem("")
         self.comboBox_4.addItem("")
         self.comboBox_4.addItem("")
+        self.date_lineEdit=QtWidgets.QLineEdit(self.centralWidget)
+        self.date_lineEdit.setGeometry(QtCore.QRect(680, 60, 161, 30))
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 857, 28))
@@ -110,13 +112,15 @@ class Aso100(QtWidgets.QMainWindow,Ui_MainWindow):
         self.basicInit()
 
     def basicInit(self):
+        date=time.strftime("%Y-%m-%d",time.localtime())
+        self.date_lineEdit.setText(date)
         self.pushButton.clicked.connect(self.getData)
         self.action.triggered.connect(self.close)
         for key in self.genre:
             self.comboBox_3.addItem(key)
 
     def getBrowser(self):
-        self.browser=webdriver.Firefox()
+        self.browser=webdriver.Firefox()#.Chrome("./chromedriver")
         self.browser.get('http://aso100.com/account/signin')
         self.browser.implicitly_wait(10)
         '''
@@ -166,11 +170,12 @@ class Aso100(QtWidgets.QMainWindow,Ui_MainWindow):
         key_genre=self.comboBox_3.currentText()
         country=self.comboBox_4.currentText()
         country_type=self.country_labels[country]
-        url='http://aso100.com/rank/more/device/%s/country/%s/brand/%s/genre/%s/?page='%(de,country_type,self.brand[key_brand],self.genre[key_genre])
+        date=self.date_lineEdit.text()
+        url='http://aso100.com/rank/more/date/%s/device/%s/country/%s/brand/%s/genre/%s/?page='%(date,de,country_type,self.brand[key_brand],self.genre[key_genre])
         startpage=1
         result=[]
-        date=time.strftime("%Y%m%d_%H%M%S",time.localtime())
-        filename=date+'_'+de+'_'+key_brand+'_'+key_genre+'_'+country+'.xlsx'
+        hour=time.strftime("_%H%M%S",time.localtime())
+        filename=date.replace('-','')+hour+'_'+de+'_'+key_brand+'_'+key_genre+'_'+country+'.xlsx'
         try:
             os.mkdir(country)
         except:
