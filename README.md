@@ -159,3 +159,13 @@ cn.bing.com --- 必应搜索
 finance.sina.com.cn --- 新浪财经 上市公司高管信息
 
 buluo.qq.com --- QQ部落帖子图片
+
+www.360che.com --- 卡车之家车型数据
+
+newseed.pedaily.cn --- 新芽融资数据
+
+www.cpbz.gov.cn --- 企业标准信息公共服务平台 企业信息
+
+bjguahao.gov.cn --- 北京市预约挂号统一平台 预约信息
+
+sysjk.ivdc.org.cn --- 国家兽药基础信息查询系统
