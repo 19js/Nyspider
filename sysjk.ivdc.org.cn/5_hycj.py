@@ -73,7 +73,7 @@ class Query(threading.Thread):
             f.close()
 
 def main():
-    page=787
+    page=1920
     while True:
         table=table_page(page)
         if table==[]:
