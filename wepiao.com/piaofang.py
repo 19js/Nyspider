@@ -27,9 +27,11 @@ def product_box_office(day):
     "lang":"cn"
     }
     html=requests.post('https://piaofang.wepiao.com/api/v1/index',data=json.dumps(data),headers=headers,timeout=30).text
-    json_data=json.loads(html)['movieBoxOffices']
+    json_data=json.loads(html)
+    nationalBoxOffice=json_data['nationalBoxOffice']
+    json_data=json_data['movieBoxOffices']
     movies=[]
-    keys=['movieId','movieName','showDate','movieNameEnglish','productBoxOffice','productTotalBoxOffice','productBoxOfficeRate','productScheduleRate','productTicketSeatRate','releaseDate']
+    keys=['movieId','movieName','showDate','productBoxOffice','productTotalBoxOffice','productBoxOfficeRate','productScheduleRate','productTicketSeatRate','releaseDate']
     for item in json_data:
         line=[]
         for key in keys:
@@ -37,20 +39,21 @@ def product_box_office(day):
                 line.append(item[key])
             except:
                 line.append('')
+        line.append(nationalBoxOffice)
         movies.append(line)
     return movies
 
 def write_to_excel():
     excel=openpyxl.Workbook(write_only=True)
     sheet=excel.create_sheet()
+    sheet.append(['movieId','movieName','showDate','productBoxOffice','productTotalBoxOffice','productBoxOfficeRate','productScheduleRate','productTicketSeatRate','releaseDate','nationalBoxOffice'])
     for line in open('./movies.txt','r'):
         line=ILLEGAL_CHARACTERS_RE.sub('',line)
         line=eval(line)
-        line.remove(line[3])
         sheet.append(line)
     excel.save('movies.xlsx')
 
-def main():
+if __name__=='__main__':
     day=datetime.datetime.now()
     day=day_get(day)
     while True:
@@ -68,5 +71,3 @@ def main():
         f.close()
         print(day_str,'ok')
         day=day_get(day)
-
-write_to_excel()
