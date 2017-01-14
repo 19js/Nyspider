@@ -8,12 +8,12 @@ from selenium import webdriver
 def parser_detail(html):
     table=BeautifulSoup(html,'html.parser').find('table',{'class':'Detail'}).find_all('tr')
     data={}
-    keys=['CVCC', '产品规格', '产品名称', '产品价格', '产品用途', '保存条件', '产品分类', '产品包装', '产品单位']
+    keys=['CVCC', '产品规格', '产品名称', '产品价格', '产品用途', '保存条件', '产品分类', '产品包装', '产品单位','是否有货']
     for item in table:
         names=item.find_all('td',{'align':'right'})
         values=item.find_all('td',{'align':'left'})
         for i in range(len(names)):
-            data[names[i].get_text()]=values[i].get_text().replace('\xa0','')
+            data[names[i].get_text().replace('：','').replace('\n','')]=values[i].get_text().replace('\xa0','')
     result=[]
     for key in keys:
         try:

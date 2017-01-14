@@ -34,14 +34,14 @@ class Query(threading.Thread):
 
 def parser(url):
     html=requests.get(url,headers=headers,timeout=30).text
-    table=BeautifulSoup(html,'html.parser').find('table',{'class':'Detail'}).find_all('tr')
+    table=BeautifulSoup(html,'lxml').find('table',{'class':'Detail'}).find_all('tr')
     data={}
-    keys=['平台资源号', '中文名称', '菌种保藏编号', '特征特性', '属名', '种名加词', '资源归类编码', '其他藏中心编号', '模式菌株', '来源历史', '主要用途', '收藏时间', '生物危害程度', '原始编号', '培养基编号', '原产国', '培养温度', '具体用途', '机构名称', '寄主名称', '隶属单位名称', '致病对象', '资源保藏类型', '致病名称', '保存方法', '传播途径', '实物状态', '分离基物', '共享方式', '采集地', '提供形式', '基因元器件', '获取途径', '记录地址', '图像', '价格', '机构名称编写', '其它', '联系方式', '\n是否有货', '序列信息']
+    keys=['平台资源号', '中文名称', '菌种保藏编号', '特征特性', '属名', '种名加词', '资源归类编码', '其他藏中心编号', '模式菌株', '来源历史', '主要用途', '收藏时间', '生物危害程度', '原始编号', '培养基编号', '原产国', '培养温度', '具体用途', '机构名称', '寄主名称', '隶属单位名称', '致病对象', '资源保藏类型', '致病名称', '保存方法', '传播途径', '实物状态', '分离基物', '共享方式', '采集地', '提供形式', '基因元器件', '获取途径', '记录地址', '图像', '价格', '机构名称编写', '其它', '联系方式', '是否有货', '序列信息']
     for item in table:
         names=item.find_all('td',{'align':'right'})
         values=item.find_all('td',{'align':'left'})
         for i in range(len(names)):
-            data[names[i].get_text()]=values[i].get_text()
+            data[names[i].get_text().replace('\n','')]=values[i].get_text().replace('\xa0','').replace('\r','').replace('\n','')
     result=[]
     for key in keys:
         try:
