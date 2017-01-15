@@ -54,12 +54,12 @@ def parser(certnum):
     html=requests.get('http://ffip.cnca.cn/ffip/ffdp/publicQueryCertAct.action?certNum=%s'%certnum,headers=headers,timeout=30).text
     tables=BeautifulSoup(html,'html.parser').find_all('table',{'class':'huitd'})
     data={}
-    keys=['发证机构', '证书编号', '行政区划', '获证企业名称', '证书截止日期', '证书状态']
+    keys=['发证机构', '证书编号','企业信息码','产品编号', '行政区划', '获证企业名称', '证书截止日期', '证书状态']
     for item in tables[0].find_all('tr'):
         try:
             tds=item.find_all('td')
             name=tds[0].get_text().replace('\r','').replace('\n','').replace(' ','').replace('\xa0','')
-            value=tds[1].get_text().replace('\r','').replace('\n','').replace(' ','').replace('\xa0','')
+            value=tds[1].get_text().replace('\r','').replace('\n','').replace(' ','').replace('\xa0','').replace('\t','')
             data[name]=value
         except:
             continue
