@@ -1,0 +1,38 @@
+{'Ford': ['EcoSport', 'Endeavor', 'Fiesta', 'Fiesta Classic', 'Figo', 'Ikon', 'Classic', 'Endeavour', 'Escort', 'Figo Aspire', 'Fusion', 'Mondeo', 'New Ikon']}
+{'Honda': ['Accord', 'Amaze', 'Brio', 'City', 'City ZX', 'Civic', 'BRV', 'CRV', 'Jazz', 'Mobilio']}
+{'Hyundai': ['Accent', 'i10', 'i20', 'Santro', 'Santro Xing', 'Verna', 'Accent Viva', 'Creta', 'Elantra', 'Elite i20', 'EON', 'Fluidic Verna', 'Getz', 'Getz Prime', 'Grand i10', 'i20 Active', 'Santa Fe', 'Sonata', 'Sonata Embera', 'Sonata Transform', 'Tucson', 'Verna Fluidic', 'Verna Transform', 'Xcent']}
+{'Mahindra': ['Bolero', 'Jeep', 'Scorpio', 'Verito', 'XUV500', 'Xylo', 'Armada', 'CL Range', 'e2o', 'E Verito', 'KUV100', 'Marshal DI', 'Maxx', 'MM Range', 'NuvoSport', 'Quanto', 'Reva', 'REVAi', 'Scorpio Getaway', 'Scorpio W', 'Thar', 'TUV300', 'Verito Vibe CS', 'Voyager']}
+{'Maruti Suzuki': ['Alto', 'Maruti 800', 'Swift', 'Swift Dzire', 'Wagon R', 'Zen', '800', 'Alto 800', 'Alto K10', 'A Star', 'Baleno', 'Celerio', 'Ciaz', 'Eeco', 'Ertiga', 'Esteem', 'Estilo', 'Grand Vitara', 'Gypsy', 'Ignis', 'Kizashi', 'Maruti 1000', 'Omni', 'Ritz', 'S Cross', 'Stingray', 'SX4', 'Versa', 'Vitara Brezza', 'Wagon R 1.0', 'Wagon R Duo', 'Zen Estilo']}
+{'Tata': ['Indica', 'Indica V2', 'Indica Vista', 'Indigo CS', 'Nano', 'Safari', 'Aria', 'Bolt', 'Estate', 'Hexa', 'Indica eV2', 'Indica V2 Xeta', 'Indigo', 'Indigo eCS', 'Indigo Marina', 'Indigo V Series', 'Indigo XL', 'Manza', 'Movus', 'Nano GenX', 'Safari Storme', 'Sumo', 'Sumo Gold', 'Sumo Grande', 'Sumo Grande MK II', 'Sumo Spacio', 'Sumo Victa', 'Tiago', 'Venture', 'Vista', 'Vista Tech', 'Winger', 'Xenon XT', 'Zest']}
+{'Ashok Leyland': ['Stile']}
+{'Audi': ['A4', 'A6', 'A8 L', 'Q3', 'Q5', 'Q7', 'A3', 'A3 Cabriolet', 'A7', 'A8', 'R8', 'RS7 Sportback', 'TT']}
+{'Bentley': ['Continental Flying Spur']}
+{'BMW': ['3 Series', '5 Series', '7 Series', 'X1', 'X3', 'X5', '1 Series', '3 Series GT', '5 Series GT', '6 Series', 'i8', 'X6']}
+{'Chevrolet': ['Aveo', 'Beat', 'Cruze', 'Optra', 'Spark', 'Tavera', 'Aveo UVA', 'Captiva', 'Enjoy', 'Forester', 'Optra Magnum', 'Optra SRV', 'Sail', 'Sail Hatchback', 'Sail UVA', 'Spark LPG', 'Tavera Neo', 'Trailblazer']}
+{'Daewoo': ['Cielo', 'Matiz', 'Nexia']}
+{'Datsun': ['GO', 'Go Cross', 'Go Plus', 'Redi GO', 'RediGo']}
+{'DC': ['Avanti']}
+{'Eicher Polaris': ['Multix']}
+{'Ferrari': ['California']}
+{'Fiat': ['Grande Punto', 'Linea', 'Palio NV', 'Palio Stile', 'Punto', 'Uno', '500', 'Abarth Punto', 'Adventure', 'Avventura', 'Linea Classic', 'Palio D', 'Palio Stile Multijet', 'Petra', 'Petra D', 'Punto Evo', 'Punto Pure']}
+{'Force Motors': ['Force One']}
+{'Hindustan Motors': ['Ambassador', 'Contessa']}
+{'ICML': ['Extreme', 'Rhino Rx']}
+{'Isuzu': ['MU7']}
+{'Jaguar': ['XF', 'XJ', 'XJ L']}
+{'Land Rover': ['Discovery', 'Discovery Sport', 'Freelander 2', 'Range Rover', 'Range Rover Evoque', 'Range Rover Sport']}
+{'Maserati': ['Ghibli', 'GranCabrio']}
+{'Mercedes Benz': ['A Class', 'C Class', 'E Class', 'GLA Class', 'M Class', 'S Class', 'AMG GT', 'B Class', 'CLA Class', 'G Class', 'GL Class', 'GLE Class', 'R Class', 'SLC', 'SL Class', 'SLK Class']}
+{'Mini': ['Cooper', 'Cooper Convertible', 'Cooper S', 'Countryman']}
+{'Mitsubishi': ['Cedia', 'Lancer', 'Lancer Evolution X', 'Outlander', 'Pajero', 'Pajero Sport', 'Challenger', 'Lancer Evolution', 'Montero']}
+{'Nissan': ['Evalia', 'Micra', 'Micra Active', 'Sunny', 'Terrano', 'X Trail', '370Z', 'Teana']}
+{'Opel': ['Astra', 'Corsa', 'Vectra']}
+{'Porsche': ['911', 'Cayenne', 'Panamera']}
+{'Premier': ['Padmini', 'Rio']}
+{'Renault': ['Duster', 'Fluence', 'Kwid', 'Logan', 'Pulse', 'Scala', 'Koleos', 'Lodgy', 'Logan Edge']}
+{'San':[]}
+{'Skoda': ['Fabia', 'Laura', 'Octavia', 'Rapid', 'Superb', 'Yeti', 'Fabia Scout', 'Octavia Combi', 'Rapid new']}
+{'Ssangyong': ['Rexton']}
+{'Toyota': ['Corolla', 'Corolla Altis', 'Etios', 'Fortuner', 'Innova', 'Qualis', 'All New Fortuner', 'Camry', 'Celica', 'Etios Cross', 'Etios Liva', 'Innova Crysta', 'Land Cruiser', 'Land Cruiser Prado', 'Prado', 'Prius']}
+{'Volkswagen': ['Beetle', 'Cross Polo', 'Jetta', 'Passat', 'Polo', 'Vento', 'Ameo', 'Polo GTI', 'Touareg']}
+{'Volvo': ['S60', 'S80', 'V40 Cross Country', 'XC60', 'XC90']}
