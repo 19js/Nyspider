@@ -15,9 +15,11 @@ headers = {
 
 def get_station(cityname):
     data={
-    'chargePointName':cityname
+    'chargePointName':cityname,
+    'measuerModel':'',
+    'isAppointment':''
     }
-    html=requests.post('http://www.echargenet.com/portal/mapService/rest/map/queryChargePoint;',data=data,headers=headers,timeout=30).text
+    html=requests.post('http://www.echargenet.com/portal/mapService/rest/map/queryChargePoint',data=data,headers=headers,timeout=30).text
     data=json.loads(html)
     return data
 
@@ -72,15 +74,20 @@ def get_time():
     timenow=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
     return timenow
 
-def write_to_excel(filename):
+def write_to_excel():
     excel=openpyxl.Workbook(write_only=True)
     sheet=excel.create_sheet()
-    for line in open(filename+'.txt','r',encoding='utf-8'):
-        try:
-            sheet.append(eval(line))
-        except:
+    keys=['date','city','stakeName','stakeTotal','directPile','alternatingPile','stakeAddr','latitude','longitude','parkingPlace','openingHour','feesStandard','chargeServiceFees','manageOrgName','manageContactInfo','序号','名称','类型','状态','最大功率','最大电压','电压','电流','电量','SOC','支付方式','接口标准']
+    sheet.append(keys)
+    for filename in os.listdir(path='.'):
+        if not filename.endswith('.txt'):
             continue
-    excel.save('result/'+filename+'.xlsx')
+        for line in open(filename,'r',encoding='utf-8'):
+            try:
+                sheet.append(eval(line))
+            except:
+                continue
+    excel.save('result/result.xlsx')
 
 def main():
     citynames=load_cities()
@@ -106,10 +113,8 @@ def main():
             continue
         f=open(cityname+'.txt','a',encoding='utf-8')
         for station in stations:
-            if cityname not in station['cityName']:
-                continue
             timenow=get_time()
-            line=[timenow]
+            line=[timenow,cityname]
             for key in keys:
                 try:
                     line.append(station[key])
@@ -118,10 +123,14 @@ def main():
             infor=station_infor(station['stakeName'])
             for item in infor:
                 f.write(str(line+item)+'\n')
-            print(timenow,station['stakeName'],'ok')
+            try:
+                print(timenow,station['stakeName'],'ok')
+            except:
+                pass
         f.close()
-        write_to_excel(cityname)
         print(get_time(),cityname,'ok')
+    write_to_excel()
+    
 try:
     sleeptime=input("输入间隔时间(分钟):")
     sleeptime=int(sleeptime)
