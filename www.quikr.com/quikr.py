@@ -7,6 +7,8 @@ import threading
 import json
 import re
 import sys
+import datetime
+
 
 headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -38,7 +40,7 @@ def get_proxies_abuyun():
 
 def switch_ip():
     html=requests.get('http://proxy.abuyun.com/switch-ip',proxies=get_proxies_abuyun()).text
-    print("Switch ip ")
+    print("Switch ip")
 
 def login():
     session=requests.session()
@@ -78,8 +80,33 @@ def paser_page(pagenum):
             car['Posted']=div.find('span',{'class':'posted'}).get_text()
         except:
             car['Posted']='NA'
+        try:
+            car['Converted_Posted_Date']=convert_posted(car['Posted'])
+        except:
+            car['Converted_Posted_Date']='NA'
         result.append(car)
-    return result
+
+    try:
+        pages=re.findall('Page (\d+) of (\d+)',html)
+        endpage=int(pages[0][1])
+    except:
+        endpage=10000
+    return result,endpage
+
+def convert_posted(posted):
+    try:
+        num=re.findall('(\d+)',posted)[0]
+        num=int(num)
+    except:
+        return 'NA'
+    today=day=datetime.datetime.now()
+    if 'day' in posted:
+        day=today-datetime.timedelta(days=num)
+        return str(day).split(' ')[0]
+    if 'month' in posted:
+        day=today-datetime.timedelta(days=num*30)
+        return str(day).split(' ')[0]
+    return str(today).split(' ')[0]
 
 def car_infor(car,session):
     try_count=0
@@ -119,17 +146,19 @@ def car_infor(car,session):
 
 def get_base_infor():
     page=1
-    endpage=3063
+    endpage=10000
     while page<=endpage:
         try:
-            result=paser_page(page)
+            result,e_page=paser_page(page)
         except:
             result=[]
         if result==[]:
             print('page',page,'failed,retrying')
             switch_ip()
             continue
-        f=open('urls.txt','a')
+        if endpage==10000:
+            endpage=e_page
+        f=open('urls.txt','a',encoding='utf-8')
         for car in result:
             f.write(str(car)+'\n')
         f.close()
@@ -138,13 +167,15 @@ def get_base_infor():
 
 def load_models():
     global models
-    for line in open('./models.txt','r'):
+    for line in open('./models.txt','r',encoding='utf-8'):
         item=eval(line)
         for key in item:
             models[key]=item[key]
 
 def parser_title(title):
     global models
+    if 'I want to sell' in title or 'All scrap junk condition' in title:
+        return ['NA','NA','NA']
     title_list=title.split(' ')
     result=[]
     for key in models:
@@ -159,20 +190,20 @@ def parser_title(title):
             text=title.split('–')[0].replace(result[0],'').replace(result[1],'')
             result.append(text)
             return result
-    return [title,title,title]
+    return ['NA','NA','NA']
 
 def get_detail_infor():
     session=login()
-    for line in open('./urls.txt','r'):
+    for line in open('./urls.txt','r',encoding='utf-8'):
         car=eval(line)
         try:
             car_infor(car, session)
         except:
-            failed=open('failed.txt','a')
+            failed=open('failed.txt','a',encoding='utf-8')
             failed.write(str(car))
             failed.close()
             continue
-        f=open('result.txt','a')
+        f=open('result.txt','a',encoding='utf-8')
         f.write(str(car)+'\n')
         f.close()
         try:
@@ -184,14 +215,17 @@ def get_detail_infor():
 def write_to_excel():
     excel=openpyxl.Workbook(write_only=True)
     sheet=excel.create_sheet()
-    keys=['Url','City','Brand','Model','Variance','Year','Price','Date','Posted','Rate','Fuel','Miliage','Color','Owner','Powertrain','Engine','Views','Body_Type','Ad_ID']
+    keys=['Url','City','Brand','Model','Variance','Year','Title','Price','Date','Posted','Converted_Posted_Date','Rate','Fuel','Miliage','Color','Owner','Powertrain','Engine','Views','Body_Type','Ad_ID']
     sheet.append(keys)
-    for line in open('./result.txt','r'):
+    for line in open('./result.txt','r',encoding='utf-8'):
         car=eval(line)
         line=[]
         for key in keys:
             try:
-                line.append(car[key])
+                value=car[key]
+                if value.replace('\r','').replace('\n','').replace('\t','').replace(' ','')=='':
+                    value='NA'
+                line.append(value)
             except:
                 line.append('NA')
         sheet.append(line)
