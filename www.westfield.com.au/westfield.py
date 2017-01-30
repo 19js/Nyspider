@@ -81,6 +81,7 @@ def write_to_excel():
     sheet=excel.create_sheet()
     for line in open('result.txt','r',encoding='utf-8'):
         try:
+            line=eval(line)
             sheet.append(line)
         except:
             continue
@@ -106,5 +107,5 @@ def westfield():
                 f.write(str(item)+'\n')
                 f.close()
     write_to_excel()
-
+    
 westfield()
