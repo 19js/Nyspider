@@ -1,6 +1,5 @@
 import openpyxl
 
-
 def load_result():
     result=[]
     for line in open('result.txt','r'):
@@ -25,7 +24,10 @@ def load_result():
         try:
             products=item['产品信息']
         except:
-            products=[]
+            f=open('empty.txt','a')
+            f.write(line)
+            f.close()
+            continue
         for product in products:
             product[-1]=item['standardStatus']
             yield baseinfor+product+numbers
@@ -33,8 +35,11 @@ def load_result():
 def write_to_excel():
     excel=openpyxl.Workbook(write_only=True)
     sheet=excel.create_sheet()
+    count=0
     for line in load_result():
         sheet.append(line)
+        count+=1
+        print(count)
     excel.save('result.xlsx')
 
 write_to_excel()

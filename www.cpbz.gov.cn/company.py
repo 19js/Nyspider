@@ -188,4 +188,5 @@ def main():
             count+=1
         print(count,'ok')
         f.close()
+company_list()
 main()
