@@ -14,7 +14,7 @@ headers = {
 
 def search(code):
     result=[]
-    for s_type in ['plbt0001','plbt0005']:
+    for s_type in ['']:
         data={
         'stockcode':code,
         'type':s_type
@@ -50,6 +50,7 @@ def topic_interaction(item):
     page=1
     filename=item[1]+'_'+item[4]+'.txt'
     pre_table=''
+    try_count=0
     while True:
         data={
         'pageNo':page,
@@ -57,11 +58,15 @@ def topic_interaction(item):
         }
         try:
             html=requests.post('http://ircs.p5w.net/ircs/topicInteraction/questionPage.do',data=data,headers=headers,timeout=30).text
+            try_count=0
         except:
             try:
                 print(item[2],page,'failed')
             except:
                 pass
+            try_count+=1
+            if try_count==5:
+                break
             continue
         try:
             value=json.loads(html)['value']
@@ -98,15 +103,20 @@ def topic_by_boardid(item):
     page=1
     filename=item[1]+'_'+item[4]+'.txt'
     pre_table=[]
+    try_count=0
     while True:
         url='http://newzspt.p5w.net/bbs/question_page.asp?boardid=%s&bbs=1&pageNo=%s'%(boardid,page)
         try:
             html=requests.get(url,headers=headers,timeout=20).text.encode('iso-8859-1').decode('gbk','ignore')
+            try_count=0
         except:
             try:
                 print(item[2],page,'failed')
             except:
                 pass
+            try_count+=1
+            if try_count==5:
+                break
             continue
         table=BeautifulSoup(html,'html.parser').find_all('q_and_r')
         if len(table)==0:
@@ -138,27 +148,33 @@ def topic_by_boardid(item):
     f.close()
 
 def topic_by_selcode(item):
-    selcode=re.findall('selcode=(\d+)',item[3])[0]
+    try:
+        selcode=re.findall('selcode=(\d+)',item[3])[0]
+    except:
+        html=requests.get(item[3],headers=headers,timeout=20).text
+        selcode=re.findall('boardid=(\d+)"',html)[0]
     page=1
     filename=item[1]+'_'+item[4]+'.txt'
     pre_table=[]
+    try_count=0
     while True:
         url='http://zsptbs.p5w.net/bbs/chatbbs/left.asp?boardid=%s&pageNo=%s'%(selcode,page)
         try:
             html=requests.get(url,headers=headers,timeout=20).text.encode('iso-8859-1').decode('gbk','ignore')
+            try_count=0
         except:
             try:
                 print(item[2],page,'failed')
             except:
                 pass
+            try_count+=1
+            if try_count==5:
+                break
             continue
         table=BeautifulSoup(html,'html.parser').find_all('tr')
         if len(table)==0:
             break
-        if table==pre_table:
-            break
-        pre_table=table
-        f=open('说明会/%s'%filename,'a',encoding='utf-8')
+        lines=[]
         for tr in table:
             tds=tr.find_all('td')
             if len(tds)!=4:
@@ -171,9 +187,15 @@ def topic_by_selcode(item):
             content=tds[-1].get_text().replace('\r','').replace('\n','')
             r_name=tds[0].get_text().replace('\r','').replace('\n','').replace(' ','').replace('\t','').replace('\xa0','')
             if r_name=='':
-                f.write('$$$%s:%s\r\n'%(q_name,content))
+                lines.append('$$$%s:%s\r\n'%(q_name,content))
             else:
-                f.write('***%s\r\n'%(content))
+                lines.append('***%s\r\n'%(content))
+        if pre_table==lines:
+            break
+        pre_table=lines
+        f=open('说明会/%s'%filename,'a',encoding='utf-8')
+        for line in lines:
+            f.write(line)
         f.close()
         try:
             print(item[2],page,'ok')
@@ -192,15 +214,20 @@ def roadshow_question_page(item):
         baseurl=item[-1].replace(item[-1].split('/')[-1],'')
     else:
         baseurl=item[-1]
+    try_count=0
     while True:
         url=baseurl+'/bbs/question_page.asp?pageNo='+str(page)
         try:
             html=requests.get(url,headers=headers,timeout=20).text.encode('iso-8859-1').decode('gbk','ignore')
+            try_count=0
         except:
             try:
                 print(item[2],page,'failed')
             except:
                 pass
+            try_count+=1
+            if try_count==5:
+                break
             continue
         table=BeautifulSoup(html,'html.parser').find_all('q_and_r')
         if len(table)==0:
@@ -235,15 +262,20 @@ def roadshow_rs(item):
         baseurl=item[-1].replace(item[-1].split('/')[-1],'')
     else:
         baseurl=item[-1]
+    try_count=0
     while True:
         url=baseurl+'/left.asp?pageNo='+str(page)
         try:
             html=requests.get(url,headers=headers,timeout=20).text.encode('iso-8859-1').decode('gbk','ignore')
+            try_count=0
         except:
             try:
                 print(item[2],page,'failed')
             except:
                 pass
+            try_count+=1
+            if try_count==5:
+                break
             continue
         table=BeautifulSoup(html,'html.parser').find_all('tr')
         if len(table)==0:
@@ -273,6 +305,60 @@ def roadshow_rs(item):
         except:
             pass
         page+=1
+
+def roadshow_by_rid(item):
+    try:
+        rid=re.findall('rid=(\d+)',item[3])[0]
+    except:
+        html=requests.get(item[-1],headers=headers,timeout=20).text
+        rid=re.findall('topicInteraction.*?rid=(\d+)',html)[0]
+    page=1
+    pre_table=''
+    try_count=0
+    while True:
+        data={
+        'pageNo':page,
+        'rid':rid
+        }
+        try:
+            html=requests.post('http://ircs.p5w.net/ircs/topicInteraction/questionPage.do',data=data,headers=headers,timeout=30).text
+            try_count=0
+        except:
+            try:
+                print(item[2],page,'failed')
+            except:
+                pass
+            try_count+=1
+            if try_count==5:
+                break
+            continue
+        try:
+            value=json.loads(html)['value']
+            table=json.loads(value)['q_all']
+        except:
+            break
+        if len(table)==0:
+            break
+        if table==pre_table:
+            break
+        pre_table=table
+        f=open('路演/%s'%item[1],'a',encoding='utf-8')
+        for ques in table:
+            try:
+                reply=ques['reply'][0]
+            except:
+                continue
+            q_content=ques['q_content'].replace('\r','').replace('\n','')
+            r_content=reply['r_content'].replace('\r','').replace('\n','')
+            r_officename=reply['r_officename'].split(':')[0]
+            f.write('***%s\r\n$$$%s:%s\r\n'%(q_content,r_officename,r_content))
+        f.close()
+        try:
+            print(item[2],page,'ok')
+        except:
+            pass
+        page+=1
+
 
 if __name__=='__main__':
     try:
@@ -306,7 +392,7 @@ if __name__=='__main__':
                             f=open('0_failed.txt','a',encoding='utf-8')
                             f.write(str(item)+'\n')
                             f.close()
-                    elif 'selcode' in item[3]:
+                    elif 'zsptbs.p5w.net/bbs/chatbbs' in item[3]:
                         try:
                             topic_by_selcode(item)
                         except:
@@ -318,21 +404,30 @@ if __name__=='__main__':
                         f.write(str(item)+'\n')
                         f.close()
                 else:
-                    if 'roadshow2008' in item[-1] or 'irm.' in item[-1]:
+                    if 'roadshow2008' in item[-1]:
                         try:
                             roadshow_question_page(item)
                         except:
-                            f=open('1_failed.txt','a',encoding='utf-8')
+                            f=open('roadshow_failed.txt','a',encoding='utf-8')
                             f.write(str(item)+'\n')
                             f.close()
                     elif '/rs20' in item[-1] or '/bbs/' in item[-1]:
                         try:
                             roadshow_rs(item)
                         except:
-                            f=open('2_failed.txt','a',encoding='utf-8')
+                            f=open('roadshow_failed.txt','a',encoding='utf-8')
+                            f.write(str(item)+'\n')
+                            f.close()
+                    elif 'video' in item[-1]:
+                        continue
+                    elif 'irm.p5w.net' in item[-1]:
+                        try:
+                            roadshow_by_rid(item)
+                        except:
+                            f=open('roadshow_failed.txt','a',encoding='utf-8')
                             f.write(str(item)+'\n')
                             f.close()
                     else:
-                        f=open('3_failed.txt','a',encoding='utf-8')
+                        f=open('roadshow_failed.txt','a',encoding='utf-8')
                         f.write(str(item)+'\n')
                         f.close()
