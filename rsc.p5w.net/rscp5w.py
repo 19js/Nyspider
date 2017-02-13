@@ -30,7 +30,7 @@ def search(code):
             except:
                 continue
             url=item.find('a').get('href')
-            if '业绩' in title and '说明会' in title:
+            if '说明会' in title:
                 try:
                     year=re.findall('(\d+)年',title)[0]
                 except:
@@ -46,7 +46,7 @@ def search(code):
     return result
 
 def topic_interaction(item):
-    rid=item[3].split('=')[-1].split('&')[0]
+    rid=re.findall('rid=(\d+)',item[3])[0]
     page=1
     filename=item[1]+'_'+item[4]+'.txt'
     pre_table=''
@@ -92,6 +92,98 @@ def topic_interaction(item):
     f=open('说明会.txt','a',encoding='utf-8')
     f.write('%s_%s|%s\r\n'%(item[1],item[4],item[-1]))
     f.close()
+
+def topic_by_boardid(item):
+    boardid=re.findall('boardid=(\d+)',item[3])[0]
+    page=1
+    filename=item[1]+'_'+item[4]+'.txt'
+    pre_table=[]
+    while True:
+        url='http://newzspt.p5w.net/bbs/question_page.asp?boardid=%s&bbs=1&pageNo=%s'%(boardid,page)
+        try:
+            html=requests.get(url,headers=headers,timeout=20).text.encode('iso-8859-1').decode('gbk','ignore')
+        except:
+            try:
+                print(item[2],page,'failed')
+            except:
+                pass
+            continue
+        table=BeautifulSoup(html,'html.parser').find_all('q_and_r')
+        if len(table)==0:
+            break
+        if table==pre_table:
+            break
+        pre_table=table
+        f=open('说明会/%s'%filename,'a',encoding='utf-8')
+        for ques in table:
+            reply=ques.find('replay')
+            if reply is None:
+                continue
+            ques=ques.find('question')
+            q_name=ques.find('q_name').get_text()
+            if '主持人' in q_name:
+                continue
+            q_content=ques.find('q_content').get_text().replace('\r','').replace('\n','')
+            r_content=reply.find('r_content').get_text()
+            r_officename=reply.find('r_officename').get_text().split(':')[0]
+            f.write('***%s\r\n$$$%s:%s\r\n'%(q_content,r_officename,r_content))
+        f.close()
+        try:
+            print(item[2],page,'ok')
+        except:
+            pass
+        page+=1
+    f=open('说明会.txt','a',encoding='utf-8')
+    f.write('%s_%s|%s\r\n'%(item[1],item[4],item[-1]))
+    f.close()
+
+def topic_by_selcode(item):
+    selcode=re.findall('selcode=(\d+)',item[3])[0]
+    page=1
+    filename=item[1]+'_'+item[4]+'.txt'
+    pre_table=[]
+    while True:
+        url='http://zsptbs.p5w.net/bbs/chatbbs/left.asp?boardid=%s&pageNo=%s'%(selcode,page)
+        try:
+            html=requests.get(url,headers=headers,timeout=20).text.encode('iso-8859-1').decode('gbk','ignore')
+        except:
+            try:
+                print(item[2],page,'failed')
+            except:
+                pass
+            continue
+        table=BeautifulSoup(html,'html.parser').find_all('tr')
+        if len(table)==0:
+            break
+        if table==pre_table:
+            break
+        pre_table=table
+        f=open('说明会/%s'%filename,'a',encoding='utf-8')
+        for tr in table:
+            tds=tr.find_all('td')
+            if len(tds)!=4:
+                continue
+            if 'images_bbs/hold.gif' in str(tr) or '发言人' in str(tr):
+                continue
+            q_name=tds[2].get_text().replace('\r','').replace('\n','').replace(' ','')
+            if '主持人' in q_name:
+                continue
+            content=tds[-1].get_text().replace('\r','').replace('\n','')
+            r_name=tds[0].get_text().replace('\r','').replace('\n','').replace(' ','').replace('\t','').replace('\xa0','')
+            if r_name=='':
+                f.write('$$$%s:%s\r\n'%(q_name,content))
+            else:
+                f.write('***%s\r\n'%(content))
+        f.close()
+        try:
+            print(item[2],page,'ok')
+        except:
+            pass
+        page+=1
+    f=open('说明会.txt','a',encoding='utf-8')
+    f.write('%s_%s|%s\r\n'%(item[1],item[4],item[-1]))
+    f.close()
+
 
 def roadshow_question_page(item):
     page=1
@@ -143,7 +235,6 @@ def roadshow_rs(item):
         baseurl=item[-1].replace(item[-1].split('/')[-1],'')
     else:
         baseurl=item[-1]
-    print(baseurl)
     while True:
         url=baseurl+'/left.asp?pageNo='+str(page)
         try:
@@ -198,11 +289,31 @@ if __name__=='__main__':
         for line in open('code/%s'%filename,'r',encoding='utf-8'):
             code=line.replace('\r','').replace('\n','').replace('\t','').replace(' ','')
             result=search(code)
+            print(result)
             for item in result:
                 if item[0]==0:
-                    try:
-                        topic_interaction(item)
-                    except:
+                    if 'topicInteraction' in item[3]:
+                        try:
+                            topic_interaction(item)
+                        except:
+                            f=open('0_failed.txt','a',encoding='utf-8')
+                            f.write(str(item)+'\n')
+                            f.close()
+                    elif 'newzspt.p5w.net/bbs/bbs.asp?boardid' in item[3]:
+                        try:
+                            topic_by_boardid(item)
+                        except:
+                            f=open('0_failed.txt','a',encoding='utf-8')
+                            f.write(str(item)+'\n')
+                            f.close()
+                    elif 'selcode' in item[3]:
+                        try:
+                            topic_by_selcode(item)
+                        except:
+                            f=open('0_failed.txt','a',encoding='utf-8')
+                            f.write(str(item)+'\n')
+                            f.close()
+                    else:
                         f=open('0_failed.txt','a',encoding='utf-8')
                         f.write(str(item)+'\n')
                         f.close()
