@@ -41,7 +41,7 @@ def search(code):
                     date='-'
                 result.append([0,code,title,url,year,date])
                 continue
-            elif '网上路演' in title and '视频' not in title:
+            elif '网上路演' in title and '新股' in title and '视频' not in title:
                 result.append([1,code,title,url])
     return result
 
@@ -237,12 +237,18 @@ def roadshow_question_page(item):
         pre_table=table
         f=open('路演/%s.txt'%item[1],'a',encoding='utf-8')
         for ques in table:
+            ques=ques.find('question')
+            q_name=ques.find('q_ofname').get_text()
+            if '主持人' in q_name:
+                continue
             reply=ques.find('replay')
             if reply is None:
-                continue
-            ques=ques.find('question')
-            q_name=ques.find('q_name').get_text()
-            if '主持人' in q_name:
+                if page!=1:
+                    try:
+                        content=ques.find('q_content').get_text().replace('\r','').replace('\n','')
+                        f.write('@@@%s:%s\r\n'%(q_name.split(':')[0],content))
+                    except:
+                        pass
                 continue
             q_content=ques.find('q_content').get_text().replace('\r','').replace('\n','')
             r_content=reply.find('r_content').get_text()
@@ -288,11 +294,16 @@ def roadshow_rs(item):
             tds=tr.find_all('td')
             if len(tds)!=4:
                 continue
-            if 'images_bbs/hold.gif' in str(tr) or '发言人' in str(tr):
+            if '发言人' in str(tr):
                 continue
             q_name=tds[2].get_text().replace('\r','').replace('\n','').replace(' ','')
             if '主持人' in q_name:
                 continue
+            if 'images_bbs/hold.gif' in str(tr):
+                if page!=1:
+                    content=tds[-1].get_text().replace('\r','').replace('\n','')
+                    f.write('@@@%s:%s\r\n'%(q_name,content))
+                    continue
             content=tds[-1].get_text().replace('\r','').replace('\n','')
             r_name=tds[0].get_text().replace('\r','').replace('\n','').replace(' ','').replace('\t','').replace('\xa0','')
             if r_name=='':
@@ -347,6 +358,15 @@ def roadshow_by_rid(item):
             try:
                 reply=ques['reply'][0]
             except:
+                try:
+                    if page!=1:
+                        q_name=ques['q_name']
+                        if '主持人' not in q_name:
+                            q_content=ques['q_content'].replace('\r','').replace('\n','')
+                            q_name=ques['q_name'].split(':')[0]
+                            f.write('@@@%s:%s\r\n'%(q_name,q_content))
+                except:
+                    pass
                 continue
             q_content=ques['q_content'].replace('\r','').replace('\n','')
             r_content=reply['r_content'].replace('\r','').replace('\n','')
@@ -358,6 +378,62 @@ def roadshow_by_rid(item):
         except:
             pass
         page+=1
+
+def crawl(item):
+    if item[0]==0:
+        if 'topicInteraction' in item[3]:
+            try:
+                topic_interaction(item)
+            except:
+                f=open('0_failed.txt','a',encoding='utf-8')
+                f.write(str(item)+'\n')
+                f.close()
+        elif 'newzspt.p5w.net/bbs/bbs.asp?boardid' in item[3]:
+            try:
+                topic_by_boardid(item)
+            except:
+                f=open('0_failed.txt','a',encoding='utf-8')
+                f.write(str(item)+'\n')
+                f.close()
+        elif 'zsptbs.p5w.net/bbs/chatbbs' in item[3]:
+            try:
+                topic_by_selcode(item)
+            except:
+                f=open('0_failed.txt','a',encoding='utf-8')
+                f.write(str(item)+'\n')
+                f.close()
+        else:
+            f=open('0_failed.txt','a',encoding='utf-8')
+            f.write(str(item)+'\n')
+            f.close()
+    else:
+        if 'roadshow2008' in item[-1]:
+            try:
+                roadshow_question_page(item)
+            except:
+                f=open('roadshow_failed.txt','a',encoding='utf-8')
+                f.write(str(item)+'\n')
+                f.close()
+        elif '/rs20' in item[-1] or '/bbs/' in item[-1]:
+            try:
+                roadshow_rs(item)
+            except:
+                f=open('roadshow_failed.txt','a',encoding='utf-8')
+                f.write(str(item)+'\n')
+                f.close()
+        elif 'video' in item[-1]:
+            return
+        elif 'irm.p5w.net' in item[-1]:
+            try:
+                roadshow_by_rid(item)
+            except:
+                f=open('roadshow_failed.txt','a',encoding='utf-8')
+                f.write(str(item)+'\n')
+                f.close()
+        else:
+            f=open('roadshow_failed.txt','a',encoding='utf-8')
+            f.write(str(item)+'\n')
+            f.close()
 
 
 if __name__=='__main__':
@@ -374,60 +450,16 @@ if __name__=='__main__':
             continue
         for line in open('code/%s'%filename,'r',encoding='utf-8'):
             code=line.replace('\r','').replace('\n','').replace('\t','').replace(' ','')
-            result=search(code)
-            print(result)
+            try:
+                result=search(code)
+            except:
+                f=open('failed_%s'%filename,'a',encoding='utf-8')
+                f.write(line)
+                f.close()
+                continue
             for item in result:
-                if item[0]==0:
-                    if 'topicInteraction' in item[3]:
-                        try:
-                            topic_interaction(item)
-                        except:
-                            f=open('0_failed.txt','a',encoding='utf-8')
-                            f.write(str(item)+'\n')
-                            f.close()
-                    elif 'newzspt.p5w.net/bbs/bbs.asp?boardid' in item[3]:
-                        try:
-                            topic_by_boardid(item)
-                        except:
-                            f=open('0_failed.txt','a',encoding='utf-8')
-                            f.write(str(item)+'\n')
-                            f.close()
-                    elif 'zsptbs.p5w.net/bbs/chatbbs' in item[3]:
-                        try:
-                            topic_by_selcode(item)
-                        except:
-                            f=open('0_failed.txt','a',encoding='utf-8')
-                            f.write(str(item)+'\n')
-                            f.close()
-                    else:
-                        f=open('0_failed.txt','a',encoding='utf-8')
-                        f.write(str(item)+'\n')
-                        f.close()
-                else:
-                    if 'roadshow2008' in item[-1]:
-                        try:
-                            roadshow_question_page(item)
-                        except:
-                            f=open('roadshow_failed.txt','a',encoding='utf-8')
-                            f.write(str(item)+'\n')
-                            f.close()
-                    elif '/rs20' in item[-1] or '/bbs/' in item[-1]:
-                        try:
-                            roadshow_rs(item)
-                        except:
-                            f=open('roadshow_failed.txt','a',encoding='utf-8')
-                            f.write(str(item)+'\n')
-                            f.close()
-                    elif 'video' in item[-1]:
-                        continue
-                    elif 'irm.p5w.net' in item[-1]:
-                        try:
-                            roadshow_by_rid(item)
-                        except:
-                            f=open('roadshow_failed.txt','a',encoding='utf-8')
-                            f.write(str(item)+'\n')
-                            f.close()
-                    else:
-                        f=open('roadshow_failed.txt','a',encoding='utf-8')
-                        f.write(str(item)+'\n')
-                        f.close()
+                #crawl(item)
+                work=threading.Thread(target=crawl,args=(item,))
+                work.setDaemon(True)
+                work.start()
+                time.sleep(2)
