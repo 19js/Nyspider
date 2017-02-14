@@ -31,7 +31,7 @@ def load_excel():
     except:
         count=10
     for row in sheet.rows:
-        line=[str(row[0].value).replace('\r','').replace('\n',''),str(row[1].value).replace('\r','').replace('\n',''),str(row[2].value).replace('\r','').replace('\n','')]
+        line=[str(row[0].value).replace('\r','').replace('\n',''),str(row[1].value).replace('\r','').replace('\n',''),str(row[2].value)]
         lines.append(line)
         if len(lines)<count:
             continue
@@ -59,24 +59,27 @@ def parser(company,url):
     except:
         return [0,0]
     table=BeautifulSoup(html,'lxml').find('div',{'class':'list'}).find_all('ul')
-    result=[0,0]
+    result=[0,'']
     for ul in table:
         try:
             name=ul.find('a',{'class':'company'}).get_text().replace('\r','').replace('\n','').replace('\t','').replace(' ','')
             num=ul.find('li',{'class':'col10'}).get_text().replace('\r','').replace('\n','').replace('\t','').replace(' ','')
+            num=int(num)
             label=ul.find('li',{'class':'col4'}).find('a',{'class':'xh'})
         except:
             continue
         if label is None:
-            label=0
+            label=''
         elif '供应商承诺该库存为现货库存' in str(label):
             label='现货'
         elif '供应商承诺该库存为原装现货库存' in str(label):
             label='原装'
-        if company in name:
-            result[0]=num
-            result[1]=label
-            break
+        if name in company:
+            result[0]+=num
+            if 'label' not in result[1]:
+                result[1]+=label
+    if result[1]=='':
+        result[1]=0
     return result
 
 def write_to_excel():
