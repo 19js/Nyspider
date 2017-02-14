@@ -65,7 +65,7 @@ def parser(company,url):
             name=ul.find('a',{'class':'company'}).get_text().replace('\r','').replace('\n','').replace('\t','').replace(' ','')
             num=ul.find('li',{'class':'col10'}).get_text().replace('\r','').replace('\n','').replace('\t','').replace(' ','')
             num=int(num)
-            label=ul.find('li',{'class':'col4'}).find('a',{'class':'xh'})
+            label=ul.find('li',{'class':'col4'})
         except:
             continue
         if label is None:
@@ -74,9 +74,11 @@ def parser(company,url):
             label='现货'
         elif '供应商承诺该库存为原装现货库存' in str(label):
             label='原装'
+        else:
+            label=''
         if name in company:
             result[0]+=num
-            if 'label' not in result[1]:
+            if label not in result[1]:
                 result[1]+=label
     if result[1]=='':
         result[1]=0
