@@ -9,8 +9,7 @@ import codecs
 #用户名
 j_username=""
 #加密后的密码
-j_password='',
-
+j_password=''
 
 class Renrendai():
     def __init__(self):
@@ -25,11 +24,11 @@ class Renrendai():
                 'Borrower_Id','Userid','Age','Education',  'Marital status','Working_City','Company_Scale','Position','Employment_Sector', 'Emploment_Length','Homeowner', 'Mortgage', 'Car', 'Car_Loan',
                 'Total_Amount','Number_of_Succesful_Loan', 'Income_Range_Monthly', 'Number_of_Borrow', 'Number_of_Repaid', 'Outstanding','Overdue_amount','Severe_overdue','Credit_Score',  'Number_Arrears', 'Credit_Limit']
         self.credit_keys=['work', 'identification', 'borrowStudy', 'video', 'mobileReceipt', 'child', 'identificationScanning', 'graduation','mobile', 'other', 'house','incomeDuty', 'account','fieldAudit', 'residence', 'marriage', 'detailInformation', 'album', 'credit', 'mobileAuth','kaixin', 'car', 'renren']
+        self.passtime_keys=['credit','identificationScanning','fieldAudit','identification','lastUpdateTime','openTime','startTime','readyTime','passTime','jsondata']
         self.count=1
         self.excel=openpyxl.Workbook(write_only=True)
         self.sheet=self.excel.create_sheet()
-        self.sheet.append(self.keys+self.credit_keys)
-        num=0
+        self.sheet.append(self.keys+self.credit_keys+self.passtime_keys)
         self.login()
         self.text_f=codecs.open('text.txt','a',encoding='utf-8')
         self.failed_f=codecs.open('failed.txt','a',encoding='utf-8')
@@ -83,11 +82,12 @@ class Renrendai():
 
     def get_credit_infor(self,html):
         json_data=BeautifulSoup(html,'lxml').find('script',id='credit-info-data').get_text()
-        data=json.loads(json_data)['data']['creditInfo']
+        data=json.loads(json_data)['data']
+        credit=data['creditInfo']
         credit_infor=[]
         for key in self.credit_keys:
             try:
-                value=data[key]
+                value=credit[key]
                 if value=='VALID':
                     value='1'
                 else:
@@ -95,7 +95,21 @@ class Renrendai():
                 credit_infor.append(value)
             except:
                 credit_infor.append('0')
-        return credit_infor
+        creditPassedTime=data['creditPassedTime']
+        passed_time=[]
+        for key in ['credit','identificationScanning','fieldAudit','identification','lastUpdateTime']:
+            try:
+                passed_time.append(creditPassedTime[key])
+            except:
+                passed_time.append('')
+        loan=data['loan']
+        for key in ['openTime','startTime','readyTime','passTime']:
+            try:
+                passed_time.append(loan[key])
+            except:
+                passed_time.append('')
+        passed_time.append(str(data))
+        return credit_infor+passed_time
 
     def parser(self,html,load_id):
         soup=BeautifulSoup(html,'lxml').find('div',id='pg-loan-invest')
