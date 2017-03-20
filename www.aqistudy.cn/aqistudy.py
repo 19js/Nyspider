@@ -12,13 +12,13 @@ headers = {
         'Accept-Encoding': 'gzip, deflate'}
 
 def get_city():
-    html=requests.get('http://www.aqistudy.cn/historydata/',headers=headers).text
-    table=BeautifulSoup(html,'lxml').find('div',{'class':'bottom'}).find_all('a')
+    html=requests.get('https://www.aqistudy.cn/historydata/',headers=headers).text
+    table=BeautifulSoup(html,'lxml').find('div',{'class':'all'}).find_all('a')
     cities=[]
     for item in table:
         try:
             name=item.get_text()
-            url='http://www.aqistudy.cn/historydata/'+item.get('href')
+            url='https://www.aqistudy.cn/historydata/'+item.get('href')
             cities.append({'name':name,'url':url})
         except:
             continue
@@ -69,7 +69,7 @@ def crawler(item):
         except:
             count+=1
             if count==5:
-                return 
+                return
     table=BeautifulSoup(html,'lxml').find('table',{'class':'table-condensed'}).find_all('tr')
     dates=[]
     for tr in table:
@@ -82,7 +82,7 @@ def crawler(item):
             continue
     for date in dates:
         try:
-            data=get_data('http://www.aqistudy.cn/historydata/daydata.php?city=%s&month=%s'%(item['name'],date))
+            data=get_data('https://www.aqistudy.cn/historydata/daydata.php?city=%s&month=%s'%(item['name'],date))
         except:
             continue
         if data==[]:
@@ -101,6 +101,6 @@ def main():
         except:
             print(city,'failed')
     print('完成')
-    
+
 main()
 time.sleep(60)
