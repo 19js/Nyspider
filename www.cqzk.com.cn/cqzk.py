@@ -99,6 +99,27 @@ def get_university_and_score():
         min_value+=50
         max_value+=50
 
+def get_student_infor(major_no,school_no,year,batch_no,subject):
+    data={
+    'majorNo':major_no,
+    'schoolNo':school_no,
+    'year':year,
+    'batchNo':batch_no,
+    'subjectName':subject
+    }
+    html=requests.post('http://zyfz.cqzk.com.cn/WillAssistance/SearchStudentInfo/',data=data,headers=headers).text
+    models=json.loads(html)['model']
+    result=[]
+    for model in models:
+        try:
+            result.append(model['Score'])
+        except:
+            continue
+    result=sorted(result)
+    if result==[]:
+        return '-','-'
+    return result[0],result[-1]
+
 def get_majors():
     school_keys=['院校代号','院校名称','院校官网','招生章程','院校录取最高分','院校录取最高分位次','院校录取平均分','院校录取最低分','院校录取最低分位次','院校录取平均分线差','院校录取最低分线差']
     major_keys=['专业代号','专业名称','专业原始计划数','专业实际录取人数','专业录取平均分']
@@ -124,13 +145,17 @@ def get_majors():
             continue
         f=open('result.txt','a')
         for major in majors:
+            try:
+                grade1,grade2=get_student_infor(major['modelInfo']['专业代号'], school_no, school['year'], school['batch_no'], school['subject'])
+            except:
+                continue
             major_line=[]
             for key in major_keys:
                 try:
                     major_line.append(major['modelInfo'][key])
                 except:
                     major_line.append('')
-            f.write(str(line+major_line)+'\n')
+            f.write(str(line+major_line+[grade1,grade2])+'\n')
         f.close()
         print(line)
 
