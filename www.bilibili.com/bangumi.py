@@ -42,8 +42,11 @@ def anime_info(url):
     info_cv=soup.find('div',{'class':'info-cv'}).find_all('span',{'class':'info-cv-item'})
     cv=[]
     for item in info_cv:
-        cv.append(item.get_text().replace('、',''))
-
+        line=item.get_text().split('、')
+        for i in line:
+            if i.replace(' ','')=='':
+                continue
+            cv.append(i)
     #描述
     des=soup.find('div',{'class':'info-desc'}).get_text().replace('\r','').replace('\n','')
 
