@@ -22,6 +22,10 @@ def load_email():
     result=text.split('---')
     return result
 
+def _format_addr(s):
+    name, addr = parseaddr(s)
+    return formataddr((Header(name, 'utf-8').encode(), addr))
+
 def send_email(fromemail,passwd,toemail,subject,text):
     msg = MIMEText(text, 'plain', 'utf-8')
     msg['Subject']=subject
@@ -173,14 +177,13 @@ def crawl():
         exists=load_exists()
     except:
         exists={}
-
     while True:
         result=[]
         for type_url in types:
             try:
                 companys=get_allow_company_urls(type_url)
             except Exception as e:
-                print('Error[company urls] ',e)
+                print('Error[company urls][%s]'%type_url,e)
                 continue
             for company in companys:
                 if company[1] in exists:
@@ -189,13 +192,14 @@ def crawl():
                     base_info=get_company_info(company[1])
                     contact_info=get_contact_info(company[1].replace('Homepage','ContactUs'))
                 except Exception as e:
-                    print('Error[company info] ',e)
                     continue
                 exists[company[1]]=1
-                print(company[0])
+                try:
+                    print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'Company: ',company[0])
+                except:
+                    pass
                 result.append([company[0]]+base_info+contact_info+[company[1]])
-        now=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
-        print(now,'抓取成功')
+        print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'抓取完成')
         if len(result)==0:
             continue
         write_to_txt(result)
@@ -204,8 +208,10 @@ def crawl():
             text+='\r\n'.join(line)+'\r\n'+'-----'*10+'\r\n\r\n'
         try:
             send_email(email_config[0], email_config[1], email_config[2],"%s--公司信息"%now, text)
+            print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'Send Email OK')
         except Exception as e:
-            print(now,'Send Email Failed',e)
+            print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'Send Email Failed',e)
+        print('Sleep')
         time.sleep(sleep_time)
 
 def globalsources():
