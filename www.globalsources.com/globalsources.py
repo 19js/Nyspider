@@ -135,13 +135,9 @@ def load_today_to_excel():
     for line in open('temp.txt','r',encoding='utf-8'):
         try:
             line=eval(line)
+            sheet.append(line)
         except:
             continue
-        if today in line:
-            try:
-                sheet.append(line)
-            except:
-                continue
     excel.save('%s.xlsx'%today)
 
 def load_exists():
@@ -149,10 +145,10 @@ def load_exists():
     for line in open('temp.txt','r',encoding='utf-8'):
         try:
             line=eval(line)
+            url=line[-1]
+            exists[url]=1
         except:
             continue
-        url=line[-1]
-        exists[url]=1
     return exists
 
 def crawl():
@@ -199,6 +195,7 @@ def crawl():
                 except:
                     pass
                 result.append([company[0]]+base_info+contact_info+[company[1]])
+            print(type_url)
         print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'抓取完成')
         if len(result)==0:
             continue
@@ -206,6 +203,7 @@ def crawl():
         text=''
         for line in result:
             text+='\r\n'.join(line)+'\r\n'+'-----'*10+'\r\n\r\n'
+        now=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
         try:
             send_email(email_config[0], email_config[1], email_config[2],"%s--公司信息"%now, text)
             print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'Send Email OK')
