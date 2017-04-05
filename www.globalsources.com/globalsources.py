@@ -129,7 +129,6 @@ def write_to_txt(result):
     f.close()
 
 def load_today_to_excel():
-    today=time.strftime("%Y-%m-%d", time.localtime())
     excel=openpyxl.Workbook(write_only=True)
     sheet=excel.create_sheet()
     for line in open('temp.txt','r',encoding='utf-8'):
@@ -138,7 +137,7 @@ def load_today_to_excel():
             sheet.append(line)
         except:
             continue
-    excel.save('%s.xlsx'%today)
+    excel.save('result.xlsx')
 
 def load_exists():
     exists={}
@@ -179,7 +178,7 @@ def crawl():
             try:
                 companys=get_allow_company_urls(type_url)
             except Exception as e:
-                print('Error[company urls][%s]'%type_url,e)
+                #print('Error[company urls][%s]'%type_url,e)
                 continue
             for company in companys:
                 if company[1] in exists:
@@ -195,9 +194,11 @@ def crawl():
                 except:
                     pass
                 result.append([company[0]]+base_info+contact_info+[company[1]])
-            print(type_url)
+            print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),type_url.replace('http://www.globalsources.com//new-products/',''),'OK')
         print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'抓取完成')
         if len(result)==0:
+            print('Sleep')
+            time.sleep(sleep_time)
             continue
         write_to_txt(result)
         text=''
