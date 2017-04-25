@@ -18,6 +18,24 @@ def get_volume(code,date):
     line=re.sub('\s+',' ',line).split(' ')
     return [code,date,line[3]]
 
+def crawl(date_from):
+    print('Date ',date_from)
+    pbar = tqdm(total=3223)
+    for line in open('./codes.txt','r',encoding='utf-8'):
+        code=line.replace('\r','').replace('\n','').replace('\t','')
+        try:
+            pbar.update(1)
+        except:
+            pass
+        try:
+            result=get_volume(code,date_from.replace('.','-'))
+        except:
+            continue
+        f=open('result/%s.txt'%date_from.replace('.','_'),'a',encoding='utf-8')
+        f.write('\t'.join(result)+'\r\n')
+        f.close()
+    pbar.close()
+
 
 def tushare_volume():
     try:
@@ -33,27 +51,11 @@ def tushare_volume():
         print("输入时间格式不正确")
         return
     while True:
-        num=1
-        print('Date ',date_from)
-        pbar = tqdm(total=3223)
-        for line in open('./codes.txt','r',encoding='utf-8'):
-            code=line.replace('\r','').replace('\n','').replace('\t','')
-            try:
-                pbar.update(1)
-            except:
-                pass
-            num+=1
-            try:
-                result=get_volume(code,date_from.replace('.','-'))
-            except:
-                continue
-            f=open('result/%s.txt'%date_from.replace('.','_'),'a',encoding='utf-8')
-            f.write('\t'.join(result)+'\r\n')
-            f.close()
-        pbar.close()
+        current_date=datetime.datetime.strptime(date_from, "%Y.%m.%d")
+        if current_date.weekday()!=5 and current_date.weekday()!=6:
+            crawl(date_from)
         if date_from==date_to:
             break
-        current_date=datetime.datetime.strptime(date_from, "%Y.%m.%d")
         date_from=day_get(current_date)
 
 while True:
