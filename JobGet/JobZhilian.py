@@ -21,8 +21,8 @@ area_keys={'龙岗':['龙岗','坪山新区','坑梓','大鹏新区'],
             '龙华新区':['龙华新区'],
             '宝安':['宝安','光明新区','公明']}
 places=['龙岗','坪山','坑梓','大鹏','坪地','平湖','布吉','坂田','横岗']
-random_int_from=5
-random_int_to=20
+random_int_from=1
+random_int_to=2
 
 try:
     os.mkdir('temp')
@@ -76,14 +76,14 @@ def get_company_urls():
                     if company_name in exists:
                         continue
                     date=item.find('td',{'class':'gxsj'}).get_text().replace('\r','').replace('\n','').replace(' ','')
-                    if date not in today:
+                    if '今天' not in date and '小时' not in date and '刚刚' not in date and '分钟' not in date:
                         statue=False
                         break
                     exists.append(company_name)
                     area=item.find('td',{'class':'gzdd'}).get_text().replace('\r\n','').replace(' ','')
                     job_name=item.find('a').get_text().replace('\r\n','').replace(' ','')
                     job_url=item.find('a').get('href')
-                    result.append(["【公司名称】:"+company_name,"【职位】:"+job_name,"【工作地点】:"+area,job_url,company_url])
+                    result.append(["【公司名称】:"+company_name,"【职位】:"+job_name,"【工作地点】:"+area,'【时间】:'+date,job_url,company_url])
             except Exception as e:
                 statue=False
                 break
