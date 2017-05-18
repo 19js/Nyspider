@@ -52,7 +52,10 @@ def load_province():
 
 def get_shop_list(offset,cityid,categoryid):
     url='https://mapi.dianping.com/searchshop.json?start={}&regionid=0&categoryid={}&sortid=0&maptype=0&cityid={}&locatecityid={}'.format(offset,categoryid,cityid,cityid)
-    html=requests.get(url,headers=headers,timeout=30).text
+    res=requests.get(url,headers=headers,timeout=30)
+    if res.status_code==451:
+        return []
+    html=res.text
     data=json.loads(html)['list']
     result=[]
     for item in data:
@@ -71,7 +74,7 @@ def searchshop():
     for category in ['210','238']:
         for line in open('./city.txt','r'):
             line=eval(line)
-            start=0
+            start=5000
             while True:
                 try:
                     result=get_shop_list(start, line[-2], category)
