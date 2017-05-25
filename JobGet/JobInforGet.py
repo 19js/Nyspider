@@ -148,10 +148,12 @@ def loademail():
     return result
 
 
-def get51Url():
-    need_place=['http://search.51job.com/jobsearch/search_result.php?fromJs=1&jobarea=040000%2C00&funtype=0000&industrytype=00&keyword=%E5%A4%96%E8%B4%B8%2B%E9%BE%99%E5%B2%97&keywordtype=2&lang=c&stype=2&postchannel=0000&fromType=1&confirmdate=9&curr_page={}','http://search.51job.com/jobsearch/search_result.php?fromJs=1&jobarea=040000%2C00&funtype=0000&industrytype=00&keyword=%E4%BE%9B%E5%BA%94%E9%93%BE%2B%E9%BE%99%E5%B2%97&keywordtype=2&lang=c&stype=2&postchannel=0000&fromType=1&confirmdate=9&curr_page={}','http://search.51job.com/jobsearch/search_result.php?fromJs=1&jobarea=040000%2C00&funtype=0000&industrytype=00&keyword=%E5%A4%96%E8%B4%B8%2B%E5%9D%AA%E5%B1%B1&keywordtype=2&lang=c&stype=2&postchannel=0000&fromType=1&confirmdate=9&curr_page={}','http://search.51job.com/jobsearch/search_result.php?fromJs=1&jobarea=040000%2C00&funtype=0000&industrytype=00&keyword=%E4%BE%9B%E5%BA%94%E9%93%BE%2B%E5%9D%AA%E5%B1%B1&keywordtype=2&lang=c&stype=2&postchannel=0000&fromType=1&confirmdate=9&curr_page={}','http://search.51job.com/jobsearch/search_result.php?fromJs=1&jobarea=040000%2C00&funtype=0000&industrytype=00&keyword=%E5%A4%96%E8%B4%B8%2B%E5%A4%A7%E9%B9%8F&keywordtype=2&lang=c&stype=2&postchannel=0000&fromType=1&confirmdate=9&curr_page={}','http://search.51job.com/jobsearch/search_result.php?fromJs=1&jobarea=040000%2C00&funtype=0000&industrytype=00&keyword=%E4%BE%9B%E5%BA%94%E9%93%BE%2B%E5%A4%A7%E9%B9%8F&keywordtype=2&lang=c&stype=2&postchannel=0000&fromType=1&confirmdate=9&curr_page={}']
+def get_company_urls():
+    need_place=['http://search.51job.com/list/040000,000000,0000,00,9,99,%25E5%25A4%2596%25E8%25B4%25B8%252B%25E9%25BE%2599%25E5%25B2%2597,2,{}.html'
+                ,'http://search.51job.com/list/040000,000000,0000,00,9,99,%25E5%25A4%2596%25E8%25B4%25B8%252B%25E5%259D%25AA%25E5%25B1%25B1,2,{}.html'
+                ,'http://search.51job.com/jobsearch/search_result.php?fromJs=1&jobarea=040000%2C00&funtype=0000&industrytype=00&keyword=%E5%A4%96%E8%B4%B8%2B%E5%A4%A7%E9%B9%8F&keywordtype=2&lang=c&stype=2&postchannel=0000&fromType=1&confirmdate=9']
     try:
-        exists=[line.replace('\n','') for line in open('51exists.txt','r',encoding='utf-8')]
+        exists=[line.replace('\n','') for line in open('temp/51_exists.txt','r',encoding='utf-8')]
     except:
         exists=[]
     result=[]

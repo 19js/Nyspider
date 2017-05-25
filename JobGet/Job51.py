@@ -9,12 +9,15 @@ from email.utils import parseaddr,formataddr
 import smtplib
 import random
 import os
+import logging
 
 headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Encoding": "gzip, deflate",
     "Accept-Language": "en-US,en;q=0.5",
-    "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:39.0) Gecko/20100101 Firefox/39.0"}
+    "Host":"search.51job.com",
+    "User-Agent":'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
+}
 
 area_keys={'龙岗':['龙岗','坪山新区','坑梓','大鹏新区'],
             '深圳市区':['南山','罗湖','福田','盐田','前海'],
@@ -68,20 +71,23 @@ def get_company_urls():
                 html=requests.get(placeurl.format(page),headers=headers,timeout=30).text.encode('ISO-8859-1').decode('gbk','ignore')
                 table=BeautifulSoup(html,'lxml').find('div',id='resultList').find_all('div',attrs={'class':'el'})
                 for item in table[1:]:
-                    company_name=item.find('span',attrs={'class':'t2'}).find('a').get('title').replace(' ','')
-                    company_url=item.find('span',{'class':'t2'}).find('a').get('href')
-                    if company_name in exists:
+                    try:
+                        company_name=item.find('span',{'class':'t2'}).get_text().replace(' ','')
+                        company_url=item.find('span',{'class':'t2'}).find('a').get('href')
+                        if company_name in exists:
+                            continue
+                        update_date=item.find('span',{'class':'t5'}).get_text()
+                        if update_date not in today:
+                            state=False
+                            break
+                        exists.append(company_name)
+                        area=item.find('span',{'class':'t3'}).get_text().replace('\r\n','').replace(' ','')
+                        job_name=item.find('a').get_text().replace('\r\n','').replace(' ','')
+                        job_url=item.find('a').get('href')
+                    except:
                         continue
-                    update_date=item.find('span',{'class':'t5'}).get_text()
-                    if update_date not in today:
-                        state=False
-                        break
-                    exists.append(company_name)
-                    area=item.find('span',{'class':'t3'}).get_text().replace('\r\n','').replace(' ','')
-                    job_name=item.find('a').get_text().replace('\r\n','').replace(' ','')
-                    job_url=item.find('a').get('href')
                     result.append(["【公司名称】:"+company_name,"【职位】:"+job_name,"【商圈】:"+area,job_url,company_url])
-            except:
+            except Exception as e:
                 break
             time.sleep(random.randint(random_int_from,random_int_to))
             print('前程无忧','Page',page,'-- OK')

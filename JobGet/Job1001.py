@@ -21,8 +21,8 @@ area_keys={'龙岗':['龙岗','坪山新区','坑梓','大鹏新区'],
             '龙华新区':['龙华新区'],
             '宝安':['宝安','光明新区','公明']}
 places=['龙岗','坪山','坑梓','大鹏','坪地','平湖','布吉','坂田','横岗']
-random_int_from=1
-random_int_to=2
+random_int_from=5
+random_int_to=20
 
 try:
     os.mkdir('temp')

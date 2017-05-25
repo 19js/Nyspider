@@ -149,7 +149,6 @@ def crawl():
             try:
                 info=get_job_info(job[-2])
             except Exception as e:
-                print(e)
                 time.sleep(random.randint(random_int_from,random_int_to))
                 continue
             line=job+info
