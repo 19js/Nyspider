@@ -7,6 +7,7 @@ from email.header import Header
 from email.mime.text import MIMEText
 from email.utils import parseaddr,formataddr
 import smtplib
+import random
 
 headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -55,17 +56,18 @@ def get_allow_company_urls(url):
     result=[]
     for item in table:
         try:
-            a=item.find('a',{'class':'detail_name'})
+            a=item.find('p',{'class':'detail_supName'}).find('a')
             title=a.get_text()
             if 'shenzhen' not in title.lower():
                 continue
             url=a.get('href')
-            memberSince=item.find('span',{'class':'memberSince'}).find_all('img')
-            if 'num1' in memberSince[0].get('class') and 'st' in memberSince[1].get('class') and 'year' in memberSince[2].get('class'):
+            memberSince=item.find('span',{'class':'detail_supYear'}).get_text()
+            if '1st year' in memberSince:
                 if [title,url] in result:
                     continue
                 result.append([title,url])
-        except:
+        except Exception as e:
+            #print('[Error][get_allow_company_urls]',e)
             continue
     return result
 
@@ -152,10 +154,11 @@ def load_exists():
 
 def crawl():
     try:
-        sleep_time=input("输入采集频率(S):")
+        sleep_time=input("输入采集间隔(S):")
         sleep_time=int(sleep_time)
     except:
-        sleep_time=60
+        sleep_time=600
+
     try:
         types=get_type_list()
     except Exception as e:
@@ -194,10 +197,12 @@ def crawl():
                 except:
                     pass
                 result.append([company[0]]+base_info+contact_info+[company[1]])
+                time.sleep(random.randint(5,20))
             print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),type_url.replace('http://www.globalsources.com//new-products/',''),'OK')
+            time.sleep(random.randint(5,20))
         print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'抓取完成')
         if len(result)==0:
-            print('Sleep')
+            print("Sleep")
             time.sleep(sleep_time)
             continue
         write_to_txt(result)
@@ -210,7 +215,7 @@ def crawl():
             print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'Send Email OK')
         except Exception as e:
             print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'Send Email Failed',e)
-        print('Sleep')
+        print("Sleep")
         time.sleep(sleep_time)
 
 def globalsources():
