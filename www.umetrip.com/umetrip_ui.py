@@ -68,11 +68,12 @@ def get_flight_info(flight_num,need_date,from_city,to_city):
     for box in fly_box:
         fly_name=box.find('h2').get('title').replace(' 始发','')
         fly_date=box.find('span').get_text()
+        date=re.findall('(\d+-\d+-\d+)',fly_date)[0]
         if from_city in fly_name:
-            line+=[fly_name,fly_date]
+            line+=[fly_name,fly_date.replace(date,''),date]
             index=num
         if to_city in fly_name:
-            line+=[fly_name,fly_date]
+            line+=[fly_name,fly_date.replace(date,''),date]
         num+=1
     for class_name in ['mileage','time','age']:
         try:
@@ -158,7 +159,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "~"))
         self.label_3.setText(_translate("MainWindow", "抓取范围："))
         self.label_4.setText(_translate("MainWindow", "到"))
-        self.label_5.setText(_translate("MainWindow", "航班号："))
+        self.label_5.setText(_translate("MainWindow", "航线："))
         self.pushButton.setText(_translate("MainWindow", "开始抓取"))
         self.pushButton_2.setText(_translate("MainWindow", "打开文件*"))
         self.menu.setTitle(_translate("MainWindow", "菜单"))
@@ -185,6 +186,7 @@ def flights(date,filepath,crawl_time_from,crawl_time_to):
             time.sleep(1*60)
             timenow=time.strftime("%H%M",time.localtime())
             timenow=int(timenow)
+        try_num=0
         while True:
             try:
                 flights=get_flights_by_route(route[0], route[1], date)
@@ -194,8 +196,8 @@ def flights(date,filepath,crawl_time_from,crawl_time_to):
                     print('抓取航线信息失败',route,'ERROR:',e)
                 except:
                     pass
-                continue_or_break=input("输入1重新抓取，0放弃抓取该航线")
-                if continue_or_break!='0':
+                try_num+=1
+                if try_num<10:
                     continue
                 else:
                     f=open('failed/'+date.replace('-','')+'_route_failed.txt','a',encoding='utf-8')
@@ -205,6 +207,7 @@ def flights(date,filepath,crawl_time_from,crawl_time_to):
                     break
         while(len(flights)):
             flight=flights.pop()
+            try_num=0
             while True:
                 try:
                     info=get_flight_info(flight[4], flight[0], flight[1], flight[2])
@@ -213,7 +216,12 @@ def flights(date,filepath,crawl_time_from,crawl_time_to):
                     except:
                         pass
                     f=open('result/'+date.replace('-','')+'航旅纵横航班信息.txt','a',encoding='utf-8')
-                    f.write(','.join(flight+info)+'\r\n')
+                    flight[6]=info[3]+' '+flight[6]
+                    flight[7]=info[3]+' '+flight[7]
+                    flight[9]=info[6]+' '+flight[9]
+                    flight[10]=info[6]+' '+flight[10]
+                    write_line=','.join(flight+info)+'\r\n'
+                    f.write(write_line.replace('  ',' '))
                     f.close()
                     break
                 except Exception as e:
@@ -221,8 +229,8 @@ def flights(date,filepath,crawl_time_from,crawl_time_to):
                         print('抓取航班信息失败',route,'ERROR:',e)
                     except:
                         pass
-                    continue_or_break=input("输入1重新抓取，0放弃抓取该航班")
-                    if continue_or_break=='1':
+                    try_num+=1
+                    if try_num<10:
                         continue
                     else:
                         f=open('failed/'+date.replace('-','')+'_flight_failed.txt','a',encoding='utf-8')
