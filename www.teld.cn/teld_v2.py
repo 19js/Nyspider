@@ -54,7 +54,7 @@ def crawl(station,crawl_date):
     f=open('temp/'+crawl_date+'.txt','a',encoding='utf-8')
     for item in infor:
         line=[timenow]
-        for key in ['name','address','operateTypeName','statypename','code','longitude','latitude']:
+        for key in ['name','address','operateTypeName','code','longitude','latitude']:
             try:
                 if station[key]==None:
                     line.append('')
@@ -104,4 +104,13 @@ def teld():
     write_to_excel(crawl_date)
     print(get_time(),crawl_date,'抓取完成')
 
-teld()
+try:
+    sleeptime=input("输入间隔时间(分钟):")
+    sleeptime=int(sleeptime)
+except:
+    sleeptime=60
+    
+while True:
+    teld()
+    print("sleep")
+    time.sleep(sleeptime*60)
