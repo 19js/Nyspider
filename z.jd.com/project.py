@@ -105,6 +105,14 @@ def get_project_base_info(project_id):
     except:
         name='-'
     try:
+        promoters_num=details_r.find('div',{'class':'promoters-num'}).find_all('div',{'class':'fl'})
+        start_num=promoters_num[0].get_text()
+        s_num=promoters_num[1].get_text()
+    except:
+        start_num='0'
+        s_num='0'
+
+    try:
         contact_box=details_r.find('ul',{'class':'contact-box'}).find_all('li')
     except Exception as e:
         contact_box=[]
@@ -121,7 +129,7 @@ def get_project_base_info(project_id):
             company_phone=item.find('div',{'class':'val'}).get_text()
         if '工作时间' in str(item):
             company_work_time=item.find('div',{'class':'val'}).get_text()
-    result+=[name,icon_v,icon_crown,company_name,company_address,company_phone,company_work_time]
+    result+=[name,icon_v,icon_crown,start_num,s_num,company_name,company_address,company_phone,company_work_time]
 
     boxs=details_r.find_all('div',{'class':'box-grade'})
     for box in boxs:
