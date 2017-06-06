@@ -14,9 +14,9 @@ headers = {
     'Accept-Encoding': 'gzip, deflate',
     'Connection': 'keep-alive'}
 
-def get_station(cityname='',provincename=''):
-    html=requests.get('http://www.teld.cn/StationNetwork/GetStationNetword?ProvinceName={}&CityName={}&KeyWords=&RegionName=&type='.format(provincename,cityname),headers=headers,timeout=30).text
-    data=json.loads(html)
+def get_station(page,cityname='',provincename=''):
+    html=requests.get("http://www.teld.cn/StationNetwork/GetStationNetWordList?ProvinceName={}&CityName={}&KeyWords=&RegionName=&type=&page={}&rows=100".format(provincename,cityname,page),headers=headers,timeout=30).text
+    data=json.loads(html)['rows']
     return data
 
 def get_chardet(filename):
@@ -29,7 +29,7 @@ def load_cities():
     if encoding=='GB2312':
         encoding='GBK'
     citynames=[]
-    for line in open('setting/cities.txt'):
+    for line in open('setting/cities.txt','r',encoding=encoding):
         name=line.replace('\r','').replace('\n','').replace('\t','').replace(' ','')
         citynames.append(name)
     return citynames
@@ -43,65 +43,43 @@ def get_time():
     timenow=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
     return timenow
 
-def write_to_excel(filename):
+def write_to_excel(crawl_date):
     excel=openpyxl.Workbook(write_only=True)
     sheet=excel.create_sheet()
-    for line in open(filename+'.txt','r',encoding='utf-8'):
+    for line in open('temp/'+crawl_date+'.txt','r',encoding='utf-8'):
         try:
             sheet.append(eval(line))
         except:
             continue
-    excel.save('result/'+filename+'.xlsx')
+    excel.save('result/'+crawl_date+'.xlsx')
 
-def main():
-    citynames=load_cities()
-    try:
-        os.mkdir('result')
-    except:
-        pass
-    province=['北京市','上海市','天津市','重庆市']
-    for name in citynames:
-        provincename=''
-        cityname=''
-        if name in province:
-            provincename=name
-        else:
-            cityname=name
-        count=0
-        status=True
-        while True:
-            try:
-                stations=get_station(cityname=cityname,provincename=provincename)
-                break
-            except:
-                if count==3:
-                    status=False
-                    break
-                count+=1
-        if status==False:
-            print(get_time(),name,'Failed')
+def crawl(cityname,provincename,crawl_date):
+    page=1
+    while True:
+        try:
+            stations=get_station(page,cityname=cityname,provincename=provincename)
+        except Exception as e:
             continue
-        f=open(name+'.txt','a',encoding='utf-8')
+        if len(stations)==0:
+            break
+        f=open('temp/'+crawl_date+'.txt','a',encoding='utf-8')
         for station in stations:
-            count=0
-            status=True
-            while True:
-                try:
-                    infor=station_infor(station['code'])
-                    break
-                except:
-                    if count==3:
-                        status=False
-                        break
-                    count+=1
-            if status==False:
+            try:
+                infor=station_infor(station['code'])
+            except:
                 continue
             timenow=get_time()
             for item in infor:
-                line=[timenow]
-                for key in ['name','address','operateTypeName','statypename']:
+                if cityname=='':
+                    line=[timenow,provincename]
+                else:
+                    line=[timenow,cityname]
+                for key in ['name','address','operateTypeName','code','longitude','latitude']:
                     try:
-                        line.append(station[key])
+                        if station[key]==None:
+                            line.append('')
+                        else:
+                            line.append(station[key])
                     except:
                         line.append('')
                 for key in ['name','piletype','stateName']:
@@ -117,17 +95,41 @@ def main():
                     except:
                         line.append('')
                 f.write(str(line)+'\n')
-            print(timenow,station['name'],'ok')
-            time.sleep(1)
+        print(timenow,cityname,provincename,page,'ok')
+        page+=1
         f.close()
-        write_to_excel(name)
+
+def main():
+    citynames=load_cities()
+    try:
+        os.mkdir('result')
+    except:
+        pass
+    try:
+        os.mkdir('temp')
+    except:
+        pass
+    province=['北京市','上海市','天津市','重庆市']
+    crawl_date=time.strftime('%Y_%m_%d')
+    for name in citynames:
+        provincename=''
+        cityname=''
+        if name in province:
+            provincename=name
+        else:
+            cityname=name
+        count=0
+        crawl(cityname, provincename, crawl_date)
         print(get_time(),name,'ok')
+    write_to_excel(crawl_date)
+
 
 try:
     sleeptime=input("输入间隔时间(分钟):")
     sleeptime=int(sleeptime)
 except:
-    sleeptime=15
+    sleeptime=60
+
 while True:
     main()
     print("sleep")

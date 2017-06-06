@@ -109,7 +109,7 @@ try:
     sleeptime=int(sleeptime)
 except:
     sleeptime=60
-    
+
 while True:
     teld()
     print("sleep")
