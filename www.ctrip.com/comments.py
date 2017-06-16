@@ -5,18 +5,16 @@ import time
 browser=webdriver.Chrome("./chromedriver")
 browser.get('http://hotels.ctrip.com/hotel/zhuhai31')
 browser.implicitly_wait(10)
-hotels=[eval(line) for line in open('hotels.txt','r')]
+hotels=[line.split('\t') for line in open('hotels.txt','r')]
 flag=True
 for hotel in hotels:
     hotel_id=hotel[2].split('.')[0].split('/')[-1]
+    '''
     if hotel_id!='1353810' and flag:
         continue
+    '''
     flag=False
     page=1
-    '''
-    if hotel_id=='435300':
-        page=54
-    '''
     endpage=1000
     while page<=endpage:
         try:
