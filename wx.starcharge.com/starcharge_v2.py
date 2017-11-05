@@ -1,6 +1,6 @@
 import requests
 import json
-import openpyxl
+import xlwt
 import time
 import chardet
 import os
@@ -110,15 +110,20 @@ def get_time():
 def write_to_excel(crawl_date):
     header = ['time', 'city_id', 'city_name', 'station_id', 'station_name', 'address', 'tel', 'gisBd09Lat',
               'gisBd09Lng', 'totalFee', 'totalFeeInfo', 'stub_id', 'stub_name', 'modelNo', 'type', 'kw', 'existsGun', 'status']
-    excel = openpyxl.Workbook(write_only=True)
-    sheet = excel.create_sheet()
-    sheet.append(header)
+    excel = xlwt.Workbook()
+    table = excel.add_sheet('table')
+    for index in range(len(header)):
+        table.write(0, index, header[index])
+    line_num = 1
     for line in open('temp/' + crawl_date + '.txt', 'r', encoding='utf-8'):
         try:
-            sheet.append(eval(line))
+            values = eval(line)
+            for index in range(len(values)):
+                table.write(line_num, index, values[index])
+            line_num += 1
         except:
             continue
-    excel.save('result/' + crawl_date + '.xlsx')
+    excel.save('result/' + crawl_date + '.xls')
 
 
 def starcharge():
