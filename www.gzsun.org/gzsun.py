@@ -90,15 +90,62 @@ def get_info(url):
 
 
 def main():
-    base_url='http://www.gzsun.org/common/zhengwenye.jsp?ggType=BIAODIXX&zhengwenId={}&lmId=3'
-    ID=10000
-    while True:
-        url=base_url.format(ID)
-        get_info(url)
-        print(ID,'OK')
-        if ID==30964:
-            break
-        ID+=1
+    # base_url='http://www.gzsun.org/common/zhengwenye.jsp?ggType=BIAODIXX&zhengwenId={}&lmId=3'
+    # ID=10000
+    # while True:
+    #     url=base_url.format(ID)
+    #     get_info(url)
+    #     print(ID,'OK')
+    #     if ID==30964:
+    #         break
+    #     ID+=1
+    # notice_result=[]
+    # notice_keys=['url','年','期数','拍卖标的','评估价值','起拍价','保证金','结构','层','面积','简介']
+    # notice_result.append(notice_keys)
+    # for line in open("./notice.txt",'r'):
+    #     item=json.loads(line)
+    #     line=[]
+    #     for key in notice_keys:
+    #         line.append(item[key])
+    #     notice_result.append(line)
+    # write_to_excel(notice_result,'拍卖公告.xlsx',True)
+
+    # auction_keys=['url','年','期数','拍卖标的','拍卖底价','成交价']
+    # auction_result=[]
+    # auction_result.append(auction_keys)
+    # for line in open("./auction_result.txt",'r'):
+    #     item=json.loads(line)
+    #     line=[]
+    #     for key in auction_keys:
+    #         line.append(item[key])
+    #     auction_result.append(line)
+    # write_to_excel(auction_result,'拍卖结果.xlsx',True)
+
+    notice_result={}
+    notice_keys=['url','年','期数','拍卖标的','评估价值','起拍价','保证金','结构','层','面积','简介']
+    notice_result.append(notice_keys)
+    for line in open("./notice.txt",'r'):
+        item=json.loads(line)
+        line=[]
+        for key in notice_keys:
+            line.append(item[key])
+        notice_result[line[2]]=line
+
+    auction_keys=['url','年','期数','拍卖标的','拍卖底价','成交价']
+    auction_result=[]
+    auction_result.append(auction_keys)
+    for line in open("./auction_result.txt",'r'):
+        item=json.loads(line)
+        line=[]
+        for key in auction_keys:
+            line.append(item[key])
+        auction_result.append(line)
+    write_to_excel(auction_result,'拍卖结果.xlsx',True)
+
 
 main()
+    
+
+
+
         
