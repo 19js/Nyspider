@@ -4,7 +4,7 @@ import random
 import json
 import re
 import os
-
+import openpyxl
 
 def get_headers():
     """
@@ -79,6 +79,10 @@ def load_city_list():
     return city_list
 
 def crawl():
+    try:
+        os.mkdir('files')
+    except:
+        pass
     city_list=load_city_list()
     for year in range(13,18):
         for month in range(1,13):
@@ -101,4 +105,41 @@ def crawl():
                 f.close()
             print(year,month,'OK')
 
-crawl()
+def write_into_excel(lines,filename):
+    excel=openpyxl.Workbook(write_only=True)
+    sheet=excel.create_sheet()
+    for line in lines:
+        try:
+            sheet.append(line)
+        except Exception as e:
+            print(e,line)
+            continue
+    excel.save(filename)
+
+def load_txt(filename):
+    keys=['ymd','bWendu','yWendu','tianqi','fengxiang','fengli','aqi','aqiInfo','aqiLevel']
+    yield ['城市','区县']+keys
+    for line in open(filename,'r',encoding='utf-8'):
+        line=json.loads(line)
+        item=[line['city']['pre_name'],line['city']['name']]
+        for key in keys:
+            try:
+                item.append(line[key])
+            except:
+                item.append('')
+        yield item
+    
+
+if __name__=='__main__':
+    #crawl()
+    try:
+        os.mkdir('excel')
+    except:
+        pass
+    for filename in os.listdir('./files/'):
+        if '.txt' not in filename:
+            continue
+        write_into_excel(load_txt('./files/'+filename),'./excel/'+filename.replace('.txt','.xlsx'))
+        print(filename,'OK')
+
+        
