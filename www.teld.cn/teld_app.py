@@ -34,7 +34,7 @@ def get_stations(city_code):
     stations_url = 'https://basesg.teld.cn/api/invoke?SID=BaseApi-App0304_SearchStation'
     page = 1
     need_keys = ['id', 'name', 'lng', 'lat',
-                 'stationAddress', 'stationType', 'stationState']
+                 'stationAddress', 'stationType', 'stationState','price','originalPrice','activityPrice']
     result = []
     while True:
         data = {
@@ -237,5 +237,4 @@ if __name__ == '__main__':
     # print(get_charge_list('81d2973c-54d8-406f-826c-8feb86492511'))
     print('开始抓取')
     teld()
-    write_to_excel('2017_12_16')
     input('')
