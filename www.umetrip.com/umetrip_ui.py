@@ -84,7 +84,15 @@ def get_flight_info(flight_num,need_date,from_city,to_city):
         pre_flight=re.findall('前序航班(.*?)\[',str(fly_box[index]))[0]
     except:
         pre_flight='-'
-    line=[pre_flight]+line
+    try:
+        tit=soup.find('div',{'class':'tit'})
+        if '主飞航班' in str(tit):
+            is_zhufei='主飞航班'
+        else:
+            is_zhufei='-'
+    except:
+        is_zhufei='-'
+    line=[is_zhufei,pre_flight]+line
     return line
 
 class Ui_MainWindow(object):
@@ -325,3 +333,4 @@ if __name__ == '__main__':
     management=UmetripCrawl()
     management.show()
     sys.exit(app.exec_())
+
