@@ -224,10 +224,10 @@ def flights(date,filepath,crawl_time_from,crawl_time_to):
                     except:
                         pass
                     f=open('result/'+date.replace('-','')+'航旅纵横航班信息.txt','a',encoding='utf-8')
-                    flight[6]=info[3]+' '+flight[6]
-                    flight[7]=info[3]+' '+flight[7]
-                    flight[9]=info[6]+' '+flight[9]
-                    flight[10]=info[6]+' '+flight[10]
+                    flight[6]=info[4]+' '+flight[6]
+                    flight[7]=info[4]+' '+flight[7]
+                    flight[9]=info[7]+' '+flight[9]
+                    flight[10]=info[7]+' '+flight[10]
                     write_line=','.join(flight+info)+'\r\n'
                     f.write(write_line.replace('  ',' '))
                     f.close()
