@@ -145,8 +145,8 @@ def get_available_skus(product_id_list):
     raise NetWorkError
 
 
-def parser_cn(res_text):
-    res_text = res_text.replace('\r', '').replace('\n', '').replace(
+def parser_cn(html):
+    res_text = html.replace('\r', '').replace('\n', '').replace(
         ' ', '').replace('\t', '').replace('\\u002F', '/').replace('：', ':')
     # products_text = re.findall('"products":({.*?})},"intl":', res_text)[0]
     # products = json.loads(products_text)
@@ -162,6 +162,11 @@ def parser_cn(res_text):
         print(current_time(), '[get_available_skus][request error]', e)
         return []
     result = []
+    soup=BeautifulSoup(html,'lxml')
+    try:
+        info=soup.find('div',{'id':'accordion-panel-3'}).get_text().replace('\r','').replace('\n','')
+    except Exception as e:
+        info='-'
     for key in products:
         product = products[key]
         item = {}
@@ -173,6 +178,7 @@ def parser_cn(res_text):
             item['style'] = product['styleColor']
         except:
             item['style'] = ''
+        item['info']=info
         sku_info = []
         for sku_item in product['skus']:
             if sku_item['skuId'] in ava_sku_list:
@@ -237,7 +243,7 @@ class NikeProduct(threading.Thread):
         if len(self.products)==0:
             self.lines.append(self.base_info)
         for product in self.products:
-            line = self.base_info + [product['color'], product['style']]
+            line = self.base_info + [product['color'], product['style'],product['info']]
             for sku_size in product['sku_info']:
                 self.lines.append(line + [sku_size])
             if len(product['sku_info']) == 0:
