@@ -52,6 +52,8 @@ def build_request(url, headers=None, proxies=None):
                 url, headers=headers, proxies=get_proxies_abuyun(), timeout=15)
             return response
         except Exception as e:
+            if '429' in str(e):
+                time.sleep(random.randint(0,1000)/1000.0)
             continue
     raise NetWorkError
 
@@ -70,9 +72,9 @@ def current_time():
 
 
 def get_products():
-    need_urls = ['https://www.adidas.com.cn/plp/list.json?ni=20&pf=25-40%2C25-60%2C14-2509&pr=-&fo=p25%2Cp14&pn={}&pageSize=120&p=%E7%94%B7%E5%AD%90-%E5%95%86%E5%93%81%E7%B1%BB%E5%9E%8B&isSaleTop=false',
-                 'https://www.adidas.com.cn/plp/list.json?ni=75&pf=25-82%2C25-60%2C14-2509&pr=-&fo=p25%2Cp14&pn={}&pageSize=120&p=%E5%A5%B3%E5%AD%90-%E5%95%86%E5%93%81%E7%B1%BB%E5%9E%8B&isSaleTop=false',
-                 'https://www.adidas.com.cn/plp/list.json?ni=120&pf=25-160%2C14-2509&pr=-&s=default_order&fo=p25%2Cp14&pn={}&pageSize=120&p=%E7%94%B7%E7%AB%A5-%E5%95%86%E5%93%81%E7%B1%BB%E5%9E%8B&isSaleTop=false']
+    need_urls = ['https://www.adidas.com.cn/plp/list.json?ni=20&pf=25-40%2C25-60%2C25-60%2C14-2509&pr=-&fo=p25%2Cp25%2Cp14&pn={}&pageSize=120&p=%E7%94%B7%E5%AD%90-%E4%B8%AD%E6%80%A7-%E5%95%86%E5%93%81%E7%B1%BB%E5%9E%8B&isSaleTop=false',
+                 'https://www.adidas.com.cn/plp/list.json?ni=75&pf=25-82%2C25-60%2C25-60%2C14-2509&pr=-&fo=p25%2Cp25%2Cp14&pn={}&pageSize=120&p=%E5%A5%B3%E5%AD%90-%E4%B8%AD%E6%80%A7-%E5%95%86%E5%93%81%E7%B1%BB%E5%9E%8B&isSaleTop=false',
+                 'https://www.adidas.com.cn/plp/list.json?ni=120&pf=25-160%2C25-220%2C14-2509&pr=-&fo=p25%2Cp25%2Cp14&pn={}&pageSize=120&p=%E7%94%B7%E7%AB%A5-%E5%A5%B3%E7%AB%A5-%E5%95%86%E5%93%81%E7%B1%BB%E5%9E%8B&isSaleTop=false']
     result = []
     for base_url in need_urls:
         page = 1
