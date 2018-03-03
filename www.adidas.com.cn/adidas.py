@@ -6,6 +6,7 @@ import requests
 import openpyxl
 import random
 import threading
+import os
 
 
 def get_headers():
@@ -53,7 +54,7 @@ def build_request(url, headers=None, proxies=None):
             return response
         except Exception as e:
             if '429' in str(e):
-                time.sleep(random.randint(0,1000)/1000.0)
+                time.sleep(random.randint(0, 1000)/1000.0)
             continue
     raise NetWorkError
 
@@ -72,12 +73,13 @@ def current_time():
 
 
 def get_products():
-    need_urls = ['https://www.adidas.com.cn/plp/list.json?ni=20&pf=25-40%2C25-60%2C25-60%2C14-2509&pr=-&fo=p25%2Cp25%2Cp14&pn={}&pageSize=120&p=%E7%94%B7%E5%AD%90-%E4%B8%AD%E6%80%A7-%E5%95%86%E5%93%81%E7%B1%BB%E5%9E%8B&isSaleTop=false',
-                 'https://www.adidas.com.cn/plp/list.json?ni=75&pf=25-82%2C25-60%2C25-60%2C14-2509&pr=-&fo=p25%2Cp25%2Cp14&pn={}&pageSize=120&p=%E5%A5%B3%E5%AD%90-%E4%B8%AD%E6%80%A7-%E5%95%86%E5%93%81%E7%B1%BB%E5%9E%8B&isSaleTop=false',
-                 'https://www.adidas.com.cn/plp/list.json?ni=120&pf=25-160%2C25-220%2C14-2509&pr=-&fo=p25%2Cp25%2Cp14&pn={}&pageSize=120&p=%E7%94%B7%E7%AB%A5-%E5%A5%B3%E7%AB%A5-%E5%95%86%E5%93%81%E7%B1%BB%E5%9E%8B&isSaleTop=false']
+    need_urls = ['https://www.adidas.com.cn/plp/list.json?pf=25-40%2C25-60%2C25-60&pr=-&fo=p25%2Cp25&pn={}&pageSize=120&p=%E7%94%B7%E5%AD%90-%E4%B8%AD%E6%80%A7&isSaleTop=false',
+                 'https://www.adidas.com.cn/plp/list.json?ni=112&pf=25-82%2C25-60%2C25-60&pr=-&fo=p25%2Cp25&pn={}&pageSize=120&p=%E5%A5%B3%E5%AD%90-%E4%B8%AD%E6%80%A7&isSaleTop=false',
+                 'https://www.adidas.com.cn/plp/list.json?ni=139&pf=25-160%2C25-220%2C24-250%2C24-239%2C24-39&pr=-&fo=p25%2Cp25%2Cp24%2Cp24%2Cp24&pn={}&pageSize=120&p=%E7%94%B7%E7%AB%A5-%E5%A5%B3%E7%AB%A5-%E5%A4%A7%E7%AB%A5%EF%BC%888-14%E5%B2%81%EF%BC%89-%E5%B0%8F%E7%AB%A5%EF%BC%884-8%E5%B2%81%EF%BC%89-%E5%A9%B4%E7%AB%A5%EF%BC%880-4%E5%B2%81%EF%BC%89&isSaleTop=false']
     result = []
     for base_url in need_urls:
         page = 1
+        failed_times = 0
         while True:
             try:
                 url = base_url.format(page) + '&_=' + \
@@ -89,7 +91,11 @@ def get_products():
                     break
             except Exception as e:
                 print(current_time(), '[get_products][request error]', url, e)
+                failed_times += 1
+                if failed_times == 3:
+                    break
                 continue
+            failed_times = 0
             try:
                 items = return_obj['view']['items']
             except Exception as e:
@@ -141,6 +147,10 @@ def get_product_info(url):
     soup = BeautifulSoup(req.text, 'lxml')
     item_id = soup.find("input", {"id": 'itemId'}).get("value")
     color = soup.find("input", {'id': 'colorDisPaly'}).get('value')
+    try:
+        login_info=soup.find('div',{'class':'login-text'}).find('p').get_text()
+    except Exception as e:
+        login_info=''
     table = soup.find('div', {'class': 'overview product-size'}).find_all("li")
     product_size = []
     for li in table:
@@ -156,6 +166,7 @@ def get_product_info(url):
                 break
     return {
         'color': color,
+        'login_info':login_info,
         'sku_info': sku_info
     }
 
@@ -172,13 +183,13 @@ class AdidasProduct(threading.Thread):
         except Exception as e:
             print(current_time(),
                   '[get_product_info][error]', self.pdp_url, e)
-            self.product = {'color': '', 'sku_info': []}
+            self.product = {'color': '','login_info':'', 'sku_info': []}
         self.lines = []
         if len(self.product['sku_info']) == 0:
-            self.lines.append(self.base_info + [self.product['color']])
+            self.lines.append(self.base_info + [self.product['color'],self.product['login_info']])
         else:
             for sku_item in self.product['sku_info']:
-                line = self.base_info + [self.product['color']] + sku_item
+                line = self.base_info + [self.product['color'],self.product['login_info']] + sku_item
                 self.lines.append(line)
 
 
@@ -218,7 +229,8 @@ def crawl():
             counter += 1
             print(current_time(),
                   '[get_product_info][OK]', task.pdp_url, counter)
-    write_to_excel(result, 'files/' +
+    current_dir = os.getcwd()
+    write_to_excel(result, current_dir+'/files/' +
                    current_time().replace(':', '_')+'_adidas' + '.xlsx')
 
 
