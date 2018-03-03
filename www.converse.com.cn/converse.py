@@ -6,6 +6,7 @@ import requests
 import openpyxl
 import random
 import threading
+import os
 
 
 def get_headers():
@@ -203,7 +204,8 @@ def crawl():
             print(current_time(),
                   '[get_product_info][OK]', task.pdp_url, counter)
         time.sleep(2)
-    write_to_excel(result, 'files/' +
+    current_dir = os.getcwd()
+    write_to_excel(result, current_dir+'/files/' +
                    current_time().replace(':', '_') + '.xlsx')
 
 
