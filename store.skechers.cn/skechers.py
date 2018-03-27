@@ -148,9 +148,8 @@ def get_products():
     return result
 
 
-def get_goods_details(product_url):
-    req = build_request(product_url)
-    soup = BeautifulSoup(req.text.replace('\n','').replace('\t',''), 'lxml').find(
+def parser_detail(html):
+    soup = BeautifulSoup(html.replace('\n','').replace('\t',''), 'lxml').find(
         'div', {'class': 'product-detail'})
     try:
         price_standard = soup.find(
@@ -165,7 +164,7 @@ def get_goods_details(product_url):
         product_number = soup.find(
             'div', {'class': 'product-number'}).get_text().replace('货号：', '').replace(' ','')
     except:
-        product_number = ''
+        product_number = '  '
     try:
         ul_list = soup.find('ul', {'class': 'size-swatch'}).find_all('li')
     except:
@@ -176,18 +175,35 @@ def get_goods_details(product_url):
         if 'unselectable' in class_str:
             continue
         size_list.append(item.get_text().replace(' ',''))
-    return [product_number, price_standard, price_sales], size_list
+    return [product_number,product_number[:-1], price_standard, price_sales], size_list
+    
+
+def get_goods_details(product_url):
+    req = build_request(product_url)
+    return parser_detail(req.text)
 
 
-def get_product_info(url):
-    req = build_request(url)
-    soup = BeautifulSoup(req.text, 'lxml').find(
-        'div', {'class': 'swatches color'}).find_all('a', {'class': 'swatchanchor'})
+def get_product_info(pd_url):
+    req = build_request(pd_url)
+    try:
+        soup = BeautifulSoup(req.text, 'lxml').find(
+            'div', {'class': 'swatches color'}).find_all('div', {'class': 'item'})
+    except Exception as e:
+        result=[]
+        product_detail, size_list=parser_detail(req.text)
+        if len(size_list)==0:
+            result.append(['',pd_url]+product_detail)
+        else:
+            for size in size_list:
+                result.append(['',pd_url]+product_detail+[size])
+        return result
     item_list = []
     for item in soup:
         try:
-            color = item.get('title').replace('选择颜色:', '')
-            url = item.get('href')
+            color = item.find('a').get('title').replace('选择颜色:', '')
+            url = item.find('a').get('href')
+            if 'selected' in str(item.get('class')):
+                url=pd_url
         except:
             continue
         item_list.append([color, url])
