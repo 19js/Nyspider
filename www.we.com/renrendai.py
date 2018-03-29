@@ -37,7 +37,7 @@ class Renrendai():
             'https://www.we.com/j_spring_security_check', data=data, headers=self.headers)
 
     def run(self):
-        id_from = 2121001
+        id_from = 2123395
         id_to = 2486529
         for loan_id in range(int(id_from), int(id_to)+1):
             try:
@@ -48,6 +48,7 @@ class Renrendai():
                     './files/failed.txt', 'a', encoding='utf-8')
                 failed_f.write(str(loan_id)+'\n')
                 failed_f.close()
+                self.login()
                 continue
             f = open('./files/loan_result', 'a')
             f.write(json.dumps(loan_info)+'\n')
