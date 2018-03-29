@@ -26,12 +26,13 @@ def get_major_info(url):
     return result
 
 def get_majors():
+    major_list=[]
     for project in projects:
         url=projects[project]
         result=get_major_info(url)
-        with open('majors.txt','a') as f:
-            for major in result:
-                f.write(str([project]+major)+'\n')
+        for major in result:
+            major_list.append([project]+major)
+    return major_list
 
 def get_major_rank(url):
     page_url='http://www.chinadegrees.cn/webrms/pages/Ranking/'+url
@@ -48,18 +49,15 @@ def get_major_rank(url):
         result.append([current_grade,college[0],college[-1]])
     return result
 
-def main():
-    # for line in open('./majors.txt','r'):
-    #     item=eval(line)
-    #     major_result=get_major_rank(item[-1])
-    #     f=open('result.txt','a')
-    #     for major in major_result:
-    #         f.write(str(item+major)+'\n')
-    #     f.close()
+def crawl():
+    major_list=get_majors()
     result=[]
-    for line in open('./result.txt','r'):
-        result.append(eval(line))
+    for item in major_list:
+        major_result=get_major_rank(item[-1])
+        for major_info in major_result:
+            result.append(item+major_info)
+        print(item,'OK')        
     write_to_excel(result,'result.xlsx',True)
 
 if __name__=='__main__':
-    main()
+    crawl()
