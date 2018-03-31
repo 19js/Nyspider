@@ -63,7 +63,7 @@ def get_company_info(url):
     result = {}
     for index in range(len(values)):
         key = values[index]
-        if key in ['名称', '企业状态', '登记状态', '法定代表人', '成立日期', '核准日期', '商事主体类型', '登记机关']:
+        if key in ['名称', '企业状态', '登记状态', '法定代表人', '成立日期', '核准日期','最近一次核准日期', '商事主体类型', '登记机关']:
             try:
                 value = values[index+1]
             except:
@@ -94,6 +94,11 @@ def get_company_info(url):
         address = get_address(scztbh)
     except Exception as e:
         address = ''
+    try:
+        tyshxydm=re.findall('tyshxydm="(.*?)";',req.text)[0]
+    except:
+        tyshxydm=''
+    result['tyshxydm']=tyshxydm
     result['address'] = address
     return result
 
