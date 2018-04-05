@@ -189,9 +189,8 @@ def parser_cn(html):
 
 
 def get_product_info(url):
-    sku_info = []
     result = []
-    for i in range(2):
+    for i in range(3):
         # if 'store.nike.com' in url:
         #     item = get_color_and_style(req.text)
         #     item['sku_info'] = []
@@ -206,8 +205,8 @@ def get_product_info(url):
         #         result = parser_cn(req.text)
         #     except Exception as e:
         #         print(current_time(), '[parser_cn][parser error]', e)
-        req = build_request(url)
         try:
+            req = build_request(url)
             result = parser_cn(req.text)
             return result
         except Exception as e:
@@ -289,8 +288,8 @@ def crawl():
             result+=task.lines
             counter+=1
             print(current_time(), '[get_product_info][OK]', task.pdp_url, counter)
-    write_to_excel(result, 'files/' +
-                   current_time().replace(':', '_') + '.xlsx')
+    write_to_excel(result, '/home/ubuntu/Products/files/nike/' +
+                   current_time().replace(':', '_') + '_nike.xlsx')
 
 
 crawl()
