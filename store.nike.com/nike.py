@@ -7,6 +7,7 @@ import openpyxl
 import random
 import threading
 
+
 def get_headers():
     pc_headers = {
         "X-Forwarded-For": '%s.%s.%s.%s' % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
@@ -52,7 +53,7 @@ def build_request(url, headers=None, proxies=None):
             return response
         except Exception as e:
             if '429' in str(e):
-                time.sleep(random.randint(0,1000)/1000.0)
+                time.sleep(random.randint(0, 1000)/1000.0)
             continue
     raise NetWorkError
 
@@ -148,11 +149,15 @@ def get_available_skus(product_id_list):
 def parser_cn(html):
     res_text = html.replace('\r', '').replace('\n', '').replace(
         ' ', '').replace('\t', '').replace('\\u002F', '/').replace('：', ':')
-    # products_text = re.findall('"products":({.*?})},"intl":', res_text)[0]
-    # products = json.loads(products_text)
-    json_data=re.findall('INITIAL_REDUX_STATE=({.*?});window',res_text)[0]
-    json_data=json.loads(json_data)
-    products=json_data['Threads']['products']
+    try:
+        json_data = re.findall(
+            'INITIAL_REDUX_STATE=({.*?});', res_text)[0]
+        json_data = json.loads(json_data)
+    except:
+        json_data = re.findall(
+            'INITIAL_REDUX_STATE=({.*?});</script>', res_text)[0]
+        json_data = json.loads(json_data)
+    products = json_data['Threads']['products']
     product_id_list = []
     for key in products:
         product_id_list.append(products[key]['id'])
@@ -162,11 +167,12 @@ def parser_cn(html):
         print(current_time(), '[get_available_skus][request error]', e)
         return []
     result = []
-    soup=BeautifulSoup(html,'lxml')
+    soup = BeautifulSoup(html, 'lxml')
     try:
-        info=soup.find('div',{'id':'accordion-panel-3'}).get_text().replace('\r','').replace('\n','')
+        info = soup.find('div', {'id': 'accordion-panel-3'}
+                         ).get_text().replace('\r', '').replace('\n', '')
     except Exception as e:
-        info='-'
+        info = '-'
     for key in products:
         product = products[key]
         item = {}
@@ -178,7 +184,7 @@ def parser_cn(html):
             item['style'] = product['styleColor']
         except:
             item['style'] = ''
-        item['info']=info
+        item['info'] = info
         sku_info = []
         for sku_item in product['skus']:
             if sku_item['skuId'] in ava_sku_list:
@@ -191,68 +197,51 @@ def parser_cn(html):
 def get_product_info(url):
     result = []
     for i in range(3):
-        # if 'store.nike.com' in url:
-        #     item = get_color_and_style(req.text)
-        #     item['sku_info'] = []
-        #     try:
-        #         sku_info = parser_store(req.text)
-        #         item['sku_info'] = sku_info
-        #     except Exception as e:
-        #         print(current_time(), '[parser_store][parser error]', e)
-        #     result.append(item)
-        # if 'www.nike.com' in url:
-        #     try:
-        #         result = parser_cn(req.text)
-        #     except Exception as e:
-        #         print(current_time(), '[parser_cn][parser error]', e)
         try:
             req = build_request(url)
+            # with open('index.html','w') as f:
+            #     f.write(req.text)
+            # return
             result = parser_cn(req.text)
             return result
         except Exception as e:
-            #print(current_time(), '[parser_cn][parser error]', e,url)
+            if i == 2:
+                print(current_time(), '[parser_cn][parser error]', e, url)
             continue
     return result
 
 
 class NikeProduct(threading.Thread):
     def __init__(self, base_info, pdp_url):
-        super(NikeProduct,self).__init__()
+        super(NikeProduct, self).__init__()
         self.base_info = base_info
         self.pdp_url = pdp_url
-        self.daemon=True
+        self.daemon = True
 
     def run(self):
-        # if 'store.nike.com' in self.pdp_url:
-        #     self.products = []
-        # else:
-        #     try:
-        #         self.products = get_product_info(self.pdp_url)
-        #     except Exception as e:
-        #         print(current_time(),
-        #               '[get_product_info][error]', self.pdp_url, e)
-        #         self.products = []
         try:
             self.products = get_product_info(self.pdp_url)
         except Exception as e:
             print(current_time(),
-                    '[get_product_info][error]', self.pdp_url, e)
+                  '[get_product_info][error]', self.pdp_url, e)
             self.products = []
-        self.lines=[]
-        if len(self.products)==0:
+        self.lines = []
+        if len(self.products) == 0:
             self.lines.append(self.base_info)
         for product in self.products:
-            line = self.base_info + [product['color'], product['style'],product['info']]
+            line = self.base_info + [product['color'],
+                                     product['style'], product['info']]
             for sku_size in product['sku_info']:
                 self.lines.append(line + [sku_size])
             if len(product['sku_info']) == 0:
                 self.lines.append(line)
 
+
 def load_products():
     products = get_products()
     keys = ['title', 'subtitle', 'pdpUrl',
             'overriddenLocalPrice', 'localPrice']
-    items=[]
+    items = []
     for product in products:
         pdp_url = product['pdpUrl']
         base_info = []
@@ -264,11 +253,11 @@ def load_products():
             except:
                 value = '-'
             base_info.append(value)
-        items.append([base_info,pdp_url])
-        if len(items)<5:
+        items.append([base_info, pdp_url])
+        if len(items) < 5:
             continue
         yield items
-        items=[]
+        items = []
     yield items
 
 
@@ -276,20 +265,23 @@ def crawl():
     result = []
     counter = 0
     for products in load_products():
-        tasks=[]
+        tasks = []
         for item in products:
-            task=NikeProduct(item[0],item[1])
+            task = NikeProduct(item[0], item[1])
             tasks.append(task)
         for task in tasks:
             task.start()
         for task in tasks:
             task.join()
         for task in tasks:
-            result+=task.lines
-            counter+=1
-            print(current_time(), '[get_product_info][OK]', task.pdp_url, counter)
-    write_to_excel(result, '/home/ubuntu/Products/files/nike/' +
-                   current_time().replace(':', '_') + '_nike.xlsx')
+            result += task.lines
+            counter += 1
+            print(current_time(),
+                  '[get_product_info][OK]', task.pdp_url, counter)
+    # path='/home/ubuntu/Products/files/nike/'
+    path = './'
+    write_to_excel(
+        result,  path+current_time().replace(':', '_') + '_nike.xlsx')
 
 
 crawl()
