@@ -40,7 +40,7 @@ def get_amac_info(url):
             '\n\n', '').replace('  ', '').replace(':', '').replace('：', '')
         value = values[i].get_text().replace('&nbsp', '').replace(
             '\r\n', '').replace('\n\n', '').replace('  ', '')
-        if value[0] == '\n':
+        if len(value) and value[0] == '\n':
             value = value[1:]
         result[key] = value
         keys.append(key)
