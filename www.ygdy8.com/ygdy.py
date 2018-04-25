@@ -69,8 +69,17 @@ def get_video_info(url):
 def get_video_list(url):
     req = build_request(url)
     res_text = req.text.encode('iso-8859-1').decode('gbk', 'ignore')
-    table = BeautifulSoup(res_text, 'lxml').find(
-        'div', {'class': 'co_content8'}).find('ul').find_all('b')
+    soup = BeautifulSoup(res_text, 'lxml').find(
+        'div', {'class': 'co_content8'})
+    try:
+        a_list = soup.find('div', {'class': 'x'}).find_all('a')
+        for a_item in a_list:
+            if '末页' in a_item.get_text():
+                end_page = a_item.get('href').split('.')[0].split('_')[-1]
+        end_page = int(end_page)
+    except:
+        end_page = 200
+    table = soup.find('ul').find_all('b')
     result = []
     for item in table:
         try:
@@ -82,7 +91,45 @@ def get_video_list(url):
         except Exception as e:
             continue
         result.append([title, url])
-    return result
+    return result, end_page
+
+
+def get_videos_by_type(video_type, base_url):
+    try:
+        os.mkdir('./files/'+video_type)
+    except:
+        pass
+    save_path = './files/'+video_type+'/'
+    page = 1
+    end_page = 200
+    while page <= end_page:
+        try:
+            videos, t_end_page = get_video_list(base_url.format(page))
+        except:
+            break
+
+        if end_page == 200:
+            end_page = t_end_page
+        if len(videos) == 0:
+            break
+        for video in videos:
+            try:
+                video_info = get_video_info(video[-1])
+            except:
+                continue
+            try:
+                filename = save_path+video[0]+'.txt'
+                info_f = open(
+                    filename, 'w', encoding='utf-8')
+                info_f.write(video_info)
+                info_f.close()
+                f = open('./目录.txt', 'a', encoding='utf-8')
+                f.write(filename+'\r\n')
+                f.close()
+            except:
+                continue
+        print(current_time(), video_type, '第{}页'.format(page), 'OK')
+        page += 1
 
 
 def crawl_videos():
@@ -103,38 +150,25 @@ def crawl_videos():
     except:
         pass
 
-    for video_type, base_url in types:
-        try:
-            os.mkdir('./files/'+video_type)
-        except:
-            pass
-        save_path = './files/'+video_type+'/'
-        page = 1
-        while True:
-            try:
-                videos = get_video_list(base_url.format(page))
-            except:
-                break
-            if len(videos) == 0:
-                break
-            for video in videos:
-                try:
-                    video_info = get_video_info(video[-1])
-                except:
-                    continue
-                try:
-                    filename = save_path+video[0]+'.txt'
-                    info_f = open(
-                        filename, 'w', encoding='utf-8')
-                    info_f.write(video_info)
-                    info_f.close()
-                    f = open('./目录.txt', 'a', encoding='utf-8')
-                    f.write(filename+'\r\n')
-                    f.close()
-                except:
-                    continue
-            print(current_time(), video_type, '第{}页'.format(page), 'OK')
-            page += 1
+    for index in range(len(types)):
+        print(index, types[index][0])
+    try:
+        index = input('请输入要爬取的序号：')
+    except:
+        index = 0
+
+    try:
+        index = int(index)
+    except:
+        print('序号输入错误')
+        return
+    if index >= len(types) or index < 0:
+        print('序号输入错误')
+        return
+    video_type = types[index][0]
+    base_url = types[index][1]
+    get_videos_by_type(video_type, base_url)
 
 
-crawl_videos()
+while True:
+    crawl_videos()
