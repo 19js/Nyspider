@@ -42,6 +42,9 @@ def get_news_info(url):
     if article_des_item is None:
         article_des_item = soup.find(
             'div', {'class': 'art_zy'})
+    if article_des_item is None:
+        article_des_item = soup.find(
+            'div', {'class': 'summary'})
     if article_des_item is not None:
         article_des = article_des_item.get_text().replace('摘要', '').replace('\n', '')
     else:
@@ -80,7 +83,7 @@ def get_history_news():
     req = build_request('https://www.cngold.org/news/futures/list_11_all.html')
     history_news_content_list = BeautifulSoup(req.text, 'lxml').find_all('div', {
         'class': 'history_news_content'})
-    f = open('./files/history_news', 'a')
+    f = open('./files/history_news', 'w')
     for content in history_news_content_list:
         history_news = content.find_all('li')
         for li in history_news:
@@ -119,5 +122,6 @@ def crawl_news():
         print(current_time(), history_news[0], 'OK')
 
 
+get_history_news()
 crawl_news()
 # write_to_excel(load_txt('./files/result'),'news.xlsx')
