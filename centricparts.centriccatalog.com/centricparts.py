@@ -11,6 +11,12 @@ T_URL = 'https://centricparts.centriccatalog.com/Inquiry/AppResult.aspx?id=WEB_P
 
 session_pool = []
 
+PC_LOC = '_ali'
+
+session_lock = threading.Lock()
+
+THREAD_SIZE = 5
+
 
 def get_products():
     req = build_request(URL)
@@ -95,39 +101,25 @@ def get_make_values():
         print(item, 'OK')
 
 
-def parser_table(html):
-    table = BeautifulSoup(html, 'lxml').find(
-        'table', {'id': 'AppDataGrid'}).find_all('tr')
-    result = []
-    for tr in table:
-        td_list = tr.find_all('td')
-        line = []
-        for td in td_list:
-            line.append(td.get_text())
-        result.append(line)
-    return result
-
-
-def get_inquiry_result(value_item):
-    url = 'https://centricparts.centriccatalog.com/Inquiry/AppResult.aspx' + \
-        '?id={}&v={}&y={}&m={}&mm={}'.format(
-            value_item[0][1], value_item[1][1], value_item[2][1], value_item[3][1], value_item[4][1])
-    session = requests.session()
-    session.get(URL)
-    req = session.get(url)
-    result = parser_table(req.text)
-
-
-def create_session_pool():
+def create_session_pool(pool_size=40):
     global session_pool
-    for i in range(40):
+    for i in range(pool_size):
         session = requests.session()
         try:
-            session.get(URL, timeout=10)
+            session.get(URL, timeout=20)
         except:
             continue
         print('create session', i+1, 'OK')
         session_pool.append(session)
+
+
+def load_session():
+    global session_pool
+    with session_lock:
+        if len(session_pool) == 0:
+            create_session_pool(THREAD_SIZE*2)
+        session = session_pool.pop(0)
+    return session
 
 
 def get_model_value(value_item):
@@ -135,12 +127,9 @@ def get_model_value(value_item):
         '?id={}&v={}&y={}&m={}'.format(
             value_item[0][1], value_item[1][1], value_item[2][1], value_item[3][1])
     global session_pool
-    if len(session_pool) == 0:
-        create_session_pool()
-    session = random.choice(session_pool)
-
     for i in range(3):
         try:
+            session = load_session()
             req = session.get(url, timeout=20, headers=get_headers())
             model_list = parser_select('ModelsDropdownlist', req.text)
             result = []
@@ -148,12 +137,10 @@ def get_model_value(value_item):
                 result.append(value_item+[model_item])
             if len(result) == 0:
                 raise NetWorkError
+            with session_lock:
+                session_pool.append(session)
             return result
         except Exception as e:
-            session_pool.remove(session)
-            session = requests.session()
-            session.get(URL, timeout=10, headers=get_headers())
-            session_pool.append(session)
             continue
     raise NetWorkError
 
@@ -185,7 +172,7 @@ def load_id_v_year_make_items():
             f.close()
             continue
         items.append(item)
-        if len(items) < 20:
+        if len(items) < THREAD_SIZE:
             continue
         yield items
         items = []
@@ -220,5 +207,131 @@ def crawl_models():
         print(current_time(), success_num, failed_num)
 
 
-create_session_pool()
+def parser_table(html):
+    table = BeautifulSoup(html, 'lxml').find(
+        'table', {'id': 'AppDataGrid'})
+    header = table.find('tr', {'class': 'header'}).find_all('td')
+    keys = []
+    for td in header:
+        key = td.get_text().replace('\xa0', '').replace('\n', '')
+        keys.append(key)
+    tr_list = table.find_all('tr')
+    result = []
+    for tr in tr_list[1:]:
+        td_list = tr.find_all('td')
+        if len(td_list) != len(keys):
+            continue
+        line = {}
+        for index in range(len(keys)):
+            key = keys[index]
+            if key == 'Pic':
+                a_list = td_list[index].find_all('a')
+                urls = []
+                for a in a_list:
+                    urls.append(
+                        'https://centricparts.centriccatalog.com/Inquiry/' + a.get('href'))
+                value = '\t\t'.join(urls)
+                line[key] = value
+                continue
+            value = td_list[index].get_text().replace(
+                '\xa0', '').replace('\n', '')
+            if key in line:
+                line[key] += '\t\t'+value
+            else:
+                line[key] = value
+        result.append(line)
+    td_list = tr_list[-1].find_all('td')
+    page_value = []
+    for td in td_list:
+        page_value.append(td.get_text().replace(
+            '\xa0', '').replace('\n', ''))
+
+    return {
+        'result': result,
+        'page_value': page_value,
+    }
+
+
+def get_inquiry_result(value_item):
+    url = 'https://centricparts.centriccatalog.com/Inquiry/AppResult.aspx' + \
+        '?id={}&v={}&y={}&m={}&mm={}'.format(
+            value_item[0][1], value_item[1][1], value_item[2][1], value_item[3][1], value_item[4][1])
+    global session_pool
+    for i in range(3):
+        try:
+            session = load_session()
+            req = session.get(url, timeout=30, headers=get_headers())
+            result = parser_table(req.text)
+            result['url'] = url
+            with session_lock:
+                session_pool.append(session)
+            return result
+        except Exception as e:
+            continue
+    raise NetWorkError
+
+
+class AppResult(threading.Thread):
+    def __init__(self, item):
+        super(AppResult, self).__init__()
+        self.daemon = True
+        self.item = item
+
+    def run(self):
+        self.status = False
+        try:
+            values = get_inquiry_result(self.item)
+            self.result = {
+                'result': values,
+                'item': self.item
+            }
+            self.status = True
+        except:
+            pass
+
+
+def load_id_v_year_make_model_items():
+    items = []
+    for line in open('./files/id_v_year_make_model'+PC_LOC, 'r'):
+        try:
+            item = json.loads(line)
+        except:
+            f = open('./files/fail'+PC_LOC, 'a')
+            f.write(line)
+            f.close()
+            continue
+        items.append(item)
+        if len(items) < 20:
+            continue
+        yield items
+        items = []
+    yield items
+
+
+def crawl_app_result():
+    success_num = 0
+    failed_num = 0
+    for items in load_id_v_year_make_model_items():
+        tasks = []
+        for item in items:
+            task = AppResult(item)
+            tasks.append(task)
+        for task in tasks:
+            task.start()
+        for task in tasks:
+            task.join()
+        for task in tasks:
+            if task.status:
+                f = open('./files/result'+PC_LOC, 'a')
+                f.write(json.dumps(task.result)+'\n')
+                f.close()
+                success_num += 1
+            else:
+                f = open('./files/fail'+PC_LOC, 'a')
+                f.write(json.dumps(task.item)+'\n')
+                f.close()
+                failed_num += 1
+        print(current_time(), success_num, failed_num)
+
+
 crawl_models()
