@@ -133,38 +133,3 @@ def build_proxy_request(url, data=None, headers=None, json_data=None):
                 time.sleep(random.randint(0, 1000)/1000.0)
             continue
     raise NetWorkError
-
-
-def create_cookie_pool(url, pool_size=50):
-    cookie_pool = []
-    succ_num = 0
-    while succ_num < pool_size:
-        session = requests.session()
-        try:
-            session.get(url, headers=get_headers(), timeout=10)
-            cookie = requests.utils.dict_from_cookiejar(session.cookies)
-            cookie_pool.append(cookie)
-        except:
-            continue
-        succ_num += 1
-        print('Create', succ_num, 'OK')
-    f = open('./cookie_pool.json', 'w')
-    json.dump(cookie_pool, f)
-    f.close()
-
-
-def load_cookie_pool():
-    if not os.path.exists('./cookie_pool.json'):
-        print('Cookie Pool File Not Exists.')
-        return []
-    f = open('./cookie_pool.json', 'r')
-    cookie_pool = json.load(f)
-    return cookie_pool
-
-
-def build_header_cookie(cookie_dict):
-    values = []
-    for key in cookie_dict:
-        value = key+'='+cookie_dict[key]
-        values.append(value)
-    return '; '.join(values)

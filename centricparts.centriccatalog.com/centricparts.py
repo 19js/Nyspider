@@ -15,7 +15,7 @@ PC_LOC = '_ali'
 
 session_lock = threading.Lock()
 
-THREAD_SIZE = 5
+THREAD_SIZE = 20
 
 
 def get_products():
@@ -103,13 +103,15 @@ def get_make_values():
 
 def create_session_pool(pool_size=40):
     global session_pool
-    for i in range(pool_size):
+    num = 0
+    while num < pool_size:
         session = requests.session()
         try:
             session.get(URL, timeout=20)
         except:
             continue
-        print('create session', i+1, 'OK')
+        num += 1
+        print('create session', num, 'OK')
         session_pool.append(session)
 
 
@@ -130,7 +132,7 @@ def get_model_value(value_item):
     for i in range(3):
         try:
             session = load_session()
-            req = session.get(url, timeout=20, headers=get_headers())
+            req = session.get(url, timeout=30, headers=get_headers())
             model_list = parser_select('ModelsDropdownlist', req.text)
             result = []
             for model_item in model_list:
