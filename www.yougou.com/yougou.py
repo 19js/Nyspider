@@ -250,11 +250,10 @@ class YougouProduct(threading.Thread):
             print(current_time(),
                   '[get_product_info][error]', self.pdp_url, e)
             self.product_list = [['']]
-        style_no = self.product_list[0][0]
         try:
-            number = style_no+self.base_info[0].split(style_no)[-1]
+            number = re.findall('[0-9a-zA-Z-]+', self.base_info[0])[-1]
         except:
-            number = style_no
+            number = ''
         for item in self.product_list:
             self.lines.append(self.base_info+[number]+item)
 
