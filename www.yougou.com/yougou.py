@@ -141,7 +141,7 @@ def get_products():
                     if item['commodityNo'] in exists:
                         continue
                     exists[item['commodityNo']] = 1
-                    line = []
+                    line = [brand]
                     for key in need_keys:
                         try:
                             value = item[key]
@@ -204,7 +204,7 @@ def get_product_info(c_no, pd_url):
         inventory = []
     for key in inventory:
         if str(key) in size_dict:
-            ava_size_list.append(size_dict[key])
+            ava_size_list.append([size_dict[key], inventory[key]])
     try:
         active_name = detail_data['active']['activeName']
     except:
@@ -222,8 +222,8 @@ def get_product_info(c_no, pd_url):
     if len(ava_size_list) == 0:
         return [product_info]
     result = []
-    for size in ava_size_list:
-        result.append(product_info+[size])
+    for size_item in ava_size_list:
+        result.append(product_info+size_item)
     return result
 
 
@@ -239,8 +239,8 @@ class YougouProduct(threading.Thread):
     def __init__(self, base_info):
         super(YougouProduct, self).__init__()
         self.base_info = base_info
-        self.pdp_url = self.base_info[2]
-        self.c_no = self.base_info[1]
+        self.pdp_url = self.base_info[3]
+        self.c_no = self.base_info[2]
 
     def run(self):
         self.lines = []
@@ -251,7 +251,7 @@ class YougouProduct(threading.Thread):
                   '[get_product_info][error]', self.pdp_url, e)
             self.product_list = [['']]
         try:
-            number = re.findall('[0-9a-zA-Z-]+', self.base_info[0])[-1]
+            number = re.findall('[0-9a-zA-Z-]+', self.base_info[1])[-1]
         except:
             number = ''
         for item in self.product_list:
