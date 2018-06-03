@@ -34,7 +34,7 @@ def get_stations(city_code):
     stations_url = 'https://basesg.teld.cn/api/invoke?SID=BaseApi-App0304_SearchStation'
     page = 1
     need_keys = ['id', 'name', 'lng', 'lat',
-                 'stationAddress', 'stationType', 'stationState','price','originalPrice','activityPrice']
+                 'stationAddress', 'stationType', 'stationState', 'price', 'originalPrice', 'activityPrice']
     result = []
     while True:
         data = {
@@ -131,10 +131,13 @@ def get_charge_list(station_id):
             line = []
             for key in need_keys:
                 try:
-                    line.append(item[key])
+                    value = item[key]
+                    if value is None:
+                        value = ''
+                    line.append(value)
                 except:
                     line.append('')
-            key = item['PileName'].replace('交流','').replace('直流','')
+            key = item['PileName']#.replace('交流', '').replace('直流', '')
             if key in result:
                 result[key].append(line)
             else:
@@ -175,11 +178,11 @@ def crawl(station, crawl_date):
                 line.append(charge_item[0])
                 line_name.append(charge_item[1])
                 line_time.append(charge_item[2])
-            f.write(str(line) + '\r\n')
-            f.write(str(line_name) + '\r\n')
-            f.write(str(line_time) + '\r\n')
+            f.write(json.dumps(line, ensure_ascii=False) + '\r\n')
+            f.write(json.dumps(line_name, ensure_ascii=False) + '\r\n')
+            f.write(json.dumps(line_time, ensure_ascii=False) + '\r\n')
         else:
-            f.write(str(line) + '\r\n')
+            f.write(json.dumps(line, ensure_ascii=False) + '\r\n')
     f.close()
     try:
         print(timenow, station[0], station[2], 'OK ')
@@ -224,9 +227,12 @@ def write_to_excel(crawl_date):
     excel = openpyxl.Workbook(write_only=True)
     sheet = excel.create_sheet()
     for line in open('temp/' + crawl_date + '.txt', 'r', encoding='utf-8'):
+        if line.replace('\r', '').replace('\n', '') == '':
+            continue
         try:
-            sheet.append(eval(line))
-        except:
+            line = line.replace('None', '"None"')
+            sheet.append(json.loads(line))
+        except Exception as e:
             continue
     excel.save('result/' + crawl_date + '.xlsx')
 
