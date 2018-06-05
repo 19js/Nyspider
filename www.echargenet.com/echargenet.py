@@ -55,13 +55,6 @@ def write_to_excel(lines, filename, write_only=True):
     excel.save(filename)
 
 
-def write_to_csv(lines, filename):
-    csvfile = open(filename, 'w', encoding='utf-8')
-    spamwriter = csv.writer(csvfile, delimiter=',',
-                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    for line in lines:
-        spamwriter.writerow(line)
-    csvfile.close()
 
 
 def get_next_date(current_date='2017-01-01'):
@@ -76,7 +69,7 @@ def current_time():
 
 
 def load_txt(filename):
-    for line in open(filename, 'r'):
+    for line in open(filename, 'r',encoding='utf-8'):
         try:
             item = json.loads(line)
         except Exception as e:
@@ -164,7 +157,10 @@ def crawl():
     f.close()
     for station in stations:
         station_id = station['id']
-        station_info = get_station_info(station_id)
+        try:
+            station_info = get_station_info(station_id)
+        except:
+            continue
         if station_info is None:
             continue
         try:
