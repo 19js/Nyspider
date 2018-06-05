@@ -50,7 +50,7 @@ def write_to_excel(lines, filename, write_only=True):
         try:
             sheet.append(line)
         except Exception as e:
-            print('Write to excel fail',e)
+            print('Write to excel fail', e)
             continue
     excel.save(filename)
 
@@ -80,7 +80,7 @@ def load_txt(filename):
         try:
             item = json.loads(line)
         except Exception as e:
-            print('load txt fail',e)
+            print('load txt fail', e)
             continue
         yield item
 
@@ -123,6 +123,8 @@ def get_station_chargers(id):
         chargers_list = json.loads(res_text)['data']
     except:
         return []
+    if chargers_list is None:
+        return []
     reg_status = {1: "故障", 2: "空闲", 3: "使用", 4: "离线", 5: "使用"}
     result = []
     keys = ['area', 'stakeNo', 'chargerType', 'status', 'standardDesc', 'soc',
@@ -163,7 +165,12 @@ def crawl():
     for station in stations:
         station_id = station['id']
         station_info = get_station_info(station_id)
-        chargers_list = get_station_chargers(station_id)
+        if station_info is None:
+            continue
+        try:
+            chargers_list = get_station_chargers(station_id)
+        except:
+            continue
         f = open(filename, 'a', encoding='utf-8')
         for charge in chargers_list:
             f.write(json.dumps(station_info+charge, ensure_ascii=False)+'\n')
