@@ -224,7 +224,7 @@ def teld():
 
 
 def write_to_excel(crawl_date):
-    excel = openpyxl.Workbook(write_only=True)
+    excel = openpyxl.Workbook(write_only=False)
     sheet = excel.create_sheet()
     for line in open('temp/' + crawl_date + '.txt', 'r', encoding='utf-8'):
         if line.replace('\r', '').replace('\n', '') == '':
