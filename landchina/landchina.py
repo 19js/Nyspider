@@ -1,22 +1,117 @@
 # -*- coding: utf-8 -*-
-
-from util import *
 from bs4 import BeautifulSoup
 import codecs
 import json
+import requests
+import time
+import openpyxl
+import random
+import datetime
+import os
+
+PROVINCE = '四川省'  # 设置爬取的省份
+DATE_START = '2018-01-01'
+DATE_END = '2018-01-02'
+
+
+province_map = {
+    '北京市': '11',
+    '天津市': '12',
+    '河北省': '13',
+    '山西省': '14',
+    '内蒙古': '15',
+    '辽宁省': '21',
+    '吉林省': '22',
+    '黑龙江省': '23',
+    '上海市': '31',
+    '江苏省': '32',
+    '浙江省': '33',
+    '安徽省': '34',
+    '福建省': '35',
+    '江西省': '36',
+    '山东省': '37',
+    '河南省': '41',
+    '湖北省': '42',
+    '湖南省': '43',
+    '广东省': '44',
+    '广西壮族': '45',
+    '海南省': '46',
+    '重庆市': '50',
+    '四川省': '51',
+    '贵州省': '52',
+    '云南省': '53',
+    '西藏': '54',
+    '陕西省': '61',
+    '甘肃省': '62',
+    '青海省': '63',
+    '宁夏回族': '64',
+    '新疆维吾尔': '65',
+    '新疆建设兵团': '66'
+}
+
+try:
+    os.mkdir('./files')
+except:
+    pass
+
+def get_headers():
+    pc_headers = {
+        "X-Forwarded-For": '%s.%s.%s.%s' % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept-Language": "en-US,en;q=0.5",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36"
+    }
+    return pc_headers
+
+
+class NetWorkError(Exception):
+    pass
+
+
+def build_request(url, headers=None, data=None):
+    if headers is None:
+        headers = get_headers()
+    for i in range(3):
+        try:
+            if data:
+                response = requests.post(
+                    url, data=data, headers=headers, timeout=20)
+            else:
+                response = requests.get(url, headers=headers, timeout=20)
+            return response
+        except:
+            continue
+    raise NetWorkError
+
+
+def write_to_excel(lines, filename, write_only=True):
+    excel = openpyxl.Workbook(write_only=write_only)
+    sheet = excel.create_sheet()
+    for line in lines:
+        sheet.append(line)
+    excel.save(filename)
+
+
+def get_next_date(current_date='2017-01-01'):
+    current_date = datetime.datetime.strptime(current_date, '%Y-%m-%d')
+    oneday = datetime.timedelta(days=1)
+    next_date = current_date+oneday
+    return str(next_date).split(' ')[0]
+
+
+def current_time():
+    return time.strftime("%Y-%m-%d %H:%M:%S")
 
 
 def get_item_list(date_limit, province):
-    nodes = {
-        '广东省': '44'
-    }
-    select_district = nodes[province]+'▓~'+province
+    select_district = province_map[province]+'▓~'+province
     page = 1
     result = []
     while True:
         data = {
             'hidComName': "default",
-            'TAB_QueryConditionItem': ['9f2c3acd-0256-4da2-a659-6949c4671a2a', 'ec9f9d83-914e-4c57-8c8d-2c57185e912a'],
+            'TAB_QueryConditionItem': ['9f2c3acd-0256-4da2-a659-6949c4671a2a', '42ad98ae-c46a-40aa-aacc-c0884036eeaf'],
             'TAB_QuerySubmitConditionData': "9f2c3acd-0256-4da2-a659-6949c4671a2a:{}|42ad98ae-c46a-40aa-aacc-c0884036eeaf:{}".format(date_limit, select_district).encode('GBK'),
             'TAB_QuerySubmitOrderData': "",
             'TAB_RowButtonActionControl': "",
@@ -48,9 +143,8 @@ def get_item_list(date_limit, province):
     return result
 
 
-def get_item_info(url):
-    req = build_request(url)
-    table = BeautifulSoup(req.text, 'lxml').find(
+def parser_info_html(res_text):
+    table = BeautifulSoup(res_text, 'lxml').find(
         'table', id='mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1')
     tr_ids = ['mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r1', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r17', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r16', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r2', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r3', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r19', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r20',
               'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r12', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r9', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r23', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r21', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r22', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r10', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r14']
@@ -101,30 +195,40 @@ def get_item_info(url):
     line = line.replace('\r', '').replace('\n', '').replace('\t', '').replace(
         '||', '|').replace('||', '|').replace('：', ':').replace(':|', ':')
     item = {}
-    keys = []
     for key_value in line.split('|'):
         key = key_value.split(':')[0]
-        if key.replace(' ', '').replace('\xa0', '') == '':
+        key = key.replace(' ', '').replace('\xa0', '')
+        if key == '':
             continue
-        keys.append(key)
         try:
             item[key] = key_value.split(':')[1]
         except:
             item[key] = ''
-    if item[' 面积(公顷)'] == item[' 土地来源']:
-        item[' 土地来源'] = '现有建设用地'
-    elif float(item[' 土地来源']) == 0:
-        item[' 土地来源'] = '新增建设用地'
+    if item['面积(公顷)'] == item['土地来源']:
+        item['土地来源'] = '现有建设用地'
+    elif float(item['土地来源']) == 0:
+        item['土地来源'] = '新增建设用地'
     else:
-        item[' 土地来源'] = '新增建设用地(来自存量库)'
-    item['url'] = url
+        item['土地来源'] = '新增建设用地(来自存量库)'
     return item
 
 
+def get_item_info(url):
+    for i in range(3):
+        try:
+            req = build_request(url)
+            item = parser_info_html(req.text)
+            item['url'] = url
+            return item
+        except:
+            continue
+    raise NetWorkError
+
+
 def get_province_items():
-    province = '广东省'
-    date_from = '2018-02-20'
-    date_to = '2018-02-23'
+    province = PROVINCE
+    date_from = DATE_START
+    date_to = DATE_END
     current_date = date_from
     while current_date != date_to:
         date = '-'.join([str(int(value)) for value in current_date.split('-')])
@@ -141,8 +245,8 @@ def get_province_items():
         for item in result:
             f.write(json.dumps(item, ensure_ascii=False)+'\n')
         f.close()
-        current_date = get_next_date(current_date)
         print(current_time(), 'Date:', current_date, 'OK')
+        current_date = get_next_date(current_date)
 
 
 def crawl_info():
@@ -163,8 +267,8 @@ def crawl_info():
 
 
 def load_result():
-    keys = [' 行政区', ' 电子监管号', ' 项目名称', ' 项目位置', ' 面积(公顷)', ' 土地来源', ' 土地用途', ' 供地方式', ' 土地使用年限', ' 行业分类', ' 土地级别', ' 成交价格(万元)',
-            '分期支付约定', ' 土地使用权人', '约定容积率下限', '约定容积率上限', '约定交地时间', ' 约定开工时间', ' 约定竣工时间', ' 实际开工时间', ' 实际竣工时间', ' 批准单位', ' 合同签订日期', 'url']
+    keys = ['行政区', '电子监管号', '项目名称', '项目位置', '面积(公顷)', '土地来源', '土地用途', '供地方式', '土地使用年限', '行业分类', '土地级别', '成交价格(万元)',
+            '分期支付约定', '土地使用权人', '约定容积率下限', '约定容积率上限', '约定交地时间', '约定开工时间', '约定竣工时间', '实际开工时间', '实际竣工时间', '批准单位', '合同签订日期', 'url']
     yield keys
     for line in codecs.open('./files/result.txt', 'r', encoding='utf-8'):
         item = json.loads(line)
@@ -185,4 +289,5 @@ def load_result():
 
 get_province_items()
 crawl_info()
-write_to_excel(load_result(),'result.xlsx')
+write_to_excel(load_result(), '{}_{}_{}.xlsx'.format(
+    PROVINCE, DATE_START, DATE_END))
