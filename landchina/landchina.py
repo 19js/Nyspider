@@ -1,4 +1,4 @@
-# encoding:utf-8
+# -*- coding: utf-8 -*-
 
 from util import *
 from bs4 import BeautifulSoup
@@ -17,7 +17,7 @@ def get_item_list(date_limit, province):
         data = {
             'hidComName': "default",
             'TAB_QueryConditionItem': ['9f2c3acd-0256-4da2-a659-6949c4671a2a', 'ec9f9d83-914e-4c57-8c8d-2c57185e912a'],
-            'TAB_QuerySubmitConditionData': "9f2c3acd-0256-4da2-a659-6949c4671a2a:{}|42ad98ae-c46a-40aa-aacc-c0884036eeaf:{}".format(date_limit, select_district.decode('utf-8').encode('GBK')),
+            'TAB_QuerySubmitConditionData': "9f2c3acd-0256-4da2-a659-6949c4671a2a:{}|42ad98ae-c46a-40aa-aacc-c0884036eeaf:{}".format(date_limit, select_district).encode('GBK'),
             'TAB_QuerySubmitOrderData': "",
             'TAB_RowButtonActionControl': "",
             'TAB_QuerySubmitPagerData': page,
@@ -41,7 +41,7 @@ def get_item_list(date_limit, province):
                 except:
                     line.append('')
             result.append(line)
-        print(page, 'OK')
+        print(date_limit, 'Page', page, 'OK')
         if len(table) < 31:
             break
         page += 1
@@ -123,7 +123,7 @@ def get_item_info(url):
 
 def get_province_items():
     province = '广东省'
-    date_from = '2016-01-01'
+    date_from = '2018-02-20'
     date_to = '2018-02-23'
     current_date = date_from
     while current_date != date_to:
@@ -131,17 +131,18 @@ def get_province_items():
         try:
             result = get_item_list(date+'~'+date, province)
         except Exception as e:
-            failed = codecs.open('./files/failed.txt', 'a', encoding='utf-8')
+            failed = codecs.open('./files/date_failed.txt',
+                                 'a', encoding='utf-8')
             failed.write(current_date+'\n')
             failed.close()
             current_date = get_next_date(current_date)
             continue
         f = codecs.open('./files/items.txt', 'a', encoding='utf-8')
         for item in result:
-            f.write(json.dumps(item)+'\n')
+            f.write(json.dumps(item, ensure_ascii=False)+'\n')
         f.close()
         current_date = get_next_date(current_date)
-        print(current_time(), current_date, 'OK')
+        print(current_time(), 'Date:', current_date, 'OK')
 
 
 def crawl_info():
@@ -154,10 +155,34 @@ def crawl_info():
                                  'a', encoding='utf-8')
             failed.write(line)
             failed.close()
+            print(item[0], 'fail')
             continue
         with codecs.open('./files/result.txt', 'a', encoding='utf-8') as f:
-            f.write(json.dumps(info_item)+'\n')
+            f.write(json.dumps(info_item, ensure_ascii=False)+'\n')
         print(current_time(), item[0], 'OK')
 
 
+def load_result():
+    keys = [' 行政区', ' 电子监管号', ' 项目名称', ' 项目位置', ' 面积(公顷)', ' 土地来源', ' 土地用途', ' 供地方式', ' 土地使用年限', ' 行业分类', ' 土地级别', ' 成交价格(万元)',
+            '分期支付约定', ' 土地使用权人', '约定容积率下限', '约定容积率上限', '约定交地时间', ' 约定开工时间', ' 约定竣工时间', ' 实际开工时间', ' 实际竣工时间', ' 批准单位', ' 合同签订日期', 'url']
+    yield keys
+    for line in codecs.open('./files/result.txt', 'r', encoding='utf-8'):
+        item = json.loads(line)
+        line = []
+        for key in keys:
+            try:
+                value = item[key]
+                if '约定容积率' in key:
+                    try:
+                        num = float(value)
+                    except:
+                        value = ''
+            except:
+                value = ''
+            line.append(value)
+        yield line
+
+
+get_province_items()
 crawl_info()
+write_to_excel(load_result(),'result.xlsx')
