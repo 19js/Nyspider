@@ -14,7 +14,8 @@ def get_city_hall(province_code, city_code):
     url = 'http://iservice.10010.com/e3/static/life/listHallByPropertyNew?provinceCode={}&cityCode={}&page={}'
     page = 1
     result = []
-    keys = ['epProvincename', 'epCityname', 'epName', 'epAddress']
+    keys = ['epProvincename', 'epCityname', 'epName',
+            'epAddress', 'epLinkTelphone', 'epBusinessTime']
     while True:
         req = build_request(url.format(province_code, city_code, page))
         res_data = req.json()
@@ -27,7 +28,10 @@ def get_city_hall(province_code, city_code):
         for hall in hall_list:
             line = []
             for key in keys:
-                line.append(hall[key])
+                try:
+                    line.append(hall[key])
+                except:
+                    line.append('')
             result.append(line)
         print(current_time(), province_code, city_code, page, 'OK')
         page += 1
@@ -47,8 +51,9 @@ def crawl_hall():
             try:
                 result = get_city_hall(province_code, city_code)
             except:
-                f=open('./files/fail','a')
-                f.write(json.dumps(provinces[index]+city,ensure_ascii=False)+'\n')
+                f = open('./files/fail', 'a')
+                f.write(json.dumps(
+                    provinces[index]+city, ensure_ascii=False)+'\n')
                 f.close()
                 continue
             f = open('./files/result', 'a')
@@ -56,6 +61,8 @@ def crawl_hall():
                 f.write(json.dumps(
                     [province_name, city_name]+hall, ensure_ascii=False)+'\n')
             f.close()
-            print(current_time(),province_name,city_name,'OK')
+            print(current_time(), province_name, city_name, 'OK')
 
-write_to_excel(load_txt('./files/result'),'联通营业厅数据.xlsx')
+
+crawl_hall()
+write_to_excel(load_txt('./files/result'), '联通营业厅数据.xlsx')
