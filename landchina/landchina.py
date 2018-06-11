@@ -9,9 +9,9 @@ import random
 import datetime
 import os
 
-PROVINCE = '四川省'  # 设置爬取的省份
-DATE_START = '2018-01-01'
-DATE_END = '2018-01-02'
+PROVINCE = '广东省'  # 设置爬取的省份
+DATE_START = '2018-02-21'
+DATE_END = '2018-02-22'
 
 
 province_map = {
@@ -49,10 +49,18 @@ province_map = {
     '新疆建设兵团': '66'
 }
 
-try:
-    os.mkdir('./files')
-except:
-    pass
+
+def init_files():
+    """
+    初始化文件
+    """
+    try:
+        os.mkdir('./files')
+    except:
+        pass
+    for filename in os.listdir('./files/'):
+        os.remove('./files/'+filename)
+
 
 def get_headers():
     pc_headers = {
@@ -70,6 +78,9 @@ class NetWorkError(Exception):
 
 
 def build_request(url, headers=None, data=None):
+    """
+    请求链接
+    """
     if headers is None:
         headers = get_headers()
     for i in range(3):
@@ -86,6 +97,9 @@ def build_request(url, headers=None, data=None):
 
 
 def write_to_excel(lines, filename, write_only=True):
+    """
+    写入excel
+    """
     excel = openpyxl.Workbook(write_only=write_only)
     sheet = excel.create_sheet()
     for line in lines:
@@ -94,6 +108,9 @@ def write_to_excel(lines, filename, write_only=True):
 
 
 def get_next_date(current_date='2017-01-01'):
+    """
+    获取下一天日期
+    """
     current_date = datetime.datetime.strptime(current_date, '%Y-%m-%d')
     oneday = datetime.timedelta(days=1)
     next_date = current_date+oneday
@@ -101,10 +118,16 @@ def get_next_date(current_date='2017-01-01'):
 
 
 def current_time():
+    """
+    获取当前时间
+    """
     return time.strftime("%Y-%m-%d %H:%M:%S")
 
 
 def get_item_list(date_limit, province):
+    """
+    爬取交易列表
+    """
     select_district = province_map[province]+'▓~'+province
     page = 1
     result = []
@@ -144,6 +167,9 @@ def get_item_list(date_limit, province):
 
 
 def parser_info_html(res_text):
+    """
+    解析供地结果信息页面
+    """
     table = BeautifulSoup(res_text, 'lxml').find(
         'table', id='mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1')
     tr_ids = ['mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r1', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r17', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r16', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r2', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r3', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r19', 'mainModuleContainer_1855_1856_ctl00_ctl00_p1_f1_r20',
@@ -214,6 +240,9 @@ def parser_info_html(res_text):
 
 
 def get_item_info(url):
+    """
+    获取结果信息，重试3次
+    """
     for i in range(3):
         try:
             req = build_request(url)
@@ -226,6 +255,9 @@ def get_item_info(url):
 
 
 def get_province_items():
+    """
+    爬取设置省份指定日期区间的所有列表数据
+    """
     province = PROVINCE
     date_from = DATE_START
     date_to = DATE_END
@@ -235,6 +267,7 @@ def get_province_items():
         try:
             result = get_item_list(date+'~'+date, province)
         except Exception as e:
+            # 获取失败将日期写入date_failed文件
             failed = codecs.open('./files/date_failed.txt',
                                  'a', encoding='utf-8')
             failed.write(current_date+'\n')
@@ -250,11 +283,15 @@ def get_province_items():
 
 
 def crawl_info():
+    """
+    爬取items.txt文件中每条交易的详细信息
+    """
     for line in codecs.open('./files/items.txt', 'r', encoding='utf-8'):
         item = json.loads(line)
         try:
             info_item = get_item_info(item[0])
         except Exception as e:
+            # 获取失败写入info_failed文件
             failed = codecs.open('./files/info_failed.txt',
                                  'a', encoding='utf-8')
             failed.write(line)
@@ -287,7 +324,11 @@ def load_result():
         yield line
 
 
+init_files()
+# 先爬取列表
 get_province_items()
+# 再爬取每条的详细信息
 crawl_info()
+# 将result.txt的数据写入excel
 write_to_excel(load_result(), '{}_{}_{}.xlsx'.format(
     PROVINCE, DATE_START, DATE_END))
