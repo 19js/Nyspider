@@ -70,8 +70,8 @@ def get_project_list(page):
         '10030': '普惠众盈',
         '21000': '银行专区'
     }
-    need_keys = ['topProductCategory', 'issueNo', 'yield', 'period', 'financingSumAmount',
-                 'bankName', 'riskManagement', 'riskManagementMode', 'productId']
+    need_keys = ['topProductCategory', 'issueNo', 'yield', 'period', 'financingSumAmount', 'bankName', 'riskManagement', 'riskManagementMode', 'productId', 'assetInfoDesc', 'currentValueDate', 'drawee', 'draweeInfo', 'endorseImageLink', 'endorseImagesLink', 'endSellTime', 'enterpriseInfo', 'enterpriseLicense', 'enterpriseName', 'isLoans', 'isSignature', 'issueTime', 'paidAmount', 'pledgeNo', 'productCategory',
+                 'productIdentifier', 'productName', 'productNo', 'issueProductPuHuiZhongYinCarRequest', 'issueProductPuHuiZhongYinDebtorBasicInfoRequest', 'issueProductPuHuiZhongYinHouseRequest', 'repaid', 'repaidTime', 'repaymentDeadline', 'returnMoneyMethod', 'riskManagementInfo', 'settleDate', 'soldOut', 'soldOutTime', 'specifyValueDate', 'startSellTime', 'unitPrice', 'usage', 'valueDate', 'valueDateMode', 'valueDays']
     for item in items:
         line = []
         for key in need_keys:
@@ -81,6 +81,8 @@ def get_project_list(page):
                     value = ''
                 if key in ['financingSumAmount', 'yield']:
                     value = value/100
+                if type(value) is str:
+                    value = value.replace('\r', '').replace('\n', '')
                 line.append(value)
             else:
                 value.append('')
@@ -117,8 +119,8 @@ def crawl_projects():
     start_page = 1  # 起始页
     end_page = 1  # 结束页
     current_page = start_page-1
-    header = ['Category', 'topProductCategory', 'issueNo', 'yield', 'period', 'financingSumAmount',
-              'bankName', 'riskManagement', 'riskManagementMode', 'productId', 'realName', 'principal', 'orderTime']
+    header = ['Category', 'topProductCategory', 'issueNo', 'yield', 'period', 'financingSumAmount', 'bankName', 'riskManagement', 'riskManagementMode', 'productId', 'assetInfoDesc', 'currentValueDate', 'drawee', 'draweeInfo', 'endorseImageLink', 'endorseImagesLink', 'endSellTime', 'enterpriseInfo', 'enterpriseLicense', 'enterpriseName', 'isLoans', 'isSignature', 'issueTime', 'paidAmount', 'pledgeNo', 'productCategory',
+              'productIdentifier', 'productName', 'productNo', 'issueProductPuHuiZhongYinCarRequest', 'issueProductPuHuiZhongYinDebtorBasicInfoRequest', 'issueProductPuHuiZhongYinHouseRequest', 'repaid', 'repaidTime', 'repaymentDeadline', 'returnMoneyMethod', 'riskManagementInfo', 'settleDate', 'soldOut', 'soldOutTime', 'specifyValueDate', 'startSellTime', 'unitPrice', 'usage', 'valueDate', 'valueDateMode', 'valueDays']
     result = [header]
     while current_page < end_page:
         projects = get_project_list(current_page)
