@@ -43,11 +43,11 @@ def get_lender_records(loan_id):
         loan_id)
     req = build_request(url)
     data = req.json()
-    keys = ['loanId', 'userId', 'userNickName',
-            'financeCategory', 'amount', 'lendTime']
+    keys = ['loanId', 'id', 'lenderType', 'userId', 'userNickName',
+            'financeCategory', 'orderNo', 'bussNo', 'amount', 'lendTime']
     if 'status' in data and data['status'] == 0:
         result = []
-        base_info = [data['data']['joinCount'], data['data']['amount']]
+        base_info = []
         for lender in data['data']['list']:
             lender_line = []
             for key in keys:
@@ -68,9 +68,16 @@ def get_lender_records(loan_id):
 
 
 def append_to_csv_file(lines, filename):
+    add_header = False
+    if not os.path.exists(filename):
+        add_header = True
     csvfile = codecs.open(filename, 'a', encoding='utf-8')
     spamwriter = csv.writer(csvfile, delimiter=',',
                             quotechar='"', quoting=csv.QUOTE_ALL)
+    if add_header:
+        header = ['loanId', 'id', 'lenderType', 'userId', 'userNickName',
+                  'financeCategory', 'orderNo', 'bussNo', 'amount', 'lendTime']
+        spamwriter.writerow(header)
     for line in lines:
         spamwriter.writerow(line)
     csvfile.close()

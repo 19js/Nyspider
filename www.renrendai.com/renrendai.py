@@ -17,7 +17,7 @@ j_username = ""
 # 密码
 j_password = ''
 
-Cookies = {}
+Cookies = {'we_sid': 's%3AVnsu1YeXpmWPmQ5tk_Xjs9j3nSQHPwrO.arDCn31SVQ6dPdEmAqGPbl%2B%2F9lKXEzS0WlTyEt7E3GA'}
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:39.0) Gecko/20100101 Firefox/39.0',
@@ -27,15 +27,17 @@ headers = {
     'Connection': 'keep-alive'}
 
 
+info_keys = ['officeScale', 'carLoan', 'realName', 'creditLevel', 'office', 'province', 'officeType', 'idNo', 'sumCreditPoint', 'houseLoan', 'marriage', 'userId', 'city', 'position',
+             'university', 'workYears', 'birthDay', 'graduation', 'homeTown', 'carYear', 'hasHouse', 'gender', 'hasCar', 'officeDomain', 'availableCredits', 'promotion', 'nickName', 'salary', 'carBrand']
+loan_keys = ['loanId', 'title', 'amount', 'status', 'interest', 'repayType', 'verifyState', 'borrowerLevel',
+             'borrowType', 'months', 'leftMonths', 'description', 'openTime', 'startTime', 'readyTime', 'passTime', 'nickName', 'address', 'jobType']
+detail_keys = ['totalCount', 'successCount', 'alreadyPayCount',
+               'borrowAmount', 'notPayTotalAmount', 'overdueAmount', 'overdueCount']
+credit_keys = ['identificationScanning', 'mobile', 'graduation', 'credit', 'residence', 'marriage', 'child', 'album', 'work', 'renren', 'kaixin', 'house',
+               'car', 'identification', 'detailInformation', 'borrowStudy', 'mobileReceipt', 'incomeDuty', 'other', 'account', 'titles', 'fieldAudit', 'mobileAuth', 'video']
+
+
 def parser_loan(item):
-    info_keys = ['officeScale', 'carLoan', 'realName', 'creditLevel', 'office', 'province', 'officeType', 'idNo', 'sumCreditPoint', 'houseLoan', 'marriage', 'userId', 'city', 'position',
-                 'university', 'workYears', 'birthDay', 'graduation', 'homeTown', 'carYear', 'hasHouse', 'gender', 'hasCar', 'officeDomain', 'availableCredits', 'promotion', 'nickName', 'salary', 'carBrand']
-    loan_keys = ['loanId', 'title', 'amount', 'status', 'interest', 'repayType', 'verifyState', 'borrowerLevel',
-                 'borrowType', 'months', 'leftMonths', 'description', 'startTime', 'passTime', 'nickName', 'address', 'jobType']
-    detail_keys = ['totalCount', 'successCount', 'alreadyPayCount',
-                   'borrowAmount', 'notPayTotalAmount', 'overdueAmount', 'overdueCount']
-    credit_keys = ['identification', 'borrowStudy',
-                   'incomeDuty', 'credit', 'identificationScanning', 'work']
     info = []
     for key in loan_keys:
         try:
@@ -68,9 +70,15 @@ def parser_loan(item):
 
 
 def append_to_csv_file(lines, filename):
+    add_header = False
+    if not os.path.exists(filename):
+        add_header = True
     csvfile = codecs.open(filename, 'a', encoding='utf-8')
     spamwriter = csv.writer(csvfile, delimiter=',',
                             quotechar='"', quoting=csv.QUOTE_ALL)
+    if add_header:
+        header = loan_keys+info_keys+detail_keys+credit_keys
+        spamwriter.writerow(header)
     for line in lines:
         spamwriter.writerow(line)
     csvfile.close()
