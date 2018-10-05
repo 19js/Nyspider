@@ -101,7 +101,10 @@ def login():
 
 def get_loan_info(loan_id):
     url = 'https://www.renrendai.com/loan-{}.html'.format(loan_id)
-    html = requests.get(url, cookies=Cookies, headers=headers).text
+    req = requests.get(url, cookies=Cookies, headers=headers)
+    if req.status_code != 200:
+        return None
+    html = req.text
     detail = re.findall("var detail = '(.*?)';", html)[0]
     data = json.loads('"%s"' % detail)
     detail = json.loads(data)
@@ -115,7 +118,7 @@ def get_loan_info(loan_id):
 
 
 def crawl():
-    loan_id = 2514193
+    loan_id = 2514436
     loan_id_to = 2714193
     login()
     temp_lines = []
@@ -123,10 +126,13 @@ def crawl():
     while loan_id < loan_id_to:
         try:
             loan_info = get_loan_info(loan_id)
+            if loan_info is None:
+                loan_id += 1
+                continue
             line = parser_loan(loan_info)
             line.append(json.dumps(loan_info))
         except Exception as e:
-            print('Error', e)
+            logging.exception(e)
             try:
                 login()
             except:
